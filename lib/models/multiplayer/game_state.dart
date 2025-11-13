@@ -1,4 +1,5 @@
 import 'room.dart';
+import 'player.dart';
 import '../../models/question.dart';
 
 /// Estado do jogo multiplayer
