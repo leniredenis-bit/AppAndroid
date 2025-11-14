@@ -1,0 +1,38 @@
+import 'package:flutter/material.dart';
+import '../../services/audio_service.dart';
+
+class MazeGame extends StatelessWidget {
+  const MazeGame({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFF101A2C),
+      appBar: AppBar(
+        title: const Text("Labirinto", style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFF162447),
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("🧩", style: TextStyle(fontSize: 80)),
+            SizedBox(height: 20),
+            Text("Labirinto", style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)),
+            SizedBox(height: 10),
+            Text("Em desenvolvimento...", style: TextStyle(fontSize: 16, color: Colors.white70)),
+            SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                AudioService().playClick();
+                Navigator.pop(context);
+              },
+              child: Text("Voltar"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

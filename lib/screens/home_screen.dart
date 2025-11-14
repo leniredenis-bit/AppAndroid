@@ -8,6 +8,7 @@ import 'stats_screen.dart';
 import 'multiplayer/multiplayer_menu_screen.dart';
 import '../widgets/emoji_text.dart';
 import '../services/audio_service.dart';
+import 'minigames_menu_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -28,9 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
     {'emoji': '🥧', 'title': 'Quiz Torta na Cara', 'desc': 'Duelo 1v1 local - quem errar perde!'},
     {'emoji': '🌐', 'title': 'Partida Online', 'desc': 'Jogue com amigos em tempo real!'},
     {'emoji': '🕹️', 'title': 'Jogo da Memória', 'desc': 'Encontre pares bíblicos!'},
-    {'emoji': '🎯', 'title': 'Em Breve...', 'desc': 'Novo minigame chegando!', 'disabled': 'true'},
-    {'emoji': '🎲', 'title': 'Em Breve...', 'desc': 'Novo minigame chegando!', 'disabled': 'true'},
-    {'emoji': '🎪', 'title': 'Em Breve...', 'desc': 'Novo minigame chegando!', 'disabled': 'true'},
+    {'emoji': '�', 'title': 'Outros Minigames', 'desc': '7 jogos divertidos te aguardam!'},
     {'emoji': '📊', 'title': 'Estatísticas', 'desc': 'Veja seu desempenho e conquistas!'},
   ];
 
@@ -140,19 +139,9 @@ class _HomeScreenState extends State<HomeScreen> {
             ...modes.asMap().entries.map((entry) {
               final index = entry.key;
               final mode = entry.value;
-              final bool isDisabled = mode['disabled'] == 'true';
               
               VoidCallback? onPressed;
-              if (isDisabled) {
-                onPressed = () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('🎮 Novo minigame em desenvolvimento! Aguarde...'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                };
-              } else if (index == 0) {
+              if (index == 0) {
                 onPressed = () {
                   AudioService().playClick();
                   startQuiz();
@@ -218,7 +207,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     MaterialPageRoute(builder: (context) => MemoryGameScreen()),
                   );
                 };
-              } else if (index == 7) { // Estatísticas é agora o índice 7
+              } else if (index == 4) {
+                // Outros Minigames
+                onPressed = () {
+                  AudioService().playClick();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MinigamesMenuScreen()),
+                  );
+                };
+              } else if (index == 5) { // Estatísticas é agora o índice 5
                 onPressed = () {
                   AudioService().playClick();
                   Navigator.push(
@@ -232,20 +230,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isDisabled ? Color(0xFF1A2633) : Color(0xFF23395D),
+                    backgroundColor: Color(0xFF23395D),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                     padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                    elevation: isDisabled ? 0 : 2,
+                    elevation: 2,
                   ),
                   onPressed: onPressed,
                   child: Row(
                     children: [
-                      Opacity(
-                        opacity: isDisabled ? 0.4 : 1.0,
-                        child: EmojiText(mode['emoji']!, size: 28),
-                      ),
+                      EmojiText(mode['emoji']!, size: 28),
                       SizedBox(width: 16),
                       Expanded(
                         child: Column(
@@ -254,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Text(
                               mode['title']!, 
                               style: TextStyle(
-                                color: isDisabled ? Colors.white38 : Colors.white, 
+                                color: Colors.white, 
                                 fontWeight: FontWeight.bold, 
                                 fontSize: 16,
                               ),
@@ -262,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Text(
                               mode['desc']!, 
                               style: TextStyle(
-                                color: isDisabled ? Colors.white24 : Colors.white70, 
+                                color: Colors.white70, 
                                 fontSize: 13,
                               ),
                             ),
