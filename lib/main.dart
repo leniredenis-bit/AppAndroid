@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/multiplayer/mock_multiplayer_service.dart';
@@ -21,6 +22,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
+        // Configura fonte padrão com suporte a emojis
+        textTheme: GoogleFonts.robotoTextTheme(
+          Theme.of(context).textTheme,
+        ).apply(
+          fontFamily: 'Roboto',
+        ),
       ),
       initialRoute: '/',
       routes: {

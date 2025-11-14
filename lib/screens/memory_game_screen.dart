@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../models/stats_service.dart';
+import '../widgets/emoji_text.dart';
 
 class MemoryGameScreen extends StatefulWidget {
   const MemoryGameScreen({Key? key}) : super(key: key);
@@ -1086,9 +1087,9 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
+                                  EmojiText(
                                     card.emoji,
-                                    style: TextStyle(fontSize: emojiSize),
+                                    size: emojiSize,
                                   ),
                                   SizedBox(height: 4),
                                   Padding(

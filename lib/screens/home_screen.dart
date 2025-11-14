@@ -6,6 +6,7 @@ import 'pie_quiz_screen.dart';
 import 'memory_game_screen.dart';
 import 'stats_screen.dart';
 import 'multiplayer/multiplayer_menu_screen.dart';
+import '../widgets/emoji_text.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -211,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: onPressed,
                   child: Row(
                     children: [
-                      Text(mode['emoji']!, style: TextStyle(fontSize: 28)),
+                      EmojiText(mode['emoji']!, size: 28),
                       SizedBox(width: 16),
                       Expanded(
                         child: Column(
