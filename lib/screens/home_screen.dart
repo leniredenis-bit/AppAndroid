@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/quiz_service.dart';
 import '../models/question.dart';
 import 'quiz_screen.dart';
+import 'pie_quiz_screen.dart';
 import 'memory_game_screen.dart';
 import 'stats_screen.dart';
 import 'multiplayer/multiplayer_menu_screen.dart';
@@ -130,15 +131,47 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed = startQuiz;
               } else if (index == 1) {
                 // Quiz Torta na Cara - Duelo 1v1
-                onPressed = () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('🥧 Quiz Torta na Cara em desenvolvimento!'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                  // TODO: Implementar tela de duelo local
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) => PieQuizScreen()));
+                onPressed = () async {
+                  try {
+                    List<Question> questions = await QuizService.loadQuestions();
+                    
+                    // Aplicar filtros se houver
+                    if (selectedDifficulty != null) {
+                      int difficultyLevel = difficulties.indexOf(selectedDifficulty!) + 1;
+                      questions = QuizService.filterByDifficulty(questions, difficultyLevel);
+                    }
+                    
+                    if (selectedTag != null) {
+                      questions = QuizService.filterByTag(questions, selectedTag!);
+                    }
+                    
+                    // Pegar 10 perguntas aleatórias
+                    questions = QuizService.getRandomQuestions(questions, 10);
+                    
+                    if (questions.isEmpty) {
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Nenhuma pergunta encontrada com esses filtros!')),
+                      );
+                      return;
+                    }
+                    
+                    if (!mounted) return;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PieQuizScreen(
+                          questions: questions,
+                          playerName: 'Apresentador',
+                        ),
+                      ),
+                    );
+                  } catch (e) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Erro ao carregar perguntas: $e')),
+                    );
+                  }
                 };
               } else if (index == 2) {
                 onPressed = () {
