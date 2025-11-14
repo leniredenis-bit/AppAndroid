@@ -653,8 +653,9 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
       return Scaffold(
         backgroundColor: Color(0xFF101A2C),
         appBar: AppBar(
-          title: Text('Configurar Jogo'),
+          title: Text('Configurar Jogo', style: TextStyle(color: Colors.white)),
           backgroundColor: Color(0xFF162447),
+          iconTheme: IconThemeData(color: Colors.white),
           elevation: 0,
         ),
         body: SingleChildScrollView(
@@ -882,10 +883,14 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
       appBar: AppBar(
-        title: Text(numPlayers > 1 
-          ? 'Jogo da Memória - Jogador ${currentPlayer + 1}' 
-          : 'Jogo da Memória'),
+        title: Text(
+          numPlayers > 1 
+            ? 'Jogo da Memória - Jogador ${currentPlayer + 1}' 
+            : 'Jogo da Memória',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Color(0xFF162447),
+        iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
         actions: [
           IconButton(

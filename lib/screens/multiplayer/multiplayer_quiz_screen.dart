@@ -283,8 +283,9 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
         backgroundColor: Color(0xFF101A2C),
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: Text('Pergunta ${_currentRoom!.currentQuestionIndex + 1}/${_currentRoom!.totalQuestions}'),
+          title: Text('Pergunta ${_currentRoom!.currentQuestionIndex + 1}/${_currentRoom!.totalQuestions}', style: TextStyle(color: Colors.white)),
           backgroundColor: Color(0xFF162447),
+          iconTheme: IconThemeData(color: Colors.white),
           elevation: 0,
           actions: [
             Padding(

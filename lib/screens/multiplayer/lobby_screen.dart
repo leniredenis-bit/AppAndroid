@@ -300,8 +300,9 @@ class _LobbyScreenState extends State<LobbyScreen> {
       child: Scaffold(
         backgroundColor: Color(0xFF101A2C),
         appBar: AppBar(
-          title: Text('Sala ${widget.roomCode}'),
+          title: Text('Sala ${widget.roomCode}', style: TextStyle(color: Colors.white)),
           backgroundColor: Color(0xFF162447),
+          iconTheme: IconThemeData(color: Colors.white),
           elevation: 0,
           leading: IconButton(
             icon: Icon(Icons.arrow_back),

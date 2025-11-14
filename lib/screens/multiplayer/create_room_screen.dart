@@ -147,8 +147,9 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
       appBar: AppBar(
-        title: Text('Criar Sala'),
+        title: Text('Criar Sala', style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF162447),
+        iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -273,7 +274,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                     IconButton(
                       icon: Icon(Icons.remove_circle_outline, color: Colors.white),
                       onPressed: () {
-                        if (_maxPlayers > 8) {
+                        if (_maxPlayers > 2) {
                           setState(() => _maxPlayers -= (_maxPlayers > 20 ? 10 : 2));
                         }
                       },

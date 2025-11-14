@@ -194,8 +194,9 @@ class _QuizScreenState extends State<QuizScreen> {
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
       appBar: AppBar(
-        title: Text('Quiz - ${currentQuestionIndex + 1}/${widget.questions.length}'),
+        title: Text('Quiz - ${currentQuestionIndex + 1}/${widget.questions.length}', style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF23395D), // Cor mais clara para legibilidade
+        iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
         actions: [
           Padding(

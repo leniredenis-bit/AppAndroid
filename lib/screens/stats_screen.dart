@@ -191,8 +191,9 @@ class _StatsScreenState extends State<StatsScreen> {
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
       appBar: AppBar(
-        title: Text('Estatísticas'),
+        title: Text('Estatísticas', style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF162447),
+        iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
       ),
       body: SingleChildScrollView(

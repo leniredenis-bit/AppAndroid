@@ -149,8 +149,9 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
       backgroundColor: Color(0xFF101A2C),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('Resultados da Rodada'),
+        title: Text('Resultados da Rodada', style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF162447),
+        iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
       ),
       body: FadeTransition(

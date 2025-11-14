@@ -160,8 +160,9 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF101A2C),
       appBar: AppBar(
-        title: const Text('🥧 Quiz Torta na Cara'),
+        title: const Text('🥧 Quiz Torta na Cara', style: TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF23395D),
+        iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true,
       ),
       body: Padding(
