@@ -31,8 +31,6 @@ class MyApp extends StatelessWidget {
       animation: LanguageService(),
       builder: (context, child) {
         return MaterialApp(
-          // Key para forçar rebuild quando idioma mudar
-          key: ValueKey(LanguageService().currentLanguageCode),
           title: 'JW SPLASH GAMES',
           debugShowCheckedModeBanner: false,
           

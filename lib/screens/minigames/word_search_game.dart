@@ -42,7 +42,7 @@ class _WordSearchGameState extends State<WordSearchGame> {
     'ALEGRIA', 'ESPERANÇA', 'BONDADE', 'JUSTIÇA',
     
     // Objetos e símbolos
-    'ARCA', 'CRUZ', 'PÃO', 'VINHO', 'ÓLEO', 'PEDRA',
+    'ARCA', 'ESTACA', 'PÃO', 'VINHO', 'ÓLEO', 'PEDRA',
     'TABUA', 'ALTAR', 'TEMPLO', 'CORDEIRO', 'POMBA',
     
     // Livros da Bíblia (alguns)
@@ -419,13 +419,13 @@ class _WordSearchGameState extends State<WordSearchGame> {
                             bool isSelected = _isCellSelected(row, col);
                             bool isFound = _foundWordCells.contains(Point(row, col));
                             
-                            // Cor de fundo: amarelo se selecionado, verde muito claro se encontrado, branco caso contrário
+                            // Cor de fundo: amarelo se selecionado, verde claro se encontrado, branco caso contrário
                             Color backgroundColor;
                             if (isSelected) {
                               backgroundColor = Colors.yellow.withOpacity(0.7);
                             } else if (isFound) {
-                              // Verde MUITO claro, quase branco, apenas um leve toque verde
-                              backgroundColor = const Color(0xFFF0FFF0); // Honeydew - verde muito suave
+                              // Verde claro visível, mas ainda bem suave
+                              backgroundColor = const Color(0xFFE0FFE0); // Verde menta claro
                             } else {
                               backgroundColor = Colors.white.withOpacity(0.9);
                             }

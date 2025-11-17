@@ -5,8 +5,14 @@ class Question {
   final int respostaCorreta; // Índice 0-3
   final int dificuldade; // 1=Fácil, 2=Médio, 3=Difícil
   final List<String> tags;
-  final String? referencia;
+  
+  /// CAMPO INVERTIDO (pós-refatoração para evitar direitos autorais):
+  /// Agora contém a referência bíblica (ex: "João 3:16") que será exibida como link clicável
   final String? textoBiblico;
+  
+  /// REMOVIDO: Não armazenamos mais o texto completo para respeitar direitos autorais.
+  /// O usuário clica na referência (textoBiblico) para abrir no JW.org/app.
+  final String? referencia; // Mantido apenas para compatibilidade (sempre null)
 
   Question({
     required this.id,

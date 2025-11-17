@@ -8,6 +8,7 @@ import '../services/audio_service.dart';
 import '../services/storage_service.dart';
 import '../services/achievement_service.dart';
 import '../widgets/achievement_unlock_dialog.dart';
+import '../widgets/bible_reference_button.dart';
 
 class QuizScreen extends StatefulWidget {
   final List<Question> questions;
@@ -279,8 +280,8 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   Widget build(BuildContext context) {
     final question = widget.questions[currentQuestionIndex];
-    final hasExplanation = (question.referencia != null && question.referencia!.isNotEmpty) ||
-                           (question.textoBiblico != null && question.textoBiblico!.isNotEmpty);
+    // Verifica se tem referência bíblica (agora em textoBiblico após inversão)
+    final hasExplanation = (question.textoBiblico != null && question.textoBiblico!.isNotEmpty);
 
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
@@ -541,46 +542,9 @@ class _QuizScreenState extends State<QuizScreen> {
                       Divider(color: Colors.white24),
                       SizedBox(height: 12),
                       
-                      // Referência
-                      if (question.referencia != null && question.referencia!.isNotEmpty)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(Icons.book, color: Colors.white70, size: 18),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                question.referencia!,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      
-                      // Texto Bíblico
-                      if (question.textoBiblico != null && question.textoBiblico!.isNotEmpty) ...[
-                        SizedBox(height: 16),
-                        Container(
-                          padding: EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Color(0xFF23395D),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            question.textoBiblico!,
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 15,
-                              fontStyle: FontStyle.italic,
-                              height: 1.5,
-                            ),
-                          ),
-                        ),
-                      ],
+                      // Referência Bíblica (agora é um link clicável)
+                      if (question.textoBiblico != null && question.textoBiblico!.isNotEmpty)
+                        BibleReferenceButton(reference: question.textoBiblico!),
                       
                       SizedBox(height: 20),
                       

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/question.dart';
 import '../services/audio_service.dart';
+import '../widgets/bible_reference_button.dart';
 
 class PieQuizScreen extends StatefulWidget {
   final List<Question> questions;
@@ -339,56 +340,11 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            if (_currentQuestion.referencia != null && 
-                                _currentQuestion.referencia!.isNotEmpty) ...[
-                              const SizedBox(height: 16),
-                              const Row(
-                                children: [
-                                  Icon(Icons.book, color: Colors.white70, size: 16),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Referência:',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _currentQuestion.referencia!,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
+                            // Referência Bíblica (agora é um link clicável)
                             if (_currentQuestion.textoBiblico != null && 
                                 _currentQuestion.textoBiblico!.isNotEmpty) ...[
                               const SizedBox(height: 16),
-                              const Row(
-                                children: [
-                                  Icon(Icons.menu_book, color: Colors.white70, size: 16),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Texto Bíblico (TNM):',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _currentQuestion.textoBiblico!,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
+                              BibleReferenceButton(reference: _currentQuestion.textoBiblico!),
                             ],
                           ],
                         ),

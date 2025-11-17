@@ -9,7 +9,7 @@ import 'multiplayer/multiplayer_menu_screen.dart';
 import '../widgets/emoji_text.dart';
 import '../services/audio_service.dart';
 import 'minigames_menu_screen.dart';
-import 'memory_game_screen.dart';
+
 import '../widgets/settings_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -202,15 +202,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 };
               } else if (index == 3) {
-                // Jogo da Memória
-                onPressed = () {
-                  AudioService().playClick();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MemoryGameScreen()),
-                  );
-                };
-              } else if (index == 4) {
                 // Minigames
                 onPressed = () {
                   AudioService().playClick();
@@ -219,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     MaterialPageRoute(builder: (context) => MinigamesMenuScreen()),
                   );
                 };
-              } else if (index == 5) {
+              } else if (index == 4) {
                 // Estatísticas
                 onPressed = () {
                   AudioService().playClick();
