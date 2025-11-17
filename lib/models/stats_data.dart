@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 /// Estatísticas globais do usuário
 class GlobalStats {
   int totalQuizzes;

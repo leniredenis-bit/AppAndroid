@@ -1,6 +1,6 @@
-# 📖 JW Quiz Flutter
+# 🎮 JW SPLASH GAMES
 
-> Quiz Bíblico interativo desenvolvido em Flutter com múltiplos modos de jogo, minigames educativos e sistema multiplayer.
+> Jogo educativo bíblico interativo desenvolvido em Flutter com quiz, 7 minigames divertidos, sistema de conquistas e suporte multilíngue!
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.35.3-blue?logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.x-blue?logo=dart)
@@ -8,14 +8,15 @@
 
 ## 🎯 Sobre o Projeto
 
-**JW Quiz Flutter** é um aplicativo educativo de perguntas e respostas sobre temas bíblicos, oferecendo uma experiência interativa e divertida para aprender mais sobre a Bíblia. O app conta com:
+**JW SPLASH GAMES** é um aplicativo educativo que combina aprendizado bíblico com diversão! O app oferece quiz interativo, 7 minigames únicos, sistema completo de conquistas e estatísticas, tudo em uma interface moderna e colorida. Principais recursos:
 
 - 🧠 **Quiz Clássico** com sistema de pontuação e timer dinâmico
-- 🌐 **Modo Multiplayer** para até 100 jogadores simultâneos
-- 🎮 **7 Minigames** educativos (Jogo da Velha, Forca, Memória, etc.)
-- 📊 **Sistema de Estatísticas** e conquistas
-- 🎵 **Músicas de fundo** e efeitos sonoros
-- 🎨 **Interface moderna** com temas personalizáveis
+- 🎮 **7 Minigames** educativos (Quebra-cabeça, Forca, Memória, Labirinto, etc.)
+- 🏆 **15 Conquistas** desbloqueáveis com animações especiais
+- 📊 **Sistema de Estatísticas** completo com histórico e streaks
+- 🌍 **3 Idiomas** (Português, English, Español)
+- 🎵 **Músicas de fundo** e efeitos sonoros imersivos
+- 🎨 **Interface moderna** com animações fluidas
 
 ---
 
@@ -27,211 +28,224 @@
 - **Timer dinâmico** que se ajusta ao tamanho da pergunta
 - **Sistema de pontuação** com bônus por tempo
 - **Feedback visual** imediato (verde = correto, vermelho = errado)
+- **Salvamento automático** de resultados e histórico
 
-### 🌐 Modo Multiplayer
-- **Criar ou entrar em salas** com código de 6 dígitos
-- **Suporte para até 100 jogadores** por sala
-- **Validação de profanidade** com sugestões de apelidos alternativos
-- **Sincronização em tempo real** entre todos os jogadores
-- **Sistema de ranking** com pódio (🥇🥈🥉)
-- **Controles do anfitrião**: iniciar partida, remover jogadores, encerrar sala
+### 🎮 7 Minigames Divertidos
 
-### 🎮 7 Minigames Educativos
-
-1. **🎯 Jogo da Velha**
-   - 2 jogadores ou vs IA (Fácil/Impossível com Minimax)
-   - Placar persistente
-   
-2. **🔤 Jogo da Forca**
-   - 20 palavras bíblicas
-   - Teclado A-Z interativo
-   - Visual do boneco
-
-3. **🧠 Sequência Rápida** (Simon Says)
-   - Memorize padrões de cores
-   - Níveis progressivos
-   - Tracking de recorde
-
-4. **🧩 Labirinto**
-   - Navegação com setas do teclado ou botões
-   - Grade 10x10
-   - Contador de movimentos
-
-5. **🔍 Caça-Palavras**
-   - Grade 12x12 com 10 palavras bíblicas
-   - Drag-to-select
-   - Direções: horizontal, vertical, diagonal
-
-6. **🧩 Quebra-Cabeça**
+1. **🧩 Quebra-Cabeça**
    - Puzzle deslizante 3x3 (8 peças)
    - Embaralhamento válido garantido
-   - Contador de movimentos
+   - Sistema de pontuação baseado em movimentos
 
-7. **🕹️ Jogo da Memória**
+2. **🔤 Forca**
+   - 20+ palavras bíblicas
+   - Teclado A-Z interativo
+   - Visual do boneco progressivo
+
+3. **🔍 Caça-Palavras**
+   - Grade 12x12 com 10 palavras bíblicas
+   - Seleção por arrastar
+   - Múltiplas direções (horizontal, vertical, diagonal)
+
+4. **🌀 Labirinto**
+   - Navegação com controles ou teclado
+   - Grade 20x20 desafiadora
+   - Contador de movimentos com pontuação
+
+5. **🎵 Sequência** (Simon Says)
+   - Memorize padrões de cores
+   - 20 níveis progressivos
+   - Tracking de recorde pessoal
+
+6. **⭕ Jogo da Velha**
+   - 2 jogadores ou vs IA
+   - IA com algoritmo Minimax (impossível de vencer!)
+   - Sistema de pontuação persistente
+
+7. **🧠 Jogo da Memória**
    - Pares de cartas com temas bíblicos
-   - Animações de flip
-   - Sistema de pontuação
+   - Animações de flip suaves
+   - Timer e sistema de estrelas
+
+### 🏆 Sistema de Conquistas
+
+**15 conquistas desbloqueáveis** em 4 categorias:
+
+**Quiz (6 conquistas)**
+- 🎓 Primeiro Passo: Complete seu primeiro quiz
+- 📚 Estudioso: Complete 10 quizzes
+- 💯 Perfeccionista: Acerte todas as perguntas de um quiz
+- ⚡ Velocista: Complete um quiz em menos de 2 minutos
+- 🔥 Sequência Perfeita: Mantenha 5 quizzes seguidos com 80%+ de acerto
+- 📖 Mestre Bíblico: Complete 50 quizzes
+
+**Minigames (5 conquistas)**
+- 🎮 Explorador: Jogue todos os 7 minigames
+- 🧩 Mestre dos Puzzles: Complete o quebra-cabeça em menos de 2 minutos
+- 🧠 Memória Fotográfica: Complete o jogo da memória sem erros
+- 🎯 Atirador de Elite: Vença 10 partidas no jogo da velha
+- 🏆 Campeão dos Minigames: Vença 50 partidas em minigames
+
+**Social (2 conquistas)**
+- 👥 Social: Participe de uma partida multiplayer
+- 🌟 Competidor: Fique no pódio em uma partida multiplayer
+
+**Master (2 conquistas)**
+- 💎 Colecionador: Desbloqueie 10 conquistas
+- 👑 Lenda: Desbloqueie todas as 15 conquistas
+
+**Recursos:**
+- Diálogo animado de desbloqueio com confetti
+- Progresso visual em cada conquista
+- Filtros por categoria na tela de conquistas
+- Persistência automática de progresso
+
+### 📊 Sistema de Estatísticas e Persistência
+
+**GlobalStats:**
+- Total de quizzes realizados
+- Taxa de acerto geral e por dificuldade
+- Pontuação mais alta (high score)
+- Streak atual e recorde de sequência
+- Desempenho por categoria bíblica
+
+**Histórico Completo:**
+- Últimos 50 quizzes salvos com detalhes
+- Timestamp, modo, pontuação, acurácia
+- Tempo gasto e perguntas respondidas
+- Filtros e busca no histórico
+
+**Recordes de Minigames:**
+- High score individual por jogo
+- Total de partidas jogadas e vencidas
+- Taxa de vitória (win rate)
+- Melhor tempo registrado
+
+### 🌍 Internacionalização
+
+**3 idiomas suportados:**
+- 🇧🇷 Português (Brasil)
+- 🇺🇸 English (United States)
+- 🇪🇸 Español (España)
+
+**Recursos:**
+- 180+ strings traduzidas por idioma
+- Troca de idioma sem restart do app
+- Seletor visual com bandeiras
+- Preferência salva localmente
 
 ### 🎵 Sistema de Áudio
 - **Músicas de fundo** aleatórias por tela (Home, Quiz, Memory Game, etc.)
 - **Efeitos sonoros** para interações (acertos, erros, cliques, vitórias)
 - **Controles de volume** e liga/desliga global
 
-### 📊 Estatísticas e Conquistas
-- Total de quizzes completados
-- Taxa de acertos geral
-- Melhor pontuação
-- Histórico de partidas
-- Sistema de achievements (em desenvolvimento)
-
 ---
 
 ## 🚀 Como Executar
 
 ### Pré-requisitos
-
-- [Flutter SDK](https://flutter.dev/docs/get-started/install) (versão 3.35.3 ou superior)
-- [Dart SDK](https://dart.dev/get-dart) (incluído no Flutter)
-- Android Studio (para emulador Android) ou Chrome (para web)
+- Flutter SDK 3.35.3 ou superior
+- Dart SDK 3.x
+- Editor de código (VS Code, Android Studio, etc.)
 
 ### Instalação
 
+1. **Clone o repositório**
 ```bash
-# Clone o repositório
 git clone https://github.com/leniredenis-bit/JWQuizFlutter.git
 cd jw_quiz_flutter
-
-# Instale as dependências
-flutter pub get
-
-# Execute no Chrome (Web)
-flutter run -d chrome
-
-# Ou execute no Android
-flutter run -d <device_id>
 ```
 
-### Build para Produção
-
+2. **Instale as dependências**
 ```bash
-# Web
-flutter build web
+flutter pub get
+```
 
-# Android APK
-flutter build apk --release
-
-# iOS (requer macOS)
-flutter build ios --release
+3. **Execute o app**
+```bash
+flutter run
 ```
 
 ---
 
-## 📁 Estrutura do Projeto
+## 📦 Dependências Principais
+
+```yaml
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences: ^2.3.3  # Persistência local
+  google_fonts: ^6.3.2        # Fontes personalizadas
+  audioplayers: ^6.5.1        # Sistema de áudio
+  uuid: ^4.5.1                # Geração de IDs únicos
+  flutter_localizations:
+    sdk: flutter              # Suporte a i18n
+```
+
+---
+
+## 🏗️ Arquitetura do Projeto
 
 ```
 lib/
-├── main.dart                    # Ponto de entrada do app
+├── main.dart                    # Entry point
 ├── models/                      # Modelos de dados
+│   ├── achievement.dart         # 15 conquistas
+│   ├── stats_data.dart          # GlobalStats, QuizHistory, etc.
 │   ├── question.dart            # Modelo de pergunta
-│   ├── quiz_service.dart        # Serviço de quiz
-│   ├── multiplayer/             # Modelos multiplayer
-│   │   ├── player.dart
-│   │   ├── room.dart
-│   │   └── game_state.dart
+│   └── quiz_service.dart        # Serviço de quiz
 ├── screens/                     # Telas do app
-│   ├── welcome_screen.dart      # Tela de boas-vindas
-│   ├── home_screen.dart         # Menu principal
+│   ├── home_screen.dart         # Tela inicial
 │   ├── quiz_screen.dart         # Quiz clássico
-│   ├── memory_game_screen.dart  # Jogo da memória
-│   ├── stats_screen.dart        # Estatísticas
-│   ├── minigames/               # Minigames
-│   │   ├── tic_tac_toe_game.dart
-│   │   ├── hangman_game.dart
-│   │   ├── sequence_game.dart
-│   │   ├── maze_game.dart
-│   │   ├── word_search_game.dart
-│   │   └── puzzle_game.dart
-│   └── multiplayer/             # Telas multiplayer
-│       ├── multiplayer_menu_screen.dart
-│       ├── create_room_screen.dart
-│       ├── join_room_screen.dart
-│       ├── lobby_screen.dart
-│       ├── multiplayer_quiz_screen.dart
-│       ├── round_result_screen.dart
-│       └── final_result_screen.dart
-├── services/                    # Serviços
-│   ├── audio_service.dart       # Gerenciamento de áudio
-│   └── multiplayer/
-│       ├── mock_multiplayer_service.dart
-│       └── profanity_filter.dart
-└── utils/                       # Utilitários
-    └── timer_calculator.dart    # Cálculo de timer dinâmico
-
-assets/
-├── audio/                       # Músicas e efeitos sonoros
-│   ├── home.mp3
-│   ├── quiz.mp3
-│   ├── memory-game.mp3
-│   └── sfx/                     # Efeitos sonoros (opcional)
-└── data/
-    └── perguntas_atualizado.json  # Banco de perguntas (854 KB)
+│   ├── achievements_screen.dart # Lista de conquistas
+│   ├── stats_screen.dart        # Estatísticas detalhadas
+│   └── minigames/               # 7 minigames
+│       ├── puzzle_game.dart
+│       ├── hangman_game.dart
+│       ├── word_search_game.dart
+│       ├── maze_game.dart
+│       ├── sequence_game.dart
+│       ├── tic_tac_toe_game.dart
+│       └── memory_game.dart
+├── services/                    # Serviços singleton
+│   ├── storage_service.dart     # Persistência centralizada
+│   ├── achievement_service.dart # Gerenciamento de conquistas
+│   ├── language_service.dart    # Internacionalização
+│   └── audio_service.dart       # Sistema de áudio
+├── widgets/                     # Widgets reutilizáveis
+│   ├── achievement_unlock_dialog.dart
+│   ├── settings_dialog.dart
+│   └── emoji_text.dart
+└── l10n/                        # Arquivos de tradução
+    ├── app_pt.arb               # Português
+    ├── app_en.arb               # English
+    └── app_es.arb               # Español
 ```
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🎨 Paleta de Cores
 
-- **[Flutter](https://flutter.dev/)** - Framework UI multiplataforma
-- **[Dart](https://dart.dev/)** - Linguagem de programação
-- **[audioplayers](https://pub.dev/packages/audioplayers)** - Reprodução de áudio
-- **Material Design** - Design system do Google
-
----
-
-## 📖 Documentação Adicional
-
-- 📘 [Como Testar](COMO_TESTAR.md) - Guia completo de testes
-- 🎮 [Sistema Multiplayer](MULTIPLAYER_README.md) - Documentação do modo multiplayer
-- ⏱️ [Sistema de Timer](TIMER_SYSTEM.md) - Timer dinâmico
-- 🎵 [Sistema de Áudio](SISTEMA_AUDIO.md) - Músicas e efeitos sonoros
-- ✅ [Checklist Final](CHECKLIST_FINAL.md) - Status de funcionalidades
+```dart
+Color(0xFF101A2C)  // Background escuro
+Color(0xFF162447)  // Cards e AppBar
+Color(0xFF1F4068)  // Accent
+Color(0xFFE43F5A)  // Destaque vermelho
+Colors.amber        // Pontuação/estrelas
+Colors.green        // Acertos
+Colors.red          // Erros
+```
 
 ---
 
-## 🎯 Roadmap
+## 🤝 Contribuindo
 
-### ✅ Concluído
-- [x] Quiz clássico com timer e pontuação
-- [x] Sistema de filtros (dificuldade e tags)
-- [x] Modo multiplayer completo
-- [x] 7 minigames funcionais
-- [x] Sistema de áudio
-- [x] Tela de estatísticas
-- [x] Jogo da memória
+Contribuições são bem-vindas! Por favor:
 
-### 🚧 Em Desenvolvimento
-- [ ] Sistema de conquistas (achievements)
-- [ ] Modo estudo (sem timer, com explicações)
-- [ ] Temas dark/light
-- [ ] Gráficos e estatísticas avançadas
-
-### 📅 Futuro
-- [ ] Backend real (Firebase)
-- [ ] Chat no multiplayer
-- [ ] Modo combate local (2 jogadores)
-- [ ] Admin panel para editar perguntas
-- [ ] Publicação na Play Store / App Store
-
----
-
-## 🤝 Como Contribuir
-
-Contribuições são bem-vindas! Veja o guia [CONTRIBUTING.md](CONTRIBUTING.md) para mais detalhes.
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
+1. Faça um Fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/NovaFeature`)
+3. Commit suas mudanças (`git commit -m 'feat: Adiciona nova feature'`)
+4. Push para a branch (`git push origin feature/NovaFeature`)
 5. Abra um Pull Request
 
 ---
@@ -245,7 +259,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ## 👨‍💻 Autor
 
 **Lenire Denis**
-
 - GitHub: [@leniredenis-bit](https://github.com/leniredenis-bit)
 - Repositório: [JWQuizFlutter](https://github.com/leniredenis-bit/JWQuizFlutter)
 
@@ -253,16 +266,10 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 🙏 Agradecimentos
 
-- Comunidade Flutter e Dart
-- Todos os testadores e contribuidores
-- Fontes de perguntas bíblicas
+- Comunidade Flutter
+- Biblioteca de perguntas bíblicas
+- Contribuidores do projeto
 
 ---
 
-<div align="center">
-
-**Feito com ❤️ e Flutter**
-
-⭐ Se você gostou do projeto, considere dar uma estrela!
-
-</div>
+**JW SPLASH GAMES** - Aprenda, jogue e divirta-se! 🎮📖✨

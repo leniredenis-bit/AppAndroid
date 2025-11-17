@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       animation: LanguageService(),
       builder: (context, child) {
         return MaterialApp(
-          title: 'JW Quiz',
+          title: 'JW SPLASH GAMES',
           debugShowCheckedModeBanner: false,
           
           // Suporte a internacionalização

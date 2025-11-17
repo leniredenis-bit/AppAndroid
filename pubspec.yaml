@@ -1,5 +1,5 @@
-name: jw_quiz_flutter
-description: "A new Flutter project."
+name: jw_splash_games
+description: "Um jogo educativo bíblico com quiz, minigames e conquistas!"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

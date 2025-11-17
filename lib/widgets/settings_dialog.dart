@@ -329,7 +329,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               // Version Info
               Center(
                 child: Text(
-                  'JW Quiz v1.0.0',
+                  'JW SPLASH GAMES v1.0.0',
                   style: TextStyle(
                     color: _isDarkTheme ? Colors.white38 : Colors.black38,
                     fontSize: 12,
