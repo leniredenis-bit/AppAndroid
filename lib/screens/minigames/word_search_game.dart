@@ -28,6 +28,7 @@ class _WordSearchGameState extends State<WordSearchGame> {
   
   late List<List<String>> _grid;
   final Set<String> _foundWords = {};
+  final Set<Point<int>> _foundWordCells = {}; // Células das palavras encontradas
   List<Point<int>>? _selectedCells;
   Point<int>? _dragStart;
   DateTime? _gameStartTime;
@@ -185,6 +186,8 @@ class _WordSearchGameState extends State<WordSearchGame> {
     if (_words.contains(selectedWord) && !_foundWords.contains(selectedWord)) {
       setState(() {
         _foundWords.add(selectedWord);
+        // Adiciona as células da palavra encontrada ao conjunto
+        _foundWordCells.addAll(_selectedCells!);
       });
       _audioService.playMatch();
       
@@ -374,15 +377,24 @@ class _WordSearchGameState extends State<WordSearchGame> {
                           mainAxisSize: MainAxisSize.min,
                           children: List.generate(gridSize, (col) {
                             bool isSelected = _isCellSelected(row, col);
+                            bool isFound = _foundWordCells.contains(Point(row, col));
+                            
+                            // Cor de fundo: amarelo se selecionado, verde claro se encontrado, branco caso contrário
+                            Color backgroundColor;
+                            if (isSelected) {
+                              backgroundColor = Colors.yellow.withOpacity(0.7);
+                            } else if (isFound) {
+                              backgroundColor = Colors.green.withOpacity(0.15); // Verde bem clarinho
+                            } else {
+                              backgroundColor = Colors.white.withOpacity(0.9);
+                            }
                             
                             return Container(
                               width: 28,
                               height: 28,
                               margin: const EdgeInsets.all(1),
                               decoration: BoxDecoration(
-                                color: isSelected 
-                                    ? Colors.yellow.withOpacity(0.7)
-                                    : Colors.white.withOpacity(0.9),
+                                color: backgroundColor,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Center(
@@ -410,6 +422,7 @@ class _WordSearchGameState extends State<WordSearchGame> {
                   onPressed: () {
                     setState(() {
                       _foundWords.clear();
+                      _foundWordCells.clear(); // Limpa as células marcadas
                       _generateGrid();
                     });
                   },

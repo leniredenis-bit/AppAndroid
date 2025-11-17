@@ -20,7 +20,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
               SizedBox(height: 16),
               Text(
-                'JW Quiz',
+                'JW SPLASH GAMES',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 36,

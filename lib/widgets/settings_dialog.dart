@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/stats_screen.dart';
 import '../screens/achievements_screen.dart';
+import '../screens/terms_screen.dart';
+import '../screens/about_screen.dart';
 import '../services/audio_service.dart';
 import '../services/language_service.dart';
-import 'dart:html' as html;
 
 class SettingsDialog extends StatefulWidget {
   final Function(bool) onThemeChanged;
@@ -45,11 +46,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
     await prefs.setDouble('musicVolume', _musicVolume);
     await prefs.setDouble('sfxVolume', _sfxVolume);
     await prefs.setBool('darkTheme', _isDarkTheme);
-  }
-
-  void _openLegalPage() {
-    // Open the legal/credits page in a new tab
-    html.window.open('https://github.com/leniredenis-bit/JWQuizFlutter', '_blank');
   }
 
   @override
@@ -185,6 +181,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       if (newLanguage != null) {
                         await LanguageService().changeLanguage(newLanguage);
                         setState(() {}); // Força rebuild para atualizar UI
+                        
+                        // Mostrar mensagem de confirmação
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Idioma alterado com sucesso!'),
+                              duration: Duration(seconds: 2),
+                              backgroundColor: Color(0xFF50C878),
+                            ),
+                          );
+                        }
                       }
                     },
                   ),
@@ -315,13 +322,36 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
               SizedBox(height: 12),
 
-              // Legal Button
+              // Terms and Conditions Button
+              _buildMenuButton(
+                icon: Icons.description,
+                title: 'Termos e Condições',
+                subtitle: 'Política de privacidade e termos',
+                color: Color(0xFF9B59B6),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const TermsScreen()),
+                  );
+                },
+              ),
+
+              SizedBox(height: 12),
+
+              // About Button
               _buildMenuButton(
                 icon: Icons.info_outline,
-                title: 'Legal',
-                subtitle: 'Créditos e licenças',
-                color: Color(0xFF9B59B6),
-                onTap: _openLegalPage,
+                title: 'Sobre o Jogo',
+                subtitle: 'Informações sobre o aplicativo',
+                color: Color(0xFF4A90E2),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AboutScreen()),
+                  );
+                },
               ),
 
               SizedBox(height: 24),
