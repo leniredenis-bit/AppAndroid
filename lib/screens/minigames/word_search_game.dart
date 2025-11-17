@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../../services/audio_service.dart';
+import '../../services/storage_service.dart';
+import '../../services/achievement_service.dart';
+import '../../widgets/achievement_unlock_dialog.dart';
 
 class WordSearchGame extends StatefulWidget {
   const WordSearchGame({super.key});
@@ -11,6 +14,8 @@ class WordSearchGame extends StatefulWidget {
 
 class _WordSearchGameState extends State<WordSearchGame> {
   final AudioService _audioService = AudioService();
+  final StorageService _storage = StorageService();
+  final AchievementService _achievementService = AchievementService();
   
   // Grid size
   static const int gridSize = 12;
@@ -25,10 +30,12 @@ class _WordSearchGameState extends State<WordSearchGame> {
   final Set<String> _foundWords = {};
   List<Point<int>>? _selectedCells;
   Point<int>? _dragStart;
+  DateTime? _gameStartTime;
   
   @override
   void initState() {
     super.initState();
+    _gameStartTime = DateTime.now();
     _audioService.playBackgroundMusic('quiz-home.mp3');
     _generateGrid();
   }
@@ -184,6 +191,7 @@ class _WordSearchGameState extends State<WordSearchGame> {
       // Check if all words found
       if (_foundWords.length == _words.length) {
         _audioService.playVictory();
+        _saveGameResult();
       }
     } else {
       _audioService.playMismatch();
@@ -193,6 +201,39 @@ class _WordSearchGameState extends State<WordSearchGame> {
       _selectedCells = null;
       _dragStart = null;
     });
+  }
+
+  Future<void> _saveGameResult() async {
+    final timeSpent = _gameStartTime != null
+        ? DateTime.now().difference(_gameStartTime!).inSeconds
+        : 0;
+
+    await _storage.saveMinigameRecord(
+      'word_search',
+      score: 100,
+      won: true,
+      timeInSeconds: timeSpent,
+    );
+
+    final records = await _storage.getMinigameRecords();
+    final wordSearchRecord = records.getRecord('word_search');
+    
+    final unlockedAchievements = await _achievementService.checkMinigameAchievements(
+      gameId: 'word_search',
+      totalGamesPlayed: wordSearchRecord.gamesPlayed,
+      won: true,
+      timeInSeconds: timeSpent,
+    );
+    
+    if (mounted && unlockedAchievements.isNotEmpty) {
+      for (final achievement in unlockedAchievements) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AchievementUnlockDialog(achievement: achievement),
+        );
+      }
+    }
   }
 
   List<Point<int>> _getCellsInLine(Point<int> start, Point<int> end) {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/stats_service.dart';
+import '../services/storage_service.dart';
+import '../models/stats_data.dart';
+import 'package:intl/intl.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({Key? key}) : super(key: key);
@@ -8,37 +10,39 @@ class StatsScreen extends StatefulWidget {
   State<StatsScreen> createState() => _StatsScreenState();
 }
 
-class _StatsScreenState extends State<StatsScreen> {
-  // Dados de exemplo - posteriormente serão carregados do SharedPreferences
-  int totalQuizzes = 0;
-  int totalScore = 0;
-  int totalQuestions = 0;
-  int correctAnswers = 0;
-  int bestScore = 0;
-  int memoryGamesPlayed = 0;
-  int bestMemoryTime = 0;
-
-  double get accuracyRate {
-    if (totalQuestions == 0) return 0;
-    return (correctAnswers / totalQuestions) * 100;
-  }
+class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStateMixin {
+  final StorageService _storage = StorageService();
+  GlobalStats? _globalStats;
+  MinigameRecords? _minigameRecords;
+  List<QuizHistory> _recentHistory = [];
+  bool _isLoading = true;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    loadStats();
+    _tabController = TabController(length: 3, vsync: this);
+    _loadStats();
   }
 
-  Future<void> loadStats() async {
-    final stats = await StatsService.loadAllStats();
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadStats() async {
+    setState(() => _isLoading = true);
+    
+    final globalStats = await _storage.getGlobalStats();
+    final minigameRecords = await _storage.getMinigameRecords();
+    final history = await _storage.getQuizHistory(limit: 10);
+    
     setState(() {
-      totalQuizzes = stats['totalQuizzes']!;
-      totalScore = stats['totalScore']!;
-      totalQuestions = stats['totalQuestions']!;
-      correctAnswers = stats['correctAnswers']!;
-      bestScore = stats['bestScore']!;
-      memoryGamesPlayed = stats['memoryGamesPlayed']!;
-      bestMemoryTime = stats['bestMemoryTime']!;
+      _globalStats = globalStats;
+      _minigameRecords = minigameRecords;
+      _recentHistory = history;
+      _isLoading = false;
     });
   }
 
@@ -126,66 +130,6 @@ class _StatsScreenState extends State<StatsScreen> {
     );
   }
 
-  Widget _buildAchievementBadge({
-    required String emoji,
-    required String title,
-    required String description,
-    required bool unlocked,
-  }) {
-    return Container(
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: unlocked ? Color(0xFF23395D) : Color(0xFF1A1A2E),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: unlocked ? Color(0xFF3A5A8C) : Colors.transparent,
-          width: 2,
-        ),
-      ),
-      child: Row(
-        children: [
-          Text(
-            emoji,
-            style: TextStyle(
-              fontSize: 32,
-              color: unlocked ? null : Colors.white24,
-            ),
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: unlocked ? Colors.white : Colors.white38,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  description,
-                  style: TextStyle(
-                    color: unlocked ? Colors.white70 : Colors.white24,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (unlocked)
-            Icon(
-              Icons.check_circle,
-              color: Colors.green,
-              size: 20,
-            ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -195,60 +139,202 @@ class _StatsScreenState extends State<StatsScreen> {
         backgroundColor: Color(0xFF162447),
         iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Colors.amber,
+          labelColor: Colors.amber,
+          unselectedLabelColor: Colors.white70,
+          tabs: [
+            Tab(icon: Icon(Icons.quiz), text: 'Quiz'),
+            Tab(icon: Icon(Icons.games), text: 'Minigames'),
+            Tab(icon: Icon(Icons.history), text: 'Histórico'),
+          ],
+        ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Seção de estatísticas principais
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator(color: Colors.amber))
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildQuizStatsTab(),
+                _buildMinigamesStatsTab(),
+                _buildHistoryTab(),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildQuizStatsTab() {
+    if (_globalStats == null) {
+      return Center(
+        child: Text(
+          'Nenhum dado disponível',
+          style: TextStyle(color: Colors.white70),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Estatísticas principais
+          Text(
+            '📊 Desempenho Geral',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 16),
+          
+          GridView.count(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.1,
+            children: [
+              _buildStatCard(
+                emoji: '🧠',
+                title: 'Quizzes\nRealizados',
+                value: '${_globalStats!.totalQuizzes}',
+              ),
+              _buildStatCard(
+                emoji: '✅',
+                title: 'Taxa de\nAcerto',
+                value: '${_globalStats!.accuracy.toStringAsFixed(1)}%',
+                valueColor: Colors.green,
+              ),
+              _buildStatCard(
+                emoji: '🏆',
+                title: 'Melhor\nScore',
+                value: '${_globalStats!.highScore}',
+                valueColor: Colors.orange,
+              ),
+              _buildStatCard(
+                emoji: '🔥',
+                title: 'Sequência\nAtual',
+                value: '${_globalStats!.currentStreak}',
+                valueColor: Colors.red,
+              ),
+            ],
+          ),
+          
+          SizedBox(height: 24),
+          
+          // Streak info
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF162447), Color(0xFF1F4068)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Column(
+                      children: [
+                        Text('🔥', style: TextStyle(fontSize: 32)),
+                        SizedBox(height: 8),
+                        Text(
+                          '${_globalStats!.currentStreak}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Sequência Atual',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Text('🏅', style: TextStyle(fontSize: 32)),
+                        SizedBox(height: 8),
+                        Text(
+                          '${_globalStats!.longestStreak}',
+                          style: TextStyle(
+                            color: Colors.amber,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Melhor Sequência',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12),
+                Text(
+                  'Mantenha 80%+ de acerto para continuar a sequência!',
+                  style: TextStyle(
+                    color: Colors.white60,
+                    fontSize: 11,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          
+          SizedBox(height: 24),
+          
+          // Desempenho por categoria
+          if (_globalStats!.scoresByCategory.isNotEmpty) ...[
             Text(
-              '📊 Desempenho Geral',
+              '📚 Por Categoria',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 16),
-            
-            GridView.count(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.1,
-              children: [
-                _buildStatCard(
-                  emoji: '🧠',
-                  title: 'Quizzes\nRealizados',
-                  value: '$totalQuizzes',
-                ),
-                _buildStatCard(
-                  emoji: '⭐',
-                  title: 'Pontuação\nTotal',
-                  value: '$totalScore',
-                  valueColor: Colors.amber,
-                ),
-                _buildStatCard(
-                  emoji: '🏆',
-                  title: 'Melhor\nScore',
-                  value: '$bestScore',
-                  valueColor: Colors.orange,
-                ),
-                _buildStatCard(
-                  emoji: '✅',
-                  title: 'Taxa de\nAcerto',
-                  value: '${accuracyRate.toStringAsFixed(1)}%',
-                  valueColor: Colors.green,
-                ),
-              ],
+            SizedBox(height: 12),
+            ..._globalStats!.scoresByCategory.entries.map((entry) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: _buildCategoryBar(entry.key, entry.value),
+              );
+            }).toList(),
+          ],
+          
+          SizedBox(height: 24),
+          
+          // Precisão por dificuldade
+          if (_globalStats!.accuracyByDifficulty.isNotEmpty) ...[
+            Text(
+              '🎯 Precisão por Dificuldade',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            
-            SizedBox(height: 24),
-            
-            // Seção de progresso
+            SizedBox(height: 12),
             Container(
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -256,145 +342,341 @@ class _StatsScreenState extends State<StatsScreen> {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '📈 Progresso',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                children: _globalStats!.accuracyByDifficulty.entries.map((entry) {
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: _buildProgressBar(
+                      label: _getDifficultyLabel(entry.key),
+                      percentage: entry.value.toDouble(),
+                      color: _getDifficultyColor(entry.key),
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  _buildProgressBar(
-                    label: 'Taxa de Acerto',
-                    percentage: accuracyRate,
-                    color: Colors.green,
-                  ),
-                  SizedBox(height: 16),
-                  _buildProgressBar(
-                    label: 'Questões Respondidas',
-                    percentage: (totalQuestions / 1180) * 100,
-                    color: Colors.blue,
-                  ),
-                ],
+                  );
+                }).toList(),
               ),
-            ),
-            
-            SizedBox(height: 24),
-            
-            // Estatísticas do Jogo da Memória
-            Text(
-              '🕹️ Jogo da Memória',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 12),
-            Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Color(0xFF162447),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Column(
-                    children: [
-                      Text('🎮', style: TextStyle(fontSize: 28)),
-                      SizedBox(height: 8),
-                      Text(
-                        '$memoryGamesPlayed',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Jogos',
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Text('⏱️', style: TextStyle(fontSize: 28)),
-                      SizedBox(height: 8),
-                      Text(
-                        bestMemoryTime > 0 
-                            ? '${bestMemoryTime ~/ 60}:${(bestMemoryTime % 60).toString().padLeft(2, '0')}'
-                            : '--:--',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Melhor Tempo',
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            
-            SizedBox(height: 24),
-            
-            // Seção de conquistas
-            Text(
-              '🏅 Conquistas',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 12),
-            
-            _buildAchievementBadge(
-              emoji: '🎓',
-              title: 'Primeiro Quiz',
-              description: 'Complete seu primeiro quiz',
-              unlocked: totalQuizzes >= 1,
-            ),
-            SizedBox(height: 8),
-            _buildAchievementBadge(
-              emoji: '🔥',
-              title: 'Estudioso',
-              description: 'Complete 10 quizzes',
-              unlocked: totalQuizzes >= 10,
-            ),
-            SizedBox(height: 8),
-            _buildAchievementBadge(
-              emoji: '💯',
-              title: 'Perfeito',
-              description: 'Acerte 10 perguntas seguidas',
-              unlocked: false, // Implementar lógica
-            ),
-            SizedBox(height: 8),
-            _buildAchievementBadge(
-              emoji: '⚡',
-              title: 'Rápido como Raio',
-              description: 'Complete um quiz em menos de 2 minutos',
-              unlocked: false, // Implementar lógica
-            ),
-            SizedBox(height: 8),
-            _buildAchievementBadge(
-              emoji: '🧠',
-              title: 'Mestre Bíblico',
-              description: 'Alcance 1000 pontos totais',
-              unlocked: totalScore >= 1000,
             ),
           ],
-        ),
+        ],
       ),
     );
   }
-}
+
+  Widget _buildMinigamesStatsTab() {
+    if (_minigameRecords == null || _minigameRecords!.records.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('🎮', style: TextStyle(fontSize: 64)),
+            SizedBox(height: 16),
+            Text(
+              'Nenhum minigame jogado ainda',
+              style: TextStyle(color: Colors.white70, fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final gameNames = {
+      'puzzle': '🧩 Quebra-Cabeça',
+      'hangman': '📝 Forca',
+      'word_search': '🔍 Caça-Palavras',
+      'maze': '🌀 Labirinto',
+      'sequence': '🎵 Sequência',
+      'tictactoe': '⭕ Jogo da Velha',
+      'memory': '🧠 Jogo da Memória',
+    };
+
+    return ListView(
+      padding: EdgeInsets.all(16),
+      children: [
+        Text(
+          '🕹️ Estatísticas dos Minigames',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 16),
+        
+        ..._minigameRecords!.records.entries.map((entry) {
+          final gameId = entry.key;
+          final record = entry.value;
+          final gameName = gameNames[gameId] ?? '🎮 $gameId';
+          
+          return Container(
+            margin: EdgeInsets.only(bottom: 12),
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Color(0xFF162447),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  gameName,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildMinigameStat('🎮', 'Jogos', '${record.gamesPlayed}'),
+                    _buildMinigameStat('🏆', 'Vitórias', '${record.gamesWon}'),
+                    _buildMinigameStat('📊', 'Taxa', '${record.winRate.toStringAsFixed(1)}%'),
+                    _buildMinigameStat('⭐', 'Recorde', '${record.highScore}'),
+                  ],
+                ),
+                if (record.bestTime != null && record.bestTime! > 0) ...[
+                  SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      '⏱️ Melhor tempo: ${_formatTime(record.bestTime!)}',
+                      style: TextStyle(color: Colors.amber, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        }).toList(),
+      ],
+    );
+  }
+
+  Widget _buildHistoryTab() {
+    if (_recentHistory.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('📜', style: TextStyle(fontSize: 64)),
+            SizedBox(height: 16),
+            Text(
+              'Nenhum histórico disponível',
+              style: TextStyle(color: Colors.white70, fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: EdgeInsets.all(16),
+      itemCount: _recentHistory.length,
+      itemBuilder: (context, index) {
+        final quiz = _recentHistory[index];
+        final accuracy = (quiz.correctAnswers / quiz.totalQuestions) * 100;
+        
+        return Container(
+          margin: EdgeInsets.only(bottom: 12),
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Color(0xFF162447),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: accuracy >= 80 ? Colors.green : Colors.transparent,
+              width: 2,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _formatDate(quiz.playedAt),
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _getModeColor(quiz.mode),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      quiz.mode.toUpperCase(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Text(
+                    '⭐ ${quiz.score}',
+                    style: TextStyle(
+                      color: Colors.amber,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Text(
+                    '${quiz.correctAnswers}/${quiz.totalQuestions}',
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontSize: 16,
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    '(${accuracy.toStringAsFixed(1)}%)',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+              if (quiz.category != null) ...[
+                SizedBox(height: 4),
+                Text(
+                  '📚 ${quiz.category}',
+                  style: TextStyle(color: Colors.white60, fontSize: 12),
+                ),
+              ],
+              if (quiz.difficulty != null) ...[
+                SizedBox(height: 4),
+                Text(
+                  '🎯 ${_getDifficultyLabel(quiz.difficulty!)}',
+                  style: TextStyle(color: Colors.white60, fontSize: 12),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMinigameStat(String emoji, String label, String value) {
+    return Column(
+      children: [
+        Text(emoji, style: TextStyle(fontSize: 20)),
+        SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(color: Colors.white60, fontSize: 10),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategoryBar(String category, int score) {
+    final maxScore = _globalStats!.scoresByCategory.values.reduce((a, b) => a > b ? a : b);
+    final percentage = maxScore > 0 ? (score / maxScore) * 100 : 0.0;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              category,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+              ),
+            ),
+            Text(
+              '$score pts',
+              style: TextStyle(
+                color: Colors.amber,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: LinearProgressIndicator(
+            value: percentage / 100,
+            backgroundColor: Color(0xFF23395D),
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+            minHeight: 8,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatTime(int seconds) {
+    final minutes = seconds ~/ 60;
+    final secs = seconds % 60;
+    return '$minutes:${secs.toString().padLeft(2, '0')}';
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('dd/MM/yyyy HH:mm').format(date);
+  }
+
+  Color _getModeColor(String mode) {
+    switch (mode.toLowerCase()) {
+      case 'rapido':
+        return Colors.orange;
+      case 'personalizado':
+        return Colors.purple;
+      default:
+        return Colors.blue;
+    }
+  }
+
+  String _getDifficultyLabel(String difficulty) {
+    switch (difficulty.toLowerCase()) {
+      case 'facil':
+        return 'Fácil';
+      case 'medio':
+        return 'Médio';
+      case 'dificil':
+        return 'Difícil';
+      default:
+        return difficulty;
+    }
+  }
+
+  Color _getDifficultyColor(String difficulty) {
+    switch (difficulty.toLowerCase()) {
+      case 'facil':
+        return Colors.green;
+      case 'medio':
+        return Colors.orange;
+      case 'dificil':
+        return Colors.red;
+      default:
+        return Colors.blue;
+    }
+  }

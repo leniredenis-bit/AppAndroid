@@ -1,6 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../services/audio_service.dart';
+import '../../services/storage_service.dart';
+import '../../services/achievement_service.dart';
+import '../../widgets/achievement_unlock_dialog.dart';
 
 enum Player { X, O, none }
 enum Mode { twoPlayers, vsAi }
@@ -14,6 +17,10 @@ class TicTacToeGame extends StatefulWidget {
 }
 
 class _TicTacToeGameState extends State<TicTacToeGame> {
+  final StorageService _storage = StorageService();
+  final AchievementService _achievementService = AchievementService();
+  DateTime? _gameStartTime;
+
   // Board: 9 positions
   List<Player> board = List<Player>.filled(9, Player.none);
   Player current = Player.X; // who plays now
@@ -43,6 +50,7 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
   }
 
   void resetBoard({bool keepStarter = true}) {
+    _gameStartTime = DateTime.now();
     setState(() {
       board = List<Player>.filled(9, Player.none);
       gameOver = false;
@@ -105,9 +113,19 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
       if (result == Player.X) {
         xWins++;
         AudioService().playVictory();
+        // Player X won (human player in vsAi mode)
+        _saveGameResult(true);
       } else if (result == Player.O) {
         oWins++;
         AudioService().playGameOver();
+        // Player O won (AI in vsAi mode or other player in 2-player mode)
+        // In vsAi, this means AI won, so player lost
+        if (mode == Mode.vsAi) {
+          _saveGameResult(false);
+        } else {
+          // In 2-player mode, O also won
+          _saveGameResult(true);
+        }
       }
       infoText = 'Jogador ${playerToString(result)} venceu!';
       setState(() {});
@@ -119,6 +137,7 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
       gameOver = true;
       draws++;
       infoText = 'Empate!';
+      _saveGameResult(false);
       setState(() {});
       return;
     }
@@ -127,6 +146,46 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
     current = (current == Player.X) ? Player.O : Player.X;
     infoText = 'Vez: ${playerToString(current)}';
     setState(() {});
+  }
+
+  Future<void> _saveGameResult(bool won) async {
+    if (_gameStartTime == null) return;
+
+    final timeSpent = DateTime.now().difference(_gameStartTime!).inSeconds;
+    final score = won ? 100 : 0;
+
+    // Save to storage
+    await _storage.saveMinigameRecord(
+      'tictactoe',
+      score: score,
+      won: won,
+      timeInSeconds: timeSpent,
+    );
+
+    // Get updated records
+    final records = await _storage.getMinigameRecords();
+    final record = records.getRecord('tictactoe');
+
+    // Check achievements only if won
+    if (won && mounted) {
+      final unlocked = await _achievementService.checkMinigameAchievements(
+        gameId: 'tictactoe',
+        totalGamesPlayed: record.gamesPlayed,
+        won: true,
+        timeInSeconds: timeSpent,
+      );
+
+      // Show achievement unlock dialogs
+      for (final achievement in unlocked) {
+        if (mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AchievementUnlockDialog(achievement: achievement),
+          );
+        }
+      }
+    }
   }
 
   // AI move logic

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/audio_service.dart';
+import '../../services/storage_service.dart';
+import '../../services/achievement_service.dart';
+import '../../widgets/achievement_unlock_dialog.dart';
 
 class MazeGame extends StatefulWidget {
   const MazeGame({super.key});
@@ -11,6 +14,8 @@ class MazeGame extends StatefulWidget {
 
 class _MazeGameState extends State<MazeGame> {
   final AudioService _audioService = AudioService();
+  final StorageService _storage = StorageService();
+  final AchievementService _achievementService = AchievementService();
   
   // Player position
   int _playerRow = 0;
@@ -19,6 +24,7 @@ class _MazeGameState extends State<MazeGame> {
   // Game state
   bool _isGameWon = false;
   int _moves = 0;
+  DateTime? _gameStartTime;
   
   // Para repetição de movimento ao segurar botão
   bool _isMoving = false;
@@ -52,6 +58,7 @@ class _MazeGameState extends State<MazeGame> {
   @override
   void initState() {
     super.initState();
+    _gameStartTime = DateTime.now();
     _audioService.playBackgroundMusic('quiz-home.mp3');
   }
 
@@ -92,6 +99,40 @@ class _MazeGameState extends State<MazeGame> {
         _isGameWon = true;
       });
       _audioService.playVictory();
+      _saveGameResult();
+    }
+  }
+
+  Future<void> _saveGameResult() async {
+    final timeSpent = _gameStartTime != null
+        ? DateTime.now().difference(_gameStartTime!).inSeconds
+        : 0;
+
+    await _storage.saveMinigameRecord(
+      'maze',
+      score: 1000 - (_moves * 5),
+      won: true,
+      timeInSeconds: timeSpent,
+    );
+
+    final records = await _storage.getMinigameRecords();
+    final mazeRecord = records.getRecord('maze');
+    
+    final unlockedAchievements = await _achievementService.checkMinigameAchievements(
+      gameId: 'maze',
+      totalGamesPlayed: mazeRecord.gamesPlayed,
+      won: true,
+      timeInSeconds: timeSpent,
+    );
+    
+    if (mounted && unlockedAchievements.isNotEmpty) {
+      for (final achievement in unlockedAchievements) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AchievementUnlockDialog(achievement: achievement),
+        );
+      }
     }
   }
 
