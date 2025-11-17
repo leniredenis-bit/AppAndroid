@@ -680,3 +680,4 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
         return Colors.blue;
     }
   }
+}
