@@ -20,11 +20,41 @@ class _WordSearchGameState extends State<WordSearchGame> {
   // Grid size
   static const int gridSize = 12;
   
-  // Biblical words to find
-  final List<String> _words = [
-    'JESUS', 'FE', 'AMOR', 'PAZ', 'DEUS', 'SALVACAO',
-    'ARCA', 'MOISÉS', 'ABRAAO', 'BIBLIA'
+  // Lista completa de palavras bíblicas disponíveis
+  static const List<String> _allBiblicalWords = [
+    // Personagens do Antigo Testamento
+    'ABRAAO', 'MOISÉS', 'ISAQUE', 'JACÓ', 'JOSE', 'SAMUEL', 
+    'DAVI', 'SALOMAO', 'ELIAS', 'ELISEU', 'ISAIAS', 'DANIEL',
+    'NOÉ', 'ADAO', 'EVA', 'CAIM', 'ABEL', 'ENOQUE', 'JOSUÉ',
+    
+    // Personagens do Novo Testamento
+    'JESUS', 'MARIA', 'JOSE', 'PEDRO', 'PAULO', 'JOÃO', 
+    'TIAGO', 'ANDRÉ', 'FILIPE', 'MATEUS', 'LUCAS', 'MARCOS',
+    'BARNABÉ', 'SILAS', 'TIMÓTEO', 'TITO',
+    
+    // Lugares
+    'BELÉM', 'NAZARÉ', 'JERUSALÉM', 'GALILEIA', 'EGITO', 
+    'SINAI', 'JORDAN', 'CANAÃ', 'BABEL', 'NÍNIVE',
+    
+    // Conceitos e virtudes
+    'AMOR', 'FÉ', 'PAZ', 'VIDA', 'LUZ', 'REINO', 'GRAÇA',
+    'PERDÃO', 'VERDADE', 'CAMINHO', 'PODER', 'GLORIA',
+    'ALEGRIA', 'ESPERANÇA', 'BONDADE', 'JUSTIÇA',
+    
+    // Objetos e símbolos
+    'ARCA', 'CRUZ', 'PÃO', 'VINHO', 'ÓLEO', 'PEDRA',
+    'TABUA', 'ALTAR', 'TEMPLO', 'CORDEIRO', 'POMBA',
+    
+    // Livros da Bíblia (alguns)
+    'GENESIS', 'ÊXODO', 'SALMOS', 'JOAO', 'ATOS',
+    
+    // Outros
+    'DEUS', 'BIBLIA', 'SALVAÇÃO', 'ALIANÇA', 'PROFETA',
+    'APOSTOLO', 'DISCIPULO', 'MILAGRE', 'ORAÇÃO', 'ANJO'
   ];
+  
+  // Palavras selecionadas para a partida atual (10 palavras aleatórias)
+  late List<String> _words;
   
   late List<List<String>> _grid;
   final Set<String> _foundWords = {};
@@ -38,6 +68,7 @@ class _WordSearchGameState extends State<WordSearchGame> {
     super.initState();
     _gameStartTime = DateTime.now();
     _audioService.playBackgroundMusic('quiz-home.mp3');
+    _selectRandomWords();
     _generateGrid();
   }
 
@@ -45,6 +76,15 @@ class _WordSearchGameState extends State<WordSearchGame> {
   void dispose() {
     _audioService.stopBackgroundMusic();
     super.dispose();
+  }
+
+  /// Seleciona 10 palavras aleatórias da lista completa
+  void _selectRandomWords() {
+    final random = Random();
+    final shuffled = List<String>.from(_allBiblicalWords)..shuffle(random);
+    
+    // Seleciona as primeiras 10 palavras após embaralhar
+    _words = shuffled.take(10).toList();
   }
 
   void _generateGrid() {
@@ -379,12 +419,13 @@ class _WordSearchGameState extends State<WordSearchGame> {
                             bool isSelected = _isCellSelected(row, col);
                             bool isFound = _foundWordCells.contains(Point(row, col));
                             
-                            // Cor de fundo: amarelo se selecionado, verde claro se encontrado, branco caso contrário
+                            // Cor de fundo: amarelo se selecionado, verde muito claro se encontrado, branco caso contrário
                             Color backgroundColor;
                             if (isSelected) {
                               backgroundColor = Colors.yellow.withOpacity(0.7);
                             } else if (isFound) {
-                              backgroundColor = Colors.green.withOpacity(0.15); // Verde bem clarinho
+                              // Verde MUITO claro, quase branco, apenas um leve toque verde
+                              backgroundColor = const Color(0xFFF0FFF0); // Honeydew - verde muito suave
                             } else {
                               backgroundColor = Colors.white.withOpacity(0.9);
                             }
@@ -423,6 +464,7 @@ class _WordSearchGameState extends State<WordSearchGame> {
                     setState(() {
                       _foundWords.clear();
                       _foundWordCells.clear(); // Limpa as células marcadas
+                      _selectRandomWords(); // Seleciona novas palavras aleatórias
                       _generateGrid();
                     });
                   },
