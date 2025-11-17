@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../models/question.dart';
 import '../models/stats_service.dart';
+import '../models/stats_data.dart';
 import '../utils/timer_calculator.dart';
 import '../services/audio_service.dart';
+import '../services/storage_service.dart';
+import '../services/achievement_service.dart';
+import '../widgets/achievement_unlock_dialog.dart';
 
 class QuizScreen extends StatefulWidget {
   final List<Question> questions;
@@ -25,10 +29,16 @@ class _QuizScreenState extends State<QuizScreen> {
   int timeRemaining = 30;
   int autoAdvanceTime = 10;
   bool showExplanation = false;
+  
+  // Rastreamento para persistência
+  List<QuestionResult> questionResults = [];
+  DateTime? quizStartTime;
+  int totalTimeSpent = 0;
 
   @override
   void initState() {
     super.initState();
+    quizStartTime = DateTime.now();
     // Inicia música de fundo do quiz
     AudioService().playBackgroundMusic('quiz');
     startTimer();
@@ -82,14 +92,26 @@ class _QuizScreenState extends State<QuizScreen> {
   void selectAnswer(int index) {
     if (selectedAnswer != null) return;
 
+    final question = widget.questions[currentQuestionIndex];
+    final isCorrect = index == question.respostaCorreta;
+    final questionStartTime = TimerCalculator.calculateQuizTime(question);
+    final timeToAnswer = questionStartTime - timeRemaining;
+
     setState(() {
       selectedAnswer = index;
       showResult = true;
     });
 
+    // Registrar resultado da pergunta
+    questionResults.add(QuestionResult(
+      questionId: question.id,
+      wasCorrect: isCorrect,
+      timeToAnswer: timeToAnswer,
+    ));
+
     _timer?.cancel();
 
-    if (index == widget.questions[currentQuestionIndex].respostaCorreta) {
+    if (isCorrect) {
       // Som de acerto!
       AudioService().playCorrectAnswer();
       setState(() {
@@ -145,12 +167,52 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void showQuizResult() async {
-    // Salvar estatísticas
+    // Calcular tempo total gasto
+    if (quizStartTime != null) {
+      totalTimeSpent = DateTime.now().difference(quizStartTime!).inSeconds;
+    }
+
+    // Salvar estatísticas antigas (StatsService)
     await StatsService.saveQuizStats(
       score: score,
       questionsAnswered: widget.questions.length,
       correctAnswers: correctAnswersCount,
     );
+
+    // Salvar no novo sistema de persistência
+    final storage = StorageService();
+    await storage.saveQuizResult(
+      mode: 'quiz_normal', // TODO: passar o modo real (rápido, estudo, etc)
+      score: score,
+      correctAnswers: correctAnswersCount,
+      totalQuestions: widget.questions.length,
+      timeSpent: totalTimeSpent,
+      difficulty: _getMostCommonDifficulty(),
+      category: _getMostCommonCategory(),
+      questionResults: questionResults,
+    );
+
+    // Verificar conquistas
+    final achievementService = AchievementService();
+    final globalStats = await storage.getGlobalStats();
+    final unlockedAchievements = await achievementService.checkQuizAchievements(
+      totalQuizzes: globalStats.totalQuizzes,
+      correctAnswers: correctAnswersCount,
+      totalQuestions: widget.questions.length,
+      timeInSeconds: totalTimeSpent,
+      streak: globalStats.currentStreak,
+    );
+
+    // Mostrar diálogos de conquistas desbloqueadas
+    if (mounted && unlockedAchievements.isNotEmpty) {
+      for (final achievement in unlockedAchievements) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AchievementUnlockDialog(achievement: achievement),
+        );
+      }
+    }
     
     if (!mounted) return;
     
@@ -192,6 +254,26 @@ class _QuizScreenState extends State<QuizScreen> {
         celebrationColor: celebrationColor,
       ),
     );
+  }
+
+  String? _getMostCommonDifficulty() {
+    if (widget.questions.isEmpty) return null;
+    final difficulties = widget.questions.map((q) => q.dificuldade).toList();
+    final mostCommon = difficulties.reduce((a, b) =>
+      difficulties.where((d) => d == a).length > difficulties.where((d) => d == b).length ? a : b);
+    return mostCommon == 1 ? 'fácil' : mostCommon == 2 ? 'médio' : 'difícil';
+  }
+
+  String? _getMostCommonCategory() {
+    if (widget.questions.isEmpty) return null;
+    // Usar a primeira tag como categoria
+    final categories = widget.questions
+        .where((q) => q.tags.isNotEmpty)
+        .map((q) => q.tags.first)
+        .toList();
+    if (categories.isEmpty) return null;
+    return categories.reduce((a, b) =>
+      categories.where((c) => c == a).length > categories.where((c) => c == b).length ? a : b);
   }
 
   @override

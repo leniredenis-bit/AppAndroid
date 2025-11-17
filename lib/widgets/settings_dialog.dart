@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/stats_screen.dart';
+import '../screens/achievements_screen.dart';
 import '../services/audio_service.dart';
+import '../services/language_service.dart';
 import 'dart:html' as html;
 
 class SettingsDialog extends StatefulWidget {
@@ -135,6 +137,62 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
               SizedBox(height: 20),
 
+              // Language Selector
+              Text(
+                '🌍 Idioma / Language',
+                style: TextStyle(
+                  color: _isDarkTheme ? Colors.white70 : Colors.black54,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 8),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _isDarkTheme ? Color(0xFF1F2D44) : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: LanguageService().currentLanguageCode,
+                    isExpanded: true,
+                    dropdownColor: _isDarkTheme ? Color(0xFF1F2D44) : Colors.white,
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: _isDarkTheme ? Colors.white : Colors.black87,
+                    ),
+                    style: TextStyle(
+                      color: _isDarkTheme ? Colors.white : Colors.black87,
+                      fontSize: 16,
+                    ),
+                    items: LanguageService().getAvailableLanguages().map((lang) {
+                      return DropdownMenuItem<String>(
+                        value: lang['code'],
+                        child: Row(
+                          children: [
+                            Text(
+                              lang['flag']!,
+                              style: TextStyle(fontSize: 24),
+                            ),
+                            SizedBox(width: 12),
+                            Text(lang['name']!),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? newLanguage) async {
+                      if (newLanguage != null) {
+                        await LanguageService().changeLanguage(newLanguage);
+                        setState(() {}); // Força rebuild para atualizar UI
+                      }
+                    },
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 20),
+
               // Music Volume
               Text(
                 '🎵 Volume da Música',
@@ -222,6 +280,23 @@ class _SettingsDialogState extends State<SettingsDialog> {
               SizedBox(height: 24),
               Divider(color: _isDarkTheme ? Colors.white24 : Colors.black12),
               SizedBox(height: 16),
+
+              // Achievements Button
+              _buildMenuButton(
+                icon: Icons.emoji_events,
+                title: 'Conquistas',
+                subtitle: 'Veja suas conquistas desbloqueadas',
+                color: Color(0xFFFFD700),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AchievementsScreen()),
+                  );
+                },
+              ),
+
+              SizedBox(height: 12),
 
               // Statistics Button
               _buildMenuButton(

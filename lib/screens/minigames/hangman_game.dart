@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../../services/audio_service.dart';
+import '../../services/storage_service.dart';
+import '../../services/achievement_service.dart';
+import '../../widgets/achievement_unlock_dialog.dart';
 
 // Custom Painter para desenhar o boneco da forca
 class HangmanPainter extends CustomPainter {
@@ -107,6 +110,9 @@ class HangmanGame extends StatefulWidget {
 }
 
 class _HangmanGameState extends State<HangmanGame> {
+  final StorageService _storage = StorageService();
+  final AchievementService _achievementService = AchievementService();
+  
   // Palavras bíblicas seguras
   final List<String> words = [
     "MOISES", "DANIEL", "JESUS", "RUTE", "ESTER", "ISAIAS",
@@ -118,10 +124,12 @@ class _HangmanGameState extends State<HangmanGame> {
   List<String> guessedLetters = [];
   List<String> wrongLetters = [];
   int maxErrors = 6;
+  DateTime? _gameStartTime;
 
   @override
   void initState() {
     super.initState();
+    _gameStartTime = DateTime.now();
     _restartGame();
   }
 
@@ -149,6 +157,7 @@ class _HangmanGameState extends State<HangmanGame> {
       guessedLetters.add(letter);
       if (hasWon) {
         AudioService().playVictory();
+        _saveGameResult(won: true);
       } else {
         AudioService().playCorrectAnswer();
       }
@@ -156,12 +165,48 @@ class _HangmanGameState extends State<HangmanGame> {
       wrongLetters.add(letter);
       if (hasLost) {
         AudioService().playGameOver();
+        _saveGameResult(won: false);
       } else {
         AudioService().playWrongAnswer();
       }
     }
 
     setState(() {});
+  }
+
+  Future<void> _saveGameResult({required bool won}) async {
+    final timeSpent = _gameStartTime != null
+        ? DateTime.now().difference(_gameStartTime!).inSeconds
+        : 0;
+
+    await _storage.saveMinigameRecord(
+      'hangman',
+      score: won ? (100 - wrongLetters.length * 10) : 0,
+      won: won,
+      timeInSeconds: timeSpent,
+    );
+
+    if (won) {
+      final records = await _storage.getMinigameRecords();
+      final hangmanRecord = records.getRecord('hangman');
+      
+      final unlockedAchievements = await _achievementService.checkMinigameAchievements(
+        gameId: 'hangman',
+        totalGamesPlayed: hangmanRecord.gamesPlayed,
+        won: won,
+        timeInSeconds: timeSpent,
+      );
+      
+      if (mounted && unlockedAchievements.isNotEmpty) {
+        for (final achievement in unlockedAchievements) {
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AchievementUnlockDialog(achievement: achievement),
+          );
+        }
+      }
+    }
   }
 
   Widget _buildHangmanDrawing() {

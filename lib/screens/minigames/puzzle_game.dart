@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../../services/audio_service.dart';
+import '../../services/storage_service.dart';
+import '../../services/achievement_service.dart';
+import '../../widgets/achievement_unlock_dialog.dart';
 
 class PuzzleGame extends StatefulWidget {
   const PuzzleGame({super.key});
@@ -19,6 +22,8 @@ class PuzzlePiece {
 
 class _PuzzleGameState extends State<PuzzleGame> {
   final AudioService _audioService = AudioService();
+  final StorageService _storage = StorageService();
+  final AchievementService _achievementService = AchievementService();
   
   // Puzzle configuration
   static const int gridSize = 3; // 3x3 jigsaw puzzle
@@ -29,6 +34,7 @@ class _PuzzleGameState extends State<PuzzleGame> {
   late List<PuzzlePiece> _availablePieces; // Pieces to drag from
   int _moves = 0;
   bool _isGameWon = false;
+  DateTime? _gameStartTime;
   
   // Puzzle pieces with biblical/spiritual emojis
   final List<PuzzlePiece> _allPieces = [
@@ -46,6 +52,7 @@ class _PuzzleGameState extends State<PuzzleGame> {
   @override
   void initState() {
     super.initState();
+    _gameStartTime = DateTime.now();
     _audioService.playBackgroundMusic('memory-game.mp3');
     _initializePuzzle();
   }
@@ -96,6 +103,44 @@ class _PuzzleGameState extends State<PuzzleGame> {
         _isGameWon = true;
       });
       _audioService.playVictory();
+      _saveGameResult();
+    }
+  }
+
+  Future<void> _saveGameResult() async {
+    final timeSpent = _gameStartTime != null
+        ? DateTime.now().difference(_gameStartTime!).inSeconds
+        : 0;
+
+    // Salvar recorde
+    await _storage.saveMinigameRecord(
+      'puzzle',
+      score: 1000 - (_moves * 10), // Pontuação baseada em movimentos
+      won: true,
+      timeInSeconds: timeSpent,
+    );
+
+    // Obter records atualizados
+    final records = await _storage.getMinigameRecords();
+    final puzzleRecord = records.getRecord('puzzle');
+
+    // Verificar conquistas
+    final unlockedAchievements = await _achievementService.checkMinigameAchievements(
+      gameId: 'puzzle',
+      totalGamesPlayed: puzzleRecord.gamesPlayed,
+      won: true,
+      timeInSeconds: timeSpent,
+    );
+
+    // Mostrar conquistas desbloqueadas
+    if (mounted && unlockedAchievements.isNotEmpty) {
+      for (final achievement in unlockedAchievements) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AchievementUnlockDialog(achievement: achievement),
+        );
+      }
     }
   }
 
