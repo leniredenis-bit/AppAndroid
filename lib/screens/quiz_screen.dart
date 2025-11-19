@@ -97,10 +97,17 @@ class _QuizScreenState extends State<QuizScreen> {
     final isCorrect = index == question.respostaCorreta;
     final questionStartTime = TimerCalculator.calculateQuizTime(question);
     final timeToAnswer = questionStartTime - timeRemaining;
+    
+    // Verifica se tem explicação (referência bíblica)
+    final hasExplanation = (question.textoBiblico != null && question.textoBiblico!.isNotEmpty);
 
     setState(() {
       selectedAnswer = index;
       showResult = true;
+      // Abre modal automaticamente se houver explicação (referência bíblica)
+      if (hasExplanation) {
+        showExplanation = true;
+      }
     });
 
     // Registrar resultado da pergunta
@@ -382,103 +389,145 @@ class _QuizScreenState extends State<QuizScreen> {
             
             // Alternativas
             Expanded(
-              child: ListView.builder(
-                itemCount: question.opcoes.length,
-                itemBuilder: (context, index) {
-                  final isSelected = selectedAnswer == index;
-                  final isCorrect = index == question.respostaCorreta;
-                  
-                  Color buttonColor = Color(0xFF23395D);
-                  if (showResult) {
-                    if (isCorrect) {
-                      buttonColor = Colors.green.shade700;
-                    } else if (isSelected && !isCorrect) {
-                      buttonColor = Colors.red.shade700;
-                    }
-                  }
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: question.opcoes.length,
+                      itemBuilder: (context, index) {
+                        final isSelected = selectedAnswer == index;
+                        final isCorrect = index == question.respostaCorreta;
+                        
+                        Color buttonColor = Color(0xFF23395D);
+                        if (showResult) {
+                          if (isCorrect) {
+                            buttonColor = Colors.green.shade700;
+                          } else if (isSelected && !isCorrect) {
+                            buttonColor = Colors.red.shade700;
+                          }
+                        }
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: buttonColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        padding: EdgeInsets.all(16),
-                        elevation: isSelected ? 4 : 2,
-                      ),
-                      onPressed: () => selectAnswer(index),
-                      child: Text(
-                        question.opcoes[index],
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            
-            // Botões de Explicação e Próxima (aparecem após responder)
-            if (showResult)
-              Padding(
-                padding: const EdgeInsets.only(top: 16, bottom: 8),
-                child: Row(
-                  children: [
-                    // Botão Explicação
-                    if (hasExplanation)
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF23395D),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: buttonColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              padding: EdgeInsets.all(16),
+                              elevation: isSelected ? 4 : 2,
                             ),
-                            padding: EdgeInsets.symmetric(vertical: 14),
-                          ),
-                          onPressed: toggleExplanation,
-                          child: Text(
-                            '📖 Explicação',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (hasExplanation) SizedBox(width: 12),
-                    // Botão Próxima
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green.shade700,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          padding: EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        onPressed: nextQuestion,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Próxima',
+                            onPressed: () => selectAnswer(index),
+                            child: Text(
+                              question.opcoes[index],
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  
+                  // Caixinha de Explicação (inline, abaixo das alternativas)
+                  if (showExplanation && hasExplanation)
+                    Container(
+                      margin: EdgeInsets.only(top: 8, bottom: 8),
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF162447),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white24, width: 2),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '📖 Explicação',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.close, color: Colors.white, size: 20),
+                                onPressed: toggleExplanation,
+                                padding: EdgeInsets.zero,
+                                constraints: BoxConstraints(),
+                              ),
+                            ],
+                          ),
+                          Divider(color: Colors.white24),
+                          SizedBox(height: 8),
+                          if (question.textoBiblico != null && question.textoBiblico!.isNotEmpty)
+                            BibleReferenceButton(reference: question.textoBiblico!),
+                          SizedBox(height: 12),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green.shade700,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              ),
+                              onPressed: () {
+                                toggleExplanation();
+                                nextQuestion();
+                              },
+                              child: Text(
+                                'Próxima',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                ],
+              ),
+            ),
+            
+            // Botão Próxima (aparece após responder, apenas se NÃO tiver explicação aberta)
+            if (showResult && !showExplanation)
+              Padding(
+                padding: const EdgeInsets.only(top: 16, bottom: 8),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade700,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: nextQuestion,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Próxima',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             
@@ -499,92 +548,6 @@ class _QuizScreenState extends State<QuizScreen> {
           ],
         ),
       ),
-      
-      // Balão de Explicação (Modal)
-      if (showExplanation && hasExplanation)
-        GestureDetector(
-          onTap: toggleExplanation,
-          child: Container(
-            color: Colors.black54,
-            child: Center(
-              child: GestureDetector(
-                onTap: () {}, // Não fecha ao clicar no balão
-                child: Container(
-                  margin: EdgeInsets.all(24),
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Color(0xFF162447),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white24, width: 2),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Cabeçalho com X para fechar
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '📖 Explicação',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.close, color: Colors.white),
-                            onPressed: toggleExplanation,
-                          ),
-                        ],
-                      ),
-                      Divider(color: Colors.white24),
-                      SizedBox(height: 12),
-                      
-                      // Referência Bíblica (agora é um link clicável)
-                      if (question.textoBiblico != null && question.textoBiblico!.isNotEmpty)
-                        BibleReferenceButton(reference: question.textoBiblico!),
-                      
-                      SizedBox(height: 20),
-                      
-                      // Botão Próxima (dentro do balão)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green.shade700,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          ),
-                          onPressed: () {
-                            toggleExplanation();
-                            nextQuestion();
-                          },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Próxima',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
     ],
   ),
     );

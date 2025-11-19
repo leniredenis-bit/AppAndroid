@@ -217,12 +217,15 @@ class _HangmanGameState extends State<HangmanGame> {
         Text("Erros: $errors / $maxErrors",
             style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
         const SizedBox(height: 20),
-        Container(
-          height: 200,
-          width: 200,
-          child: CustomPaint(
-            painter: HangmanPainter(errors),
-            size: Size(200, 200),
+        Center(
+          child: Container(
+            height: 200,
+            width: 200,
+            alignment: Alignment.center,
+            child: CustomPaint(
+              painter: HangmanPainter(errors),
+              size: Size(200, 200),
+            ),
           ),
         ),
       ],
@@ -324,10 +327,22 @@ class _HangmanGameState extends State<HangmanGame> {
                 style: TextStyle(fontSize: 24, color: Colors.green, fontWeight: FontWeight.bold),
               ),
             if (hasLost)
-              Text(
-                "😢 Você perdeu!\nA palavra era: $chosenWord",
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 24, color: Colors.red, fontWeight: FontWeight.bold),
+              Column(
+                children: [
+                  Text(
+                    "😢 Você perdeu!\nA palavra era: $chosenWord",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 24, color: Colors.red, fontWeight: FontWeight.bold),
+                  ),
+                  if (wrongLetters.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      "Letras erradas: ${wrongLetters.join(', ')}",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 16, color: Colors.red, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ],
               ),
             const SizedBox(height: 20),
             if (!hasWon && !hasLost) _buildKeyboard(),

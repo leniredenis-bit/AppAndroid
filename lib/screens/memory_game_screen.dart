@@ -81,7 +81,7 @@ class MemoryThemes {
       {'emoji': '🚂', 'name': 'Trem'},
       {'emoji': '🚁', 'name': 'Helicóptero'},
     ],
-    'peixes': [
+    'vida_marinha': [
       {'emoji': '🐟', 'name': 'Peixe'},
       {'emoji': '🐠', 'name': 'Peixe Tropical'},
       {'emoji': '🐡', 'name': 'Baiacu'},
@@ -188,7 +188,7 @@ class MemoryThemes {
       'animais': '🐶 Animais',
       'frutas': '🍎 Frutas',
       'transportes': '🚗 Transportes',
-      'peixes': '🐟 Peixes',
+      'vida_marinha': '🐟 Vida Marinha',
       'aves': '🦅 Aves',
       'numeros': '🔢 Números',
       'objetos': '📱 Objetos',
@@ -706,7 +706,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                           'animais',
                           'frutas',
                           'transportes',
-                          'peixes',
+                          'vida_marinha',
                           'aves',
                           'numeros',
                           'objetos',
@@ -1086,8 +1086,8 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                         color: card.isMatched
                             ? Colors.green.shade700
                             : card.isFlipped
-                                ? Color(0xFF3A5A8C)
-                                : Color(0xFF23395D),
+                                ? Color(0xFF2D4A73)
+                                : Color(0xFF1A2F4D),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
