@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart' as custom_tabs;
+import '../services/language_service.dart';
 
 /// Widget que exibe uma referência bíblica clicável que abre no JW Library app
 /// (se instalado) ou no navegador com preview.
@@ -18,17 +19,25 @@ class BibleReferenceButton extends StatelessWidget {
     required this.reference,
   });
 
-  /// Converte a referência textual para URL do JW.org
+  /// Converte a referência textual para URL do JW.org baseado no idioma
   /// 
-  /// Formato de busca que funciona: https://www.jw.org/pt/busca/?q=Daniel+6%3A16&link=%2Fresults%2FT%2Fbible%3Fq%3D
+  /// URLs por idioma:
+  /// - PT: https://www.jw.org/pt/busca/?q=Daniel+6%3A16&link=%2Fresults%2FT%2Fbible%3Fq%3D
+  /// - EN: https://www.jw.org/en/search/?q=Genesis+6%3A13-14&link=%2Fresults%2FE%2Fbible%3Fq%3D
+  /// - ES: https://www.jw.org/es/búsquedas/?q=génesis+6%3A13-14&link=%2Fresults%2FS%2Fall%3Fsort%3Drel%26q%3D
   String _buildJWUrl() {
     final cleanRef = reference.trim();
-    
-    // Encode da referência para URL (espaços viram +, : vira %3A)
     final query = Uri.encodeComponent(cleanRef).replaceAll('%20', '+');
+    final lang = LanguageService().currentLanguageCode;
     
-    // URL de busca do JW.org que redireciona corretamente para a Bíblia
-    return 'https://www.jw.org/pt/busca/?q=$query&link=%2Fresults%2FT%2Fbible%3Fq%3D';
+    switch (lang) {
+      case 'en':
+        return 'https://www.jw.org/en/search/?q=$query&link=%2Fresults%2FE%2Fbible%3Fq%3D';
+      case 'es':
+        return 'https://www.jw.org/es/búsquedas/?q=$query&link=%2Fresults%2FS%2Fall%3Fsort%3Drel%26q%3D';
+      default: // 'pt'
+        return 'https://www.jw.org/pt/busca/?q=$query&link=%2Fresults%2FT%2Fbible%3Fq%3D';
+    }
   }
 
   /// Abre o link com preview usando Custom Tabs (melhor experiência)
@@ -75,12 +84,20 @@ class BibleReferenceButton extends StatelessWidget {
   Future<void> _openReferenceFallback(BuildContext context) async {
     final url = _buildJWUrl();
     final uri = Uri.parse(url);
+    final lang = LanguageService().currentLanguageCode;
+    
+    // Mensagens de erro por idioma
+    final errorMessages = {
+      'pt': 'Não foi possível abrir a referência.',
+      'en': 'Could not open the reference.',
+      'es': 'No se pudo abrir la referencia.',
+    };
     
     try {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else if (context.mounted) {
-        _showError(context, 'Não foi possível abrir a referência.');
+        _showError(context, errorMessages[lang] ?? errorMessages['pt']!);
       }
     } catch (e) {
       if (context.mounted) {
@@ -100,6 +117,15 @@ class BibleReferenceButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lang = LanguageService().currentLanguageCode;
+    
+    // Texto "Toque para ler o texto completo" por idioma
+    final readTextMessages = {
+      'pt': 'Toque para ler o texto completo',
+      'en': 'Tap to read the full text',
+      'es': 'Toca para leer el texto completo',
+    };
+    
     return InkWell(
       onTap: () => _openReferenceWithPreview(context),
       borderRadius: BorderRadius.circular(12),
@@ -136,7 +162,7 @@ class BibleReferenceButton extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Toque para ler o texto completo',
+                    readTextMessages[lang] ?? readTextMessages['pt']!,
                     style: TextStyle(
                       color: Colors.white60,
                       fontSize: 12,
@@ -169,12 +195,29 @@ class BibleReferenceLink extends StatelessWidget {
   String _buildJWUrl() {
     final cleanRef = reference.trim();
     final query = Uri.encodeComponent(cleanRef).replaceAll('%20', '+');
-    return 'https://www.jw.org/pt/busca/?q=$query&link=%2Fresults%2FT%2Fbible%3Fq%3D';
+    final lang = LanguageService().currentLanguageCode;
+    
+    switch (lang) {
+      case 'en':
+        return 'https://www.jw.org/en/search/?q=$query&link=%2Fresults%2FE%2Fbible%3Fq%3D';
+      case 'es':
+        return 'https://www.jw.org/es/búsquedas/?q=$query&link=%2Fresults%2FS%2Fall%3Fsort%3Drel%26q%3D';
+      default: // 'pt'
+        return 'https://www.jw.org/pt/busca/?q=$query&link=%2Fresults%2FT%2Fbible%3Fq%3D';
+    }
   }
 
   Future<void> _openReference(BuildContext context) async {
     final url = _buildJWUrl();
     final uri = Uri.parse(url);
+    final lang = LanguageService().currentLanguageCode;
+    
+    // Mensagens de erro por idioma
+    final errorMessages = {
+      'pt': 'Não foi possível abrir a referência.',
+      'en': 'Could not open the reference.',
+      'es': 'No se pudo abrir la referencia.',
+    };
     
     try {
       if (await canLaunchUrl(uri)) {
@@ -182,7 +225,7 @@ class BibleReferenceLink extends StatelessWidget {
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Não foi possível abrir a referência.'),
+            content: Text(errorMessages[lang] ?? errorMessages['pt']!),
             backgroundColor: Colors.red.shade700,
           ),
         );

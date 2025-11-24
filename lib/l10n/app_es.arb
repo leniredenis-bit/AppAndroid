@@ -154,6 +154,9 @@
   "errorGeneric": "Ocurrió un error. Inténtalo de nuevo.",
   "errorConnection": "Error de conexión. Verifica tu internet.",
   
+  "bibleReadFullText": "Toca para leer el texto completo",
+  "bibleOpenError": "No se pudo abrir la referencia.",
+  
   "gameWon": "¡Ganaste!",
   "gameLost": "¡Perdiste!",
   "gameDraw": "¡Empate!",
@@ -161,5 +164,195 @@
   "gameResume": "Reanudar",
   "gameQuit": "Salir",
   "gameCompleted": "¡Completado!",
-  "gameTimeElapsed": "Tiempo transcurrido: {time}"
+  "gameTimeElapsed": "Tiempo transcurrido: {time}",
+  
+  "memoryGameTitle": "🧠 Juego de Memoria",
+  "memoryGameDifficulty": "Dificultad",
+  "memoryGameEasy": "Fácil (4x4)",
+  "memoryGameMedium": "Medio (6x6)",
+  "memoryGameHard": "Difícil (8x8)",
+  "memoryGameTheme": "Tema",
+  "memoryGameEmojis": "Emojis",
+  "memoryGameColors": "Colores",
+  "memoryGamePlayers": "Jugadores",
+  "memoryGameSinglePlayer": "Un Jugador",
+  "memoryGameTwoPlayers": "Dos Jugadores",
+  "memoryGameAttempts": "Intentos",
+  "memoryGameMatches": "Aciertos",
+  "memoryGamePlayer": "Jugador {player}",
+  "@memoryGamePlayer": {
+    "placeholders": {
+      "player": {
+        "type": "int"
+      }
+    }
+  },
+  "memoryGameScore": "Puntuación: {score}",
+  "@memoryGameScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "memoryGameYourTurn": "¡Tu turno!",
+  "memoryGameWinner": "¡Jugador {player} ganó!",
+  "@memoryGameWinner": {
+    "placeholders": {
+      "player": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "ticTacToeTitle": "⭕❌ Tres en Raya",
+  "ticTacToeMode": "Modo",
+  "ticTacToeTwoPlayers": "Dos Jugadores",
+  "ticTacToeVsAI": "vs IA",
+  "ticTacToeDifficulty": "Dificultad",
+  "ticTacToeEasy": "Fácil",
+  "ticTacToeMedium": "Medio",
+  "ticTacToeHard": "Difícil",
+  "ticTacToePlayerX": "Jugador X",
+  "ticTacToePlayerO": "Jugador O",
+  "ticTacToeWins": "Victorias",
+  "ticTacToeDraws": "Empates",
+  "ticTacToePlayerWon": "¡{player} ganó!",
+  "@ticTacToePlayerWon": {
+    "placeholders": {
+      "player": {
+        "type": "String"
+      }
+    }
+  },
+  "ticTacToeTurn": "Turno de {player}",
+  "@ticTacToeTurn": {
+    "placeholders": {
+      "player": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "hangmanTitle": "🔤 Ahorcado",
+  "hangmanCategory": "Categoría",
+  "hangmanAttempts": "Intentos restantes: {attempts}",
+  "@hangmanAttempts": {
+    "placeholders": {
+      "attempts": {
+        "type": "int"
+      }
+    }
+  },
+  "hangmanGuess": "Adivina la letra",
+  "hangmanWin": "¡Felicitaciones! ¡Ganaste!",
+  "hangmanLose": "¡Juego terminado! La palabra era: {word}",
+  "@hangmanLose": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "hangmanNewGame": "Nuevo Juego",
+  
+  "wordSearchTitle": "🔍 Sopa de Letras",
+  "wordSearchWordsFound": "Palabras encontradas: {found}/{total}",
+  "@wordSearchWordsFound": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "wordSearchTimeElapsed": "Tiempo: {time}",
+  "@wordSearchTimeElapsed": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "wordSearchCongratulations": "¡Felicitaciones! ¡Encontraste todas las palabras!",
+  "wordSearchWordList": "Lista de Palabras",
+  
+  "mazeTitle": "🌀 Laberinto",
+  "mazeMoves": "Movimientos: {moves}",
+  "@mazeMoves": {
+    "placeholders": {
+      "moves": {
+        "type": "int"
+      }
+    }
+  },
+  "mazeTime": "Tiempo: {time}",
+  "@mazeTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "mazeControls": "Usa las flechas para moverte",
+  "mazeVictory": "¡Encontraste la salida!",
+  "mazeNewMaze": "Nuevo Laberinto",
+  "mazeDifficulty": "Dificultad",
+  "mazeEasy": "Fácil",
+  "mazeMedium": "Medio",
+  "mazeHard": "Difícil",
+  
+  "sequenceTitle": "🎯 Secuencia",
+  "sequenceLevel": "Nivel: {level}",
+  "@sequenceLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "sequenceHighScore": "Puntuación Máxima: {score}",
+  "@sequenceHighScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "sequenceWatch": "Observa la secuencia",
+  "sequenceYourTurn": "¡Tu turno!",
+  "sequenceGameOver": "¡Juego Terminado!",
+  "sequenceNewGame": "Nuevo Juego",
+  "sequenceYourScore": "Tu puntuación: {score}",
+  "@sequenceYourScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "sequenceNewRecord": "¡Nuevo récord!",
+  
+  "puzzleTitle": "🧩 Rompecabezas",
+  "puzzleMoves": "Movimientos: {moves}",
+  "@puzzleMoves": {
+    "placeholders": {
+      "moves": {
+        "type": "int"
+      }
+    }
+  },
+  "puzzleTime": "Tiempo: {time}",
+  "@puzzleTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "puzzleDragPieces": "Arrastra las piezas para resolver el rompecabezas",
+  "puzzleComplete": "¡Rompecabezas completado!",
+  "puzzleNewPuzzle": "Nuevo Rompecabezas"
 }

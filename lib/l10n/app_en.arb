@@ -154,6 +154,9 @@
   "errorGeneric": "An error occurred. Please try again.",
   "errorConnection": "Connection error. Check your internet.",
   
+  "bibleReadFullText": "Tap to read the full text",
+  "bibleOpenError": "Could not open the reference.",
+  
   "gameWon": "You won!",
   "gameLost": "You lost!",
   "gameDraw": "Draw!",
@@ -161,5 +164,195 @@
   "gameResume": "Resume",
   "gameQuit": "Quit",
   "gameCompleted": "Completed!",
-  "gameTimeElapsed": "Time elapsed: {time}"
+  "gameTimeElapsed": "Time elapsed: {time}",
+  
+  "memoryGameTitle": "🧠 Memory Game",
+  "memoryGameDifficulty": "Difficulty",
+  "memoryGameEasy": "Easy (4x4)",
+  "memoryGameMedium": "Medium (6x6)",
+  "memoryGameHard": "Hard (8x8)",
+  "memoryGameTheme": "Theme",
+  "memoryGameEmojis": "Emojis",
+  "memoryGameColors": "Colors",
+  "memoryGamePlayers": "Players",
+  "memoryGameSinglePlayer": "Single Player",
+  "memoryGameTwoPlayers": "Two Players",
+  "memoryGameAttempts": "Attempts",
+  "memoryGameMatches": "Matches",
+  "memoryGamePlayer": "Player {player}",
+  "@memoryGamePlayer": {
+    "placeholders": {
+      "player": {
+        "type": "int"
+      }
+    }
+  },
+  "memoryGameScore": "Score: {score}",
+  "@memoryGameScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "memoryGameYourTurn": "Your turn!",
+  "memoryGameWinner": "Player {player} won!",
+  "@memoryGameWinner": {
+    "placeholders": {
+      "player": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "ticTacToeTitle": "⭕❌ Tic-Tac-Toe",
+  "ticTacToeMode": "Mode",
+  "ticTacToeTwoPlayers": "Two Players",
+  "ticTacToeVsAI": "vs AI",
+  "ticTacToeDifficulty": "Difficulty",
+  "ticTacToeEasy": "Easy",
+  "ticTacToeMedium": "Medium",
+  "ticTacToeHard": "Hard",
+  "ticTacToePlayerX": "Player X",
+  "ticTacToePlayerO": "Player O",
+  "ticTacToeWins": "Wins",
+  "ticTacToeDraws": "Draws",
+  "ticTacToePlayerWon": "{player} won!",
+  "@ticTacToePlayerWon": {
+    "placeholders": {
+      "player": {
+        "type": "String"
+      }
+    }
+  },
+  "ticTacToeTurn": "{player}'s turn",
+  "@ticTacToeTurn": {
+    "placeholders": {
+      "player": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "hangmanTitle": "🔤 Hangman",
+  "hangmanCategory": "Category",
+  "hangmanAttempts": "Attempts remaining: {attempts}",
+  "@hangmanAttempts": {
+    "placeholders": {
+      "attempts": {
+        "type": "int"
+      }
+    }
+  },
+  "hangmanGuess": "Guess the letter",
+  "hangmanWin": "Congratulations! You won!",
+  "hangmanLose": "Game over! The word was: {word}",
+  "@hangmanLose": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "hangmanNewGame": "New Game",
+  
+  "wordSearchTitle": "🔍 Word Search",
+  "wordSearchWordsFound": "Words found: {found}/{total}",
+  "@wordSearchWordsFound": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "wordSearchTimeElapsed": "Time: {time}",
+  "@wordSearchTimeElapsed": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "wordSearchCongratulations": "Congratulations! You found all the words!",
+  "wordSearchWordList": "Word List",
+  
+  "mazeTitle": "🌀 Maze",
+  "mazeMoves": "Moves: {moves}",
+  "@mazeMoves": {
+    "placeholders": {
+      "moves": {
+        "type": "int"
+      }
+    }
+  },
+  "mazeTime": "Time: {time}",
+  "@mazeTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "mazeControls": "Use arrows to move",
+  "mazeVictory": "You found the exit!",
+  "mazeNewMaze": "New Maze",
+  "mazeDifficulty": "Difficulty",
+  "mazeEasy": "Easy",
+  "mazeMedium": "Medium",
+  "mazeHard": "Hard",
+  
+  "sequenceTitle": "🎯 Sequence",
+  "sequenceLevel": "Level: {level}",
+  "@sequenceLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "sequenceHighScore": "High Score: {score}",
+  "@sequenceHighScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "sequenceWatch": "Watch the sequence",
+  "sequenceYourTurn": "Your turn!",
+  "sequenceGameOver": "Game Over!",
+  "sequenceNewGame": "New Game",
+  "sequenceYourScore": "Your score: {score}",
+  "@sequenceYourScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "sequenceNewRecord": "New record!",
+  
+  "puzzleTitle": "🧩 Puzzle",
+  "puzzleMoves": "Moves: {moves}",
+  "@puzzleMoves": {
+    "placeholders": {
+      "moves": {
+        "type": "int"
+      }
+    }
+  },
+  "puzzleTime": "Time: {time}",
+  "@puzzleTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "puzzleDragPieces": "Drag the pieces to solve the puzzle",
+  "puzzleComplete": "Puzzle completed!",
+  "puzzleNewPuzzle": "New Puzzle"
 }

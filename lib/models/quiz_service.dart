@@ -1,22 +1,53 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'question.dart';
+import '../services/language_service.dart';
 
 class QuizService {
   static List<Question>? _questions;
+  static String? _currentLanguage;
 
-  static Future<List<Question>> loadQuestions() async {
-    if (_questions != null) {
-      return _questions!;
-    }
-
-    // Carregar como bytes e decodificar explicitamente como UTF-8
-    final ByteData data = await rootBundle.load('assets/data/perguntas_atualizado.json');
-    final String jsonString = utf8.decode(data.buffer.asUint8List());
-    final List<dynamic> jsonList = json.decode(jsonString);
+  /// Carrega perguntas do arquivo JSON correspondente ao idioma atual
+  /// 
+  /// Arquivos suportados:
+  /// - perguntas_pt.json (Português)
+  /// - perguntas_en.json (English)
+  /// - perguntas_es.json (Español)
+  static Future<List<Question>> loadQuestions({bool forceReload = false}) async {
+    final currentLang = LanguageService().currentLanguageCode;
     
-    _questions = jsonList.map((json) => Question.fromJson(json)).toList();
+    // Recarregar se mudou o idioma ou se forçado
+    if (forceReload || _questions == null || _currentLanguage != currentLang) {
+      _currentLanguage = currentLang;
+      
+      // Determinar qual arquivo carregar baseado no idioma
+      final fileName = 'assets/data/perguntas_$currentLang.json';
+      
+      try {
+        // Carregar como bytes e decodificar explicitamente como UTF-8
+        final ByteData data = await rootBundle.load(fileName);
+        final String jsonString = utf8.decode(data.buffer.asUint8List());
+        final List<dynamic> jsonList = json.decode(jsonString);
+        
+        _questions = jsonList.map((json) => Question.fromJson(json)).toList();
+      } catch (e) {
+        // Fallback para português se arquivo do idioma não existir
+        print('⚠️ Arquivo $fileName não encontrado, usando perguntas_pt.json');
+        final ByteData data = await rootBundle.load('assets/data/perguntas_pt.json');
+        final String jsonString = utf8.decode(data.buffer.asUint8List());
+        final List<dynamic> jsonList = json.decode(jsonString);
+        
+        _questions = jsonList.map((json) => Question.fromJson(json)).toList();
+      }
+    }
+    
     return _questions!;
+  }
+  
+  /// Limpa o cache de perguntas (útil ao trocar idioma)
+  static void clearCache() {
+    _questions = null;
+    _currentLanguage = null;
   }
 
   static List<Question> filterByDifficulty(List<Question> questions, int difficulty) {

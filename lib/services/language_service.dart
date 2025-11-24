@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/storage_service.dart';
+import '../models/quiz_service.dart'; // Para limpar cache de perguntas
 
 /// Serviço para gerenciamento de idioma do aplicativo
 class LanguageService extends ChangeNotifier {
@@ -68,6 +69,10 @@ class LanguageService extends ChangeNotifier {
     }
 
     _currentLocale = newLocale;
+    
+    // Limpar cache de perguntas para recarregar no novo idioma
+    QuizService.clearCache();
+    debugPrint('✅ Idioma alterado para $languageCode - Cache de perguntas limpo');
     
     // Salvar preferência
     try {

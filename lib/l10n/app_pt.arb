@@ -200,6 +200,9 @@
   "errorGeneric": "Ocorreu um erro. Tente novamente.",
   "errorConnection": "Erro de conexão. Verifique sua internet.",
   
+  "bibleReadFullText": "Toque para ler o texto completo",
+  "bibleOpenError": "Não foi possível abrir a referência.",
+  
   "gameWon": "Você ganhou!",
   "gameLost": "Você perdeu!",
   "gameDraw": "Empate!",
@@ -212,5 +215,102 @@
     "placeholders": {
       "time": {"type": "String"}
     }
-  }
+  },
+  
+  "memoryGameTitle": "🧠 Jogo da Memória",
+  "memoryGameDifficulty": "Dificuldade",
+  "memoryGameEasy": "Fácil (6 pares)",
+  "memoryGameMedium": "Médio (10 pares)",
+  "memoryGameHard": "Difícil (15 pares)",
+  "memoryGameTheme": "Tema",
+  "memoryGamePlayers": "Jogadores",
+  "memoryGameStartGame": "Iniciar Jogo",
+  "memoryGameAttempts": "Tentativas",
+  "memoryGameMatches": "Pares",
+  "memoryGameTime": "Tempo",
+  "memoryGamePlayerTurn": "Vez do Jogador {player}",
+  "@memoryGamePlayerTurn": {
+    "placeholders": {
+      "player": {"type": "int"}
+    }
+  },
+  "memoryGameScore": "Pontos: {score}",
+  "@memoryGameScore": {
+    "placeholders": {
+      "score": {"type": "int"}
+    }
+  },
+  "memoryGameCongrats": "Parabéns! 🎉",
+  "memoryGamePlayAgain": "Jogar Novamente",
+  
+  "ticTacToeTitle": "⭕ Jogo da Velha",
+  "ticTacToeMode": "Modo",
+  "ticTacToeTwoPlayers": "2 Jogadores",
+  "ticTacToeVsAI": "vs IA",
+  "ticTacToeDifficulty": "Dificuldade da IA",
+  "ticTacToeEasy": "Fácil",
+  "ticTacToeImpossible": "Impossível",
+  "ticTacToePlayerX": "Jogador X",
+  "ticTacToePlayerO": "Jogador O",
+  "ticTacToeYourTurn": "Sua vez!",
+  "ticTacToeWins": "Vitórias",
+  "ticTacToeDraws": "Empates",
+  "ticTacToeResetScores": "Resetar Placar",
+  "ticTacToeNewGame": "Novo Jogo",
+  
+  "hangmanTitle": "🎯 Forca Bíblica",
+  "hangmanCategory": "Categoria",
+  "hangmanAttempts": "Tentativas restantes",
+  "hangmanGuess": "Adivinhe a letra",
+  "hangmanWin": "Você ganhou! 🎉",
+  "hangmanLose": "Fim de jogo!",
+  "hangmanTheWordWas": "A palavra era:",
+  "hangmanPlayAgain": "Jogar Novamente",
+  
+  "wordSearchTitle": "🔍 Caça-Palavras",
+  "wordSearchWordsFound": "Palavras encontradas: {found}/{total}",
+  "@wordSearchWordsFound": {
+    "placeholders": {
+      "found": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "wordSearchTimeElapsed": "Tempo: {time}",
+  "@wordSearchTimeElapsed": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "wordSearchComplete": "Completado! 🎉",
+  "wordSearchNewGame": "Novo Jogo",
+  
+  "mazeTitle": "🗺️ Labirinto",
+  "mazeMoves": "Movimentos",
+  "mazeTime": "Tempo",
+  "mazeControls": "Controles",
+  "mazeUseButtons": "Use os botões ou teclas de seta",
+  "mazeGoal": "Encontre a saída!",
+  "mazeVictory": "Saída encontrada! 🎉",
+  "mazePlayAgain": "Jogar Novamente",
+  
+  "sequenceTitle": "🎵 Sequência de Cores",
+  "sequenceLevel": "Nível",
+  "sequenceHighScore": "Recorde",
+  "sequenceWatchSequence": "Observe a sequência...",
+  "sequenceYourTurn": "Sua vez!",
+  "sequenceGameOver": "Fim de jogo!",
+  "sequenceReached": "Você chegou ao nível {level}!",
+  "@sequenceReached": {
+    "placeholders": {
+      "level": {"type": "int"}
+    }
+  },
+  "sequenceNewRecord": "Novo recorde! 🏆",
+  "sequenceTryAgain": "Tentar Novamente",
+  
+  "puzzleTitle": "🧩 Quebra-Cabeça",
+  "puzzleMoves": "Movimentos",
+  "puzzleDragPieces": "Arraste as peças para os lugares corretos",
+  "puzzleComplete": "Quebra-cabeça completo! 🎉",
+  "puzzleNewGame": "Novo Jogo"
 }
