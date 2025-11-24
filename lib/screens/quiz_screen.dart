@@ -9,11 +9,14 @@ import '../services/storage_service.dart';
 import '../services/achievement_service.dart';
 import '../widgets/achievement_unlock_dialog.dart';
 import '../widgets/bible_reference_button.dart';
+import '../l10n/app_localizations.dart';
 
 class QuizScreen extends StatefulWidget {
   final List<Question> questions;
 
-  const QuizScreen({Key? key, required this.questions}) : super(key: key);
+  const QuizScreen({
+    super.key,
+    required this.questions});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -286,6 +289,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final question = widget.questions[currentQuestionIndex];
     // Verifica se tem referência bíblica (agora em textoBiblico após inversão)
     final hasExplanation = (question.textoBiblico != null && question.textoBiblico!.isNotEmpty);
@@ -293,7 +297,7 @@ class _QuizScreenState extends State<QuizScreen> {
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
       appBar: AppBar(
-        title: Text('Quiz - ${currentQuestionIndex + 1}/${widget.questions.length}', style: TextStyle(color: Colors.white)),
+        title: Text(l10n.quizTitle(currentQuestionIndex + 1, widget.questions.length), style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF23395D), // Cor mais clara para legibilidade
         iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
@@ -657,7 +661,7 @@ class _AnimatedResultDialogState extends State<_AnimatedResultDialog>
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: widget.celebrationColor.withOpacity(0.3),
+              color: widget.celebrationColor.withValues(alpha: 0.3),
               blurRadius: 20,
               spreadRadius: 5,
             ),

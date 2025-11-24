@@ -11,10 +11,10 @@ class LobbyScreen extends StatefulWidget {
   final String playerId;
 
   const LobbyScreen({
-    Key? key,
+    super.key,
     required this.roomCode,
     required this.playerId,
-  }) : super(key: key);
+  });
 
   @override
   State<LobbyScreen> createState() => _LobbyScreenState();
@@ -291,10 +291,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
     final players = _currentRoom!.players.values.toList();
     final isStarting = _currentRoom!.status == RoomStatus.starting;
 
-    return WillPopScope(
-      onWillPop: () async {
-        await _leaveRoom();
-        return false;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (!didPop) {
+          await _leaveRoom();
+        }
       },
       child: Scaffold(
         backgroundColor: Color(0xFF101A2C),

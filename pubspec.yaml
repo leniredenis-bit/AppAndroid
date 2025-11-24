@@ -42,6 +42,12 @@ dependencies:
   uuid: ^4.5.1
   url_launcher: ^6.3.1
   flutter_custom_tabs: ^2.1.0  # Para preview de links dentro do app
+  intl: ^0.20.2  # Para formatação de datas e números
+  
+  # Firebase para multiplayer online
+  firebase_core: ^2.24.2
+  firebase_database: ^10.4.0
+  firebase_auth: ^4.15.3
 
 dev_dependencies:
   flutter_test:

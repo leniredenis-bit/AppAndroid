@@ -330,7 +330,7 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xFF1E2A3A).withOpacity(0.6),
+        color: Color(0xFF1E2A3A).withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white10, width: 1),
       ),
@@ -626,7 +626,7 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
         const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(8), border: Border.all(color: color, width: 2)),
+          decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8), border: Border.all(color: color, width: 2)),
           child: Text(value.toString(), style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 20)),
         )
       ],

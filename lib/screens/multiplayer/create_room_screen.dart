@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../services/multiplayer/mock_multiplayer_service.dart';
 import '../../services/multiplayer/profanity_filter.dart';
 import 'lobby_screen.dart';
 
 /// Tela para o anfitrião criar uma nova sala multiplayer
 class CreateRoomScreen extends StatefulWidget {
-  const CreateRoomScreen({Key? key}) : super(key: key);
+  const CreateRoomScreen({super.key});
 
   @override
   State<CreateRoomScreen> createState() => _CreateRoomScreenState();
@@ -304,7 +303,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
               Container(
                 padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Color(0xFF23395D).withOpacity(0.5),
+                  color: Color(0xFF23395D).withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Color(0xFF3A5A8C)),
                 ),
@@ -329,7 +328,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                   padding: EdgeInsets.all(12),
                   margin: EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade900.withOpacity(0.3),
+                    color: Colors.red.shade900.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.red.shade700),
                   ),

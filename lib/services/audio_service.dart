@@ -1,4 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:math';
 
 /// Serviço centralizado para gerenciar música de fundo e efeitos sonoros
@@ -71,7 +72,7 @@ class AudioService {
     } catch (e) {
       // No Flutter Web, autoplay pode ser bloqueado pelo navegador
       // Isso é esperado - o áudio só tocará após primeira interação
-      print('Aviso: Música de fundo requer interação do usuário primeiro (Web)');
+      debugPrint('Aviso: Música de fundo requer interação do usuário primeiro (Web)');
     }
   }
 
@@ -108,7 +109,7 @@ class AudioService {
       await _sfxPlayer.play(AssetSource(assetPath.replaceFirst('assets/', '')));
     } catch (e) {
       // Se o arquivo não existe, ignora silenciosamente
-      print('SFX não encontrado: $assetPath');
+      debugPrint('SFX não encontrado: $assetPath');
     }
     */
   }

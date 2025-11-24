@@ -454,8 +454,8 @@ class _MazeGameState extends State<MazeGame> {
       height: 200,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white.withOpacity(0.1),
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+        color: Colors.white.withValues(alpha: 0.1),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 2),
       ),
       child: Stack(
         children: [
@@ -471,11 +471,11 @@ class _MazeGameState extends State<MazeGame> {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.8),
+                  color: Colors.blue.withValues(alpha: 0.8),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: Offset(0, 4),
                     ),
@@ -498,11 +498,11 @@ class _MazeGameState extends State<MazeGame> {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.8),
+                  color: Colors.blue.withValues(alpha: 0.8),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: Offset(0, 4),
                     ),
@@ -525,11 +525,11 @@ class _MazeGameState extends State<MazeGame> {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.8),
+                  color: Colors.blue.withValues(alpha: 0.8),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: Offset(0, 4),
                     ),
@@ -552,11 +552,11 @@ class _MazeGameState extends State<MazeGame> {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.8),
+                  color: Colors.blue.withValues(alpha: 0.8),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: Offset(0, 4),
                     ),
@@ -573,7 +573,7 @@ class _MazeGameState extends State<MazeGame> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.5),
+                color: Colors.orange.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.navigation, color: Colors.white, size: 20),
@@ -665,7 +665,7 @@ class _MazeGameState extends State<MazeGame> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: SingleChildScrollView(
@@ -683,7 +683,7 @@ class _MazeGameState extends State<MazeGame> {
                                 color: _getCellColor(row, col),
                                 borderRadius: BorderRadius.circular(2),
                                 border: Border.all(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   width: 0.5,
                                 ),
                               ),

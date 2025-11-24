@@ -6,7 +6,7 @@ import 'lobby_screen.dart';
 
 /// Tela para jogador entrar em uma sala existente
 class JoinRoomScreen extends StatefulWidget {
-  const JoinRoomScreen({Key? key}) : super(key: key);
+  const JoinRoomScreen({super.key});
 
   @override
   State<JoinRoomScreen> createState() => _JoinRoomScreenState();
@@ -311,7 +311,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                   padding: EdgeInsets.all(12),
                   margin: EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade900.withOpacity(0.3),
+                    color: Colors.red.shade900.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.red.shade700),
                   ),

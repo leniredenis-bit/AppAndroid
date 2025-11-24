@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StatsService {
@@ -35,9 +36,9 @@ class StatsService {
         await prefs.setInt(_keyBestScore, score);
       }
       
-      print('✅ Estatísticas salvas com sucesso!');
+      debugPrint('✅ Estatísticas salvas com sucesso!');
     } catch (e) {
-      print('⚠️ Erro ao salvar estatísticas (pode ser limitação do navegador): $e');
+      debugPrint('⚠️ Erro ao salvar estatísticas (pode ser limitação do navegador): $e');
     }
   }
 
@@ -58,9 +59,9 @@ class StatsService {
         await prefs.setInt(_keyBestMemoryTime, timeInSeconds);
       }
       
-      print('✅ Estatísticas do jogo da memória salvas!');
+      debugPrint('✅ Estatísticas do jogo da memória salvas!');
     } catch (e) {
-      print('⚠️ Erro ao salvar estatísticas da memória: $e');
+      debugPrint('⚠️ Erro ao salvar estatísticas da memória: $e');
     }
   }
 
@@ -79,7 +80,7 @@ class StatsService {
         'bestMemoryTime': prefs.getInt(_keyBestMemoryTime) ?? 0,
       };
     } catch (e) {
-      print('⚠️ Erro ao carregar estatísticas: $e');
+      debugPrint('⚠️ Erro ao carregar estatísticas: $e');
       // Retorna valores padrão em caso de erro
       return {
         'totalQuizzes': 0,

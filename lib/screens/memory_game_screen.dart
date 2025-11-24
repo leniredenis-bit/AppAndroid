@@ -5,7 +5,7 @@ import '../widgets/emoji_text.dart';
 import '../services/audio_service.dart';
 
 class MemoryGameScreen extends StatefulWidget {
-  const MemoryGameScreen({Key? key}) : super(key: key);
+  const MemoryGameScreen({super.key});
 
   @override
   State<MemoryGameScreen> createState() => _MemoryGameScreenState();

@@ -376,7 +376,7 @@ class _WordSearchGameState extends State<WordSearchGame> {
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: found ? Colors.green : Colors.white.withOpacity(0.3),
+                          color: found ? Colors.green : Colors.white.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -408,7 +408,7 @@ class _WordSearchGameState extends State<WordSearchGame> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Column(
@@ -422,12 +422,12 @@ class _WordSearchGameState extends State<WordSearchGame> {
                             // Cor de fundo: amarelo se selecionado, verde claro se encontrado, branco caso contrário
                             Color backgroundColor;
                             if (isSelected) {
-                              backgroundColor = Colors.yellow.withOpacity(0.7);
+                              backgroundColor = Colors.yellow.withValues(alpha: 0.7);
                             } else if (isFound) {
                               // Verde claro visível, mas ainda bem suave
                               backgroundColor = const Color(0xFFE0FFE0); // Verde menta claro
                             } else {
-                              backgroundColor = Colors.white.withOpacity(0.9);
+                              backgroundColor = Colors.white.withValues(alpha: 0.9);
                             }
                             
                             return Container(

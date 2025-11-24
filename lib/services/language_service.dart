@@ -50,7 +50,7 @@ class LanguageService extends ChangeNotifier {
         }
       }
     } catch (e) {
-      print('Erro ao carregar idioma salvo: $e');
+      debugPrint('Erro ao carregar idioma salvo: $e');
       // Manter idioma padrão (pt)
     }
   }
@@ -58,7 +58,7 @@ class LanguageService extends ChangeNotifier {
   /// Mudar idioma
   Future<void> changeLanguage(String languageCode) async {
     if (!languageInfo.containsKey(languageCode)) {
-      print('Idioma não suportado: $languageCode');
+      debugPrint('Idioma não suportado: $languageCode');
       return;
     }
 
@@ -75,7 +75,7 @@ class LanguageService extends ChangeNotifier {
       final updatedPrefs = prefs.copyWith(language: languageCode);
       await _storage.savePreferences(updatedPrefs);
     } catch (e) {
-      print('Erro ao salvar idioma: $e');
+      debugPrint('Erro ao salvar idioma: $e');
     }
 
     notifyListeners();

@@ -198,7 +198,7 @@ class BibleReferenceButton extends StatelessWidget {
           color: const Color(0xFF23395D),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.blue.shade700.withOpacity(0.3),
+            color: Colors.blue.shade700.withValues(alpha: 0.3),
             width: 1,
           ),
         ),

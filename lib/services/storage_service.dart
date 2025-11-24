@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../models/stats_data.dart';
@@ -68,7 +69,7 @@ class StorageService {
         final List<dynamic> decoded = jsonDecode(historyJson);
         historyList = decoded.map((item) => QuizHistory.fromJson(item)).toList();
       } catch (e) {
-        print('Erro ao decodificar histórico: $e');
+        debugPrint('Erro ao decodificar histórico: $e');
       }
     }
 
@@ -95,7 +96,7 @@ class StorageService {
       final historyList = decoded.map((item) => QuizHistory.fromJson(item)).toList();
       return historyList.take(limit).toList();
     } catch (e) {
-      print('Erro ao carregar histórico: $e');
+      debugPrint('Erro ao carregar histórico: $e');
       return [];
     }
   }
@@ -170,7 +171,7 @@ class StorageService {
       final Map<String, dynamic> decoded = jsonDecode(statsJson);
       return GlobalStats.fromJson(decoded);
     } catch (e) {
-      print('Erro ao carregar stats globais: $e');
+      debugPrint('Erro ao carregar stats globais: $e');
       return GlobalStats();
     }
   }
@@ -224,7 +225,7 @@ class StorageService {
       final Map<String, dynamic> decoded = jsonDecode(recordsJson);
       return MinigameRecords.fromJson(decoded);
     } catch (e) {
-      print('Erro ao carregar recordes de minigames: $e');
+      debugPrint('Erro ao carregar recordes de minigames: $e');
       return MinigameRecords();
     }
   }
@@ -248,7 +249,7 @@ class StorageService {
       final Map<String, dynamic> decoded = jsonDecode(prefsJson);
       return UserPreferences.fromJson(decoded);
     } catch (e) {
-      print('Erro ao carregar preferências: $e');
+      debugPrint('Erro ao carregar preferências: $e');
       return UserPreferences();
     }
   }
@@ -313,7 +314,7 @@ class StorageService {
         await savePreferences(preferences);
       }
     } catch (e) {
-      print('Erro ao importar dados: $e');
+      debugPrint('Erro ao importar dados: $e');
       rethrow;
     }
   }

@@ -9,9 +9,9 @@ class AchievementUnlockDialog extends StatefulWidget {
   final Achievement achievement;
 
   const AchievementUnlockDialog({
-    Key? key,
+    super.key,
     required this.achievement,
-  }) : super(key: key);
+  });
 
   @override
   State<AchievementUnlockDialog> createState() => _AchievementUnlockDialogState();
@@ -168,7 +168,7 @@ class _AchievementUnlockDialogState extends State<AchievementUnlockDialog>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Color(0xFFFFD700).withOpacity(0.5),
+                      color: Color(0xFFFFD700).withValues(alpha: 0.5),
                       blurRadius: 20,
                       spreadRadius: 5,
                     ),
@@ -254,7 +254,7 @@ class _AchievementUnlockDialogState extends State<AchievementUnlockDialog>
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
-                          color: widget.achievement.getCategoryColor().withOpacity(0.3),
+                          color: widget.achievement.getCategoryColor().withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: widget.achievement.getCategoryColor(),
@@ -355,8 +355,9 @@ class ConfettiPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (var particle in particles) {
+      final opacity = 1.0 - progress * 0.5;
       final paint = Paint()
-        ..color = particle.color.withOpacity(1.0 - progress * 0.5);
+        ..color = particle.color.withValues(alpha: opacity);
 
       // Calcular posição atual
       final currentX = particle.startX + (particle.endX - particle.startX) * progress;

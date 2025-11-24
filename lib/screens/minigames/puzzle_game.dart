@@ -247,7 +247,7 @@ class _PuzzleGameState extends State<PuzzleGame> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: SizedBox(
@@ -276,19 +276,19 @@ class _PuzzleGameState extends State<PuzzleGame> {
                                 decoration: BoxDecoration(
                                   color: placedPiece != null
                                       ? placedPiece.color
-                                      : Colors.white.withOpacity(0.1),
+                                      : Colors.white.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
                                     color: isCorrect 
                                         ? Colors.green
                                         : candidateData.isNotEmpty 
                                             ? Colors.yellow
-                                            : Colors.white.withOpacity(0.3),
+                                            : Colors.white.withValues(alpha: 0.3),
                                     width: isCorrect ? 3 : 2,
                                   ),
                                   boxShadow: placedPiece != null ? [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.3),
+                                      color: Colors.black.withValues(alpha: 0.3),
                                       blurRadius: 5,
                                       spreadRadius: 2,
                                     ),
@@ -315,7 +315,7 @@ class _PuzzleGameState extends State<PuzzleGame> {
                                           '${index + 1}',
                                           style: TextStyle(
                                             fontSize: 24,
-                                            color: Colors.white.withOpacity(0.3),
+                                            color: Colors.white.withValues(alpha: 0.3),
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -347,7 +347,7 @@ class _PuzzleGameState extends State<PuzzleGame> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Wrap(
@@ -362,11 +362,11 @@ class _PuzzleGameState extends State<PuzzleGame> {
                                   width: 80,
                                   height: 80,
                                   decoration: BoxDecoration(
-                                    color: piece.color.withOpacity(0.8),
+                                    color: piece.color.withValues(alpha: 0.8),
                                     borderRadius: BorderRadius.circular(10),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.5),
+                                        color: Colors.black.withValues(alpha: 0.5),
                                         blurRadius: 10,
                                         spreadRadius: 5,
                                       ),
@@ -430,7 +430,7 @@ class _PuzzleGameState extends State<PuzzleGame> {
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 5,
             spreadRadius: 2,
           ),

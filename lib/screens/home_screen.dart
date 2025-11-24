@@ -11,9 +11,10 @@ import '../services/audio_service.dart';
 import 'minigames_menu_screen.dart';
 
 import '../widgets/settings_dialog.dart';
+import '../l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -66,8 +67,9 @@ class _HomeScreenState extends State<HomeScreen> {
         isLoadingTags = false;
       });
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao carregar categorias: $e')),
+          SnackBar(content: Text(l10n.homeLoadingCategoriesError(e.toString()))),
         );
       }
     }
@@ -100,8 +102,9 @@ class _HomeScreenState extends State<HomeScreen> {
       
       if (questions.isEmpty) {
         if (!mounted) return;
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Nenhuma pergunta encontrada com esses filtros!')),
+          SnackBar(content: Text(l10n.homeNoQuestionsFound)),
         );
         return;
       }
@@ -115,8 +118,9 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao carregar perguntas: $e')),
+        SnackBar(content: Text(l10n.homeLoadingError(e.toString()))),
       );
     }
   }
@@ -124,10 +128,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
       appBar: AppBar(
-        title: Text('JW SPLASH GAMES', style: TextStyle(color: Colors.white)),
+        title: Text(l10n.appTitle, style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF162447),
         iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
@@ -170,8 +176,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     
                     if (questions.isEmpty) {
                       if (!mounted) return;
+                      final l10n = AppLocalizations.of(context)!;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Nenhuma pergunta encontrada com esses filtros!')),
+                        SnackBar(content: Text(l10n.homeNoQuestionsFound)),
                       );
                       return;
                     }
@@ -188,8 +195,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   } catch (e) {
                     if (!mounted) return;
+                    final l10n = AppLocalizations.of(context)!;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Erro ao carregar perguntas: $e')),
+                      SnackBar(content: Text(l10n.homeLoadingError(e.toString()))),
                     );
                   }
                 };
@@ -270,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: 16),
             
             // Filtros de dificuldade (MOVIDOS PARA BAIXO)
-            Text('Dificuldade', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(l10n.homeDifficulty, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
             SizedBox(height: 8),
             Row(
               children: difficulties.map((dif) => Padding(
@@ -291,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             SizedBox(height: 16),
             // Tags de categorias
-            Text('Categorias', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(l10n.homeCategories, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
             SizedBox(height: 8),
             isLoadingTags 
               ? Center(
@@ -336,7 +344,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Color(0xFF3A5A8C),
                           ),
                           label: Text(
-                            showAllTags ? 'Ver menos' : 'Ver mais (${allTags.length - initialTagsCount}+)',
+                            showAllTags ? l10n.homeShowLess : l10n.homeShowMore(allTags.length - initialTagsCount),
                             style: TextStyle(color: Color(0xFF3A5A8C)),
                           ),
                         ),
@@ -350,13 +358,15 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           AudioService().playClick();
+          final l10n = AppLocalizations.of(context)!;
           showDialog(
             context: context,
             builder: (context) => SettingsDialog(
               onThemeChanged: (isDark) {
+                final theme = isDark ? l10n.homeThemeDark : l10n.homeThemeLight;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Tema ${isDark ? "escuro" : "claro"} ativado!'),
+                    content: Text(l10n.homeThemeActivated(theme)),
                     duration: Duration(seconds: 1),
                   ),
                 );

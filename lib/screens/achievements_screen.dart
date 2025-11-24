@@ -4,7 +4,7 @@ import '../services/achievement_service.dart';
 import '../services/audio_service.dart';
 
 class AchievementsScreen extends StatefulWidget {
-  const AchievementsScreen({Key? key}) : super(key: key);
+  const AchievementsScreen({super.key});
 
   @override
   State<AchievementsScreen> createState() => _AchievementsScreenState();
@@ -111,7 +111,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: Offset(0, 5),
           ),
@@ -146,7 +146,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
             child: LinearProgressIndicator(
               value: percentage / 100,
               minHeight: 12,
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
               valueColor: AlwaysStoppedAnimation<Color>(
                 percentage == 100 ? Color(0xFFFFD700) : Color(0xFF4A90E2),
               ),
@@ -266,8 +266,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
           gradient: LinearGradient(
             colors: isUnlocked
                 ? [
-                    Color(0xFFFFD700).withOpacity(0.3),
-                    Color(0xFFFFA500).withOpacity(0.2),
+                    Color(0xFFFFD700).withValues(alpha: 0.3),
+                    Color(0xFFFFA500).withValues(alpha: 0.2),
                   ]
                 : [
                     Color(0xFF2A3F5F),
@@ -278,14 +278,14 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
           ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isUnlocked ? Color(0xFFFFD700) : Colors.white.withOpacity(0.2),
+            color: isUnlocked ? Color(0xFFFFD700) : Colors.white.withValues(alpha: 0.2),
             width: isUnlocked ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
               color: isUnlocked
-                  ? Color(0xFFFFD700).withOpacity(0.3)
-                  : Colors.black.withOpacity(0.3),
+                  ? Color(0xFFFFD700).withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.3),
               blurRadius: 10,
               offset: Offset(0, 5),
             ),
@@ -301,7 +301,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                 achievement.emoji,
                 style: TextStyle(
                   fontSize: 56,
-                  color: isUnlocked ? null : Colors.white.withOpacity(0.3),
+                  color: isUnlocked ? null : Colors.white.withValues(alpha: 0.3),
                 ),
               ),
               SizedBox(height: 12),
@@ -341,7 +341,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                   child: LinearProgressIndicator(
                     value: progress / 100,
                     minHeight: 6,
-                    backgroundColor: Colors.white.withOpacity(0.2),
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
                     valueColor: AlwaysStoppedAnimation<Color>(achievement.getCategoryColor()),
                   ),
                 ),
@@ -399,7 +399,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: achievement.getCategoryColor().withOpacity(0.3),
+                  color: achievement.getCategoryColor().withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: achievement.getCategoryColor()),
                 ),
@@ -442,7 +442,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                       child: LinearProgressIndicator(
                         value: achievement.progressPercentage / 100,
                         minHeight: 12,
-                        backgroundColor: Colors.white.withOpacity(0.2),
+                        backgroundColor: Colors.white.withValues(alpha: 0.2),
                         valueColor: AlwaysStoppedAnimation<Color>(achievement.getCategoryColor()),
                       ),
                     ),

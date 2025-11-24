@@ -22,6 +22,36 @@
   
   "homeWelcome": "Bem-vindo ao",
   "homeSubtitle": "Aprenda e divirta-se!",
+  "homeDifficulty": "Dificuldade",
+  "homeCategories": "Categorias",
+  "homeShowMore": "Ver mais ({count}+)",
+  "@homeShowMore": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "homeShowLess": "Ver menos",
+  "homeNoQuestionsFound": "Nenhuma pergunta encontrada com esses filtros!",
+  "homeLoadingError": "Erro ao carregar perguntas: {error}",
+  "@homeLoadingError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "homeLoadingCategoriesError": "Erro ao carregar categorias: {error}",
+  "@homeLoadingCategoriesError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "homeThemeActivated": "Tema {theme} ativado!",
+  "@homeThemeActivated": {
+    "placeholders": {
+      "theme": {"type": "String"}
+    }
+  },
+  "homeThemeDark": "escuro",
+  "homeThemeLight": "claro",
   "playQuiz": "🎯 Jogar Quiz",
   "playMinigames": "🎮 Minigames",
   "viewStats": "📊 Estatísticas",
@@ -36,6 +66,13 @@
   "quizModeFast": "Rápido",
   "quizModeFastDesc": "Desafio contra o relógio",
   "quizQuestion": "Pergunta",
+  "quizTitle": "Quiz - {current}/{total}",
+  "@quizTitle": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
   "quizExplanation": "📖 Explicação",
   "quizNextIn": "Próxima pergunta em {seconds}s...",
   "@quizNextIn": {

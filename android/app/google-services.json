@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "813525522600",
+    "firebase_url": "https://jwsplashgames-fc4a1-default-rtdb.firebaseio.com",
+    "project_id": "jwsplashgames-fc4a1",
+    "storage_bucket": "jwsplashgames-fc4a1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:813525522600:android:55c3dfe5d80c9e3ca44a9d",
+        "android_client_info": {
+          "package_name": "com.jwsplashgames.quiz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYkjf0hx_l2ItKRCptU1wuoTiGWWfKqRE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

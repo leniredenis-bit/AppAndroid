@@ -10,7 +10,9 @@ import '../services/language_service.dart';
 class SettingsDialog extends StatefulWidget {
   final Function(bool) onThemeChanged;
   
-  const SettingsDialog({Key? key, required this.onThemeChanged}) : super(key: key);
+  const SettingsDialog({
+    super.key,
+    required this.onThemeChanged});
 
   @override
   State<SettingsDialog> createState() => _SettingsDialogState();
@@ -125,7 +127,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         _saveSettings();
                         widget.onThemeChanged(value);
                       },
-                      activeColor: Color(0xFF4A90E2),
+                      activeThumbColor: Color(0xFF4A90E2),
                     ),
                   ],
                 ),
@@ -389,7 +391,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           color: _isDarkTheme ? Color(0xFF1F2D44) : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: color.withOpacity(0.3),
+            color: color.withValues(alpha: 0.3),
             width: 2,
           ),
         ),
@@ -398,7 +400,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             Container(
               padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 24),

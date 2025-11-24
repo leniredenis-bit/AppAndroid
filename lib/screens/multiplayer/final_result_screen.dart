@@ -12,10 +12,10 @@ class FinalResultScreen extends StatefulWidget {
   final String playerId;
 
   const FinalResultScreen({
-    Key? key,
+    super.key,
     required this.roomCode,
     required this.playerId,
-  }) : super(key: key);
+  });
 
   @override
   State<FinalResultScreen> createState() => _FinalResultScreenState();
@@ -528,7 +528,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
           Container(
             height: height,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.3),
+              color: color.withValues(alpha: 0.3),
               borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
               border: Border.all(color: color, width: 3),
             ),

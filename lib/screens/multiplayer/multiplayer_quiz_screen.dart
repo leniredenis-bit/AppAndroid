@@ -13,10 +13,10 @@ class MultiplayerQuizScreen extends StatefulWidget {
   final String playerId;
 
   const MultiplayerQuizScreen({
-    Key? key,
+    super.key,
     required this.roomCode,
     required this.playerId,
-  }) : super(key: key);
+  });
 
   @override
   State<MultiplayerQuizScreen> createState() => _MultiplayerQuizScreenState();
@@ -273,8 +273,8 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
     final playersCount = _currentRoom!.players.length;
     final answeredCount = _currentRoom!.players.values.where((p) => p.hasAnswered).length;
 
-    return WillPopScope(
-      onWillPop: () async => false, // Impede voltar durante o quiz
+    return PopScope(
+      canPop: false, // Impede voltar durante o quiz
       child: Scaffold(
         backgroundColor: Color(0xFF101A2C),
         appBar: AppBar(
@@ -407,7 +407,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
                               height: 32,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.white.withValues(alpha: 0.2),
                               ),
                               child: Center(
                                 child: Text(

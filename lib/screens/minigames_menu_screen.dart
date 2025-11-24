@@ -9,7 +9,7 @@ import 'minigames/puzzle_game.dart';
 import 'memory_game_screen.dart';
 
 class MinigamesMenuScreen extends StatelessWidget {
-  const MinigamesMenuScreen({Key? key}) : super(key: key);
+  const MinigamesMenuScreen({super.key});
 
   final List<Map<String, dynamic>> minigames = const [
     {
@@ -127,7 +127,7 @@ class MinigamesMenuScreen extends StatelessWidget {
                   gradient: LinearGradient(
                     colors: [
                       game['color'],
-                      game['color'].withOpacity(0.7),
+                      game['color'].withValues(alpha: 0.7),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -135,7 +135,7 @@ class MinigamesMenuScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: game['color'].withOpacity(0.3),
+                      color: game['color'].withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: Offset(0, 4),
                     ),

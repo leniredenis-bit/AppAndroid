@@ -4,7 +4,7 @@ import '../models/stats_data.dart';
 import 'package:intl/intl.dart';
 
 class StatsScreen extends StatefulWidget {
-  const StatsScreen({Key? key}) : super(key: key);
+  const StatsScreen({super.key});
 
   @override
   State<StatsScreen> createState() => _StatsScreenState();

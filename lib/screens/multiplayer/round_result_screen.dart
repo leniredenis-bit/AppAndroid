@@ -11,10 +11,10 @@ class RoundResultScreen extends StatefulWidget {
   final String playerId;
 
   const RoundResultScreen({
-    Key? key,
+    super.key,
     required this.roomCode,
     required this.playerId,
-  }) : super(key: key);
+  });
 
   @override
   State<RoundResultScreen> createState() => _RoundResultScreenState();
@@ -247,7 +247,7 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
                       boxShadow: rank <= 3
                           ? [
                               BoxShadow(
-                                color: (medalColor ?? Colors.transparent).withOpacity(0.3),
+                                color: (medalColor ?? Colors.transparent).withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 spreadRadius: 1,
                               ),

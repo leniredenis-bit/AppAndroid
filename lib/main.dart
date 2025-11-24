@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/multiplayer/mock_multiplayer_service.dart';
 import 'services/audio_service.dart';
 import 'services/language_service.dart';
+import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inicializar Firebase
+  await Firebase.initializeApp();
   
   // Inicializar serviço multiplayer
   MockMultiplayerService.initialize();
@@ -37,11 +42,12 @@ class MyApp extends StatelessWidget {
           // Suporte a internacionalização
           locale: LanguageService().currentLocale,
           localizationsDelegates: const [
+            AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: LanguageService.supportedLocales,
+          supportedLocales: AppLocalizations.supportedLocales,
           
           theme: ThemeData(
             primarySwatch: Colors.blue,

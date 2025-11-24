@@ -69,6 +69,45 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeSubtitle => 'Aprenda e divirta-se!';
 
   @override
+  String get homeDifficulty => 'Dificuldade';
+
+  @override
+  String get homeCategories => 'Categorias';
+
+  @override
+  String homeShowMore(int count) {
+    return 'Ver mais ($count+)';
+  }
+
+  @override
+  String get homeShowLess => 'Ver menos';
+
+  @override
+  String get homeNoQuestionsFound =>
+      'Nenhuma pergunta encontrada com esses filtros!';
+
+  @override
+  String homeLoadingError(String error) {
+    return 'Erro ao carregar perguntas: $error';
+  }
+
+  @override
+  String homeLoadingCategoriesError(String error) {
+    return 'Erro ao carregar categorias: $error';
+  }
+
+  @override
+  String homeThemeActivated(String theme) {
+    return 'Tema $theme ativado!';
+  }
+
+  @override
+  String get homeThemeDark => 'escuro';
+
+  @override
+  String get homeThemeLight => 'claro';
+
+  @override
   String get playQuiz => '🎯 Jogar Quiz';
 
   @override
@@ -106,6 +145,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get quizQuestion => 'Pergunta';
+
+  @override
+  String quizTitle(int current, int total) {
+    return 'Quiz - $current/$total';
+  }
 
   @override
   String get quizExplanation => '📖 Explicação';

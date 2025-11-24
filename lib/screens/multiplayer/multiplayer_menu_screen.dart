@@ -4,7 +4,7 @@ import 'join_room_screen.dart';
 
 /// Menu de seleção: Criar Sala ou Entrar em Sala
 class MultiplayerMenuScreen extends StatelessWidget {
-  const MultiplayerMenuScreen({Key? key}) : super(key: key);
+  const MultiplayerMenuScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +171,7 @@ class MultiplayerMenuScreen extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, size: 32, color: Colors.white),
@@ -193,7 +193,7 @@ class MultiplayerMenuScreen extends StatelessWidget {
                       Text(
                         subtitle,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 14,
                         ),
                       ),

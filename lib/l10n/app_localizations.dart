@@ -220,6 +220,66 @@ abstract class AppLocalizations {
   /// **'Aprenda e divirta-se!'**
   String get homeSubtitle;
 
+  /// No description provided for @homeDifficulty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dificuldade'**
+  String get homeDifficulty;
+
+  /// No description provided for @homeCategories.
+  ///
+  /// In pt, this message translates to:
+  /// **'Categorias'**
+  String get homeCategories;
+
+  /// No description provided for @homeShowMore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver mais ({count}+)'**
+  String homeShowMore(int count);
+
+  /// No description provided for @homeShowLess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver menos'**
+  String get homeShowLess;
+
+  /// No description provided for @homeNoQuestionsFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma pergunta encontrada com esses filtros!'**
+  String get homeNoQuestionsFound;
+
+  /// No description provided for @homeLoadingError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao carregar perguntas: {error}'**
+  String homeLoadingError(String error);
+
+  /// No description provided for @homeLoadingCategoriesError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao carregar categorias: {error}'**
+  String homeLoadingCategoriesError(String error);
+
+  /// No description provided for @homeThemeActivated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tema {theme} ativado!'**
+  String homeThemeActivated(String theme);
+
+  /// No description provided for @homeThemeDark.
+  ///
+  /// In pt, this message translates to:
+  /// **'escuro'**
+  String get homeThemeDark;
+
+  /// No description provided for @homeThemeLight.
+  ///
+  /// In pt, this message translates to:
+  /// **'claro'**
+  String get homeThemeLight;
+
   /// No description provided for @playQuiz.
   ///
   /// In pt, this message translates to:
@@ -297,6 +357,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Pergunta'**
   String get quizQuestion;
+
+  /// No description provided for @quizTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quiz - {current}/{total}'**
+  String quizTitle(int current, int total);
 
   /// No description provided for @quizExplanation.
   ///

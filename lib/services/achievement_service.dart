@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/achievement.dart';
 
@@ -62,7 +63,7 @@ class AchievementService {
           return template;
         }).toList();
       } catch (e) {
-        print('Erro ao carregar conquistas: $e');
+        debugPrint('Erro ao carregar conquistas: $e');
         _achievements = List.from(Achievements.all);
       }
     } else {

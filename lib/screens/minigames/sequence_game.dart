@@ -244,7 +244,7 @@ class _SequenceGameState extends State<SequenceGame> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Column(
@@ -283,11 +283,11 @@ class _SequenceGameState extends State<SequenceGame> {
                         child: Container(
                           padding: EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.8),
+                            color: Colors.green.withValues(alpha: 0.8),
                             borderRadius: BorderRadius.circular(15),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.green.withOpacity(0.5),
+                                color: Colors.green.withValues(alpha: 0.5),
                                 blurRadius: 20,
                                 spreadRadius: 5,
                               ),
@@ -371,13 +371,13 @@ class _SequenceGameState extends State<SequenceGame> {
                         decoration: BoxDecoration(
                           color: isHighlighted 
                               ? _colors[index] 
-                              : _colors[index].withOpacity(0.6),
+                              : _colors[index].withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(15),
                           boxShadow: [
                             BoxShadow(
                               color: isHighlighted 
-                                  ? _colors[index].withOpacity(0.8)
-                                  : Colors.black.withOpacity(0.3),
+                                  ? _colors[index].withValues(alpha: 0.8)
+                                  : Colors.black.withValues(alpha: 0.3),
                               blurRadius: isHighlighted ? 20 : 10,
                               spreadRadius: isHighlighted ? 5 : 2,
                             ),
