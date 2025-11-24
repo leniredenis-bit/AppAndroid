@@ -3,6 +3,7 @@ import 'dart:math';
 import '../../services/audio_service.dart';
 import '../../services/storage_service.dart';
 import '../../services/achievement_service.dart';
+import '../../services/minigame_content_service.dart';
 import '../../widgets/achievement_unlock_dialog.dart';
 
 class WordSearchGame extends StatefulWidget {
@@ -16,42 +17,10 @@ class _WordSearchGameState extends State<WordSearchGame> {
   final AudioService _audioService = AudioService();
   final StorageService _storage = StorageService();
   final AchievementService _achievementService = AchievementService();
+  final MinigameContentService _contentService = MinigameContentService();
   
   // Grid size
   static const int gridSize = 12;
-  
-  // Lista completa de palavras bíblicas disponíveis
-  static const List<String> _allBiblicalWords = [
-    // Personagens do Antigo Testamento
-    'ABRAAO', 'MOISÉS', 'ISAQUE', 'JACÓ', 'JOSE', 'SAMUEL', 
-    'DAVI', 'SALOMAO', 'ELIAS', 'ELISEU', 'ISAIAS', 'DANIEL',
-    'NOÉ', 'ADAO', 'EVA', 'CAIM', 'ABEL', 'ENOQUE', 'JOSUÉ',
-    
-    // Personagens do Novo Testamento
-    'JESUS', 'MARIA', 'JOSE', 'PEDRO', 'PAULO', 'JOÃO', 
-    'TIAGO', 'ANDRÉ', 'FILIPE', 'MATEUS', 'LUCAS', 'MARCOS',
-    'BARNABÉ', 'SILAS', 'TIMÓTEO', 'TITO',
-    
-    // Lugares
-    'BELÉM', 'NAZARÉ', 'JERUSALÉM', 'GALILEIA', 'EGITO', 
-    'SINAI', 'JORDAN', 'CANAÃ', 'BABEL', 'NÍNIVE',
-    
-    // Conceitos e virtudes
-    'AMOR', 'FÉ', 'PAZ', 'VIDA', 'LUZ', 'REINO', 'GRAÇA',
-    'PERDÃO', 'VERDADE', 'CAMINHO', 'PODER', 'GLORIA',
-    'ALEGRIA', 'ESPERANÇA', 'BONDADE', 'JUSTIÇA',
-    
-    // Objetos e símbolos
-    'ARCA', 'ESTACA', 'PÃO', 'VINHO', 'ÓLEO', 'PEDRA',
-    'TABUA', 'ALTAR', 'TEMPLO', 'CORDEIRO', 'POMBA',
-    
-    // Livros da Bíblia (alguns)
-    'GENESIS', 'ÊXODO', 'SALMOS', 'JOAO', 'ATOS',
-    
-    // Outros
-    'DEUS', 'BIBLIA', 'SALVAÇÃO', 'ALIANÇA', 'PROFETA',
-    'APOSTOLO', 'DISCIPULO', 'MILAGRE', 'ORAÇÃO', 'ANJO'
-  ];
   
   // Palavras selecionadas para a partida atual (10 palavras aleatórias)
   late List<String> _words;
@@ -78,10 +47,11 @@ class _WordSearchGameState extends State<WordSearchGame> {
     super.dispose();
   }
 
-  /// Seleciona 10 palavras aleatórias da lista completa
+  /// Seleciona 10 palavras aleatórias da lista completa (baseada no idioma atual)
   void _selectRandomWords() {
     final random = Random();
-    final shuffled = List<String>.from(_allBiblicalWords)..shuffle(random);
+    final allWords = _contentService.wordSearchWords;
+    final shuffled = List<String>.from(allWords)..shuffle(random);
     
     // Seleciona as primeiras 10 palavras após embaralhar
     _words = shuffled.take(10).toList();

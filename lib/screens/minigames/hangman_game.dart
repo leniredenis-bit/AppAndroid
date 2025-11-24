@@ -3,6 +3,7 @@ import 'dart:math';
 import '../../services/audio_service.dart';
 import '../../services/storage_service.dart';
 import '../../services/achievement_service.dart';
+import '../../services/minigame_content_service.dart';
 import '../../widgets/achievement_unlock_dialog.dart';
 
 // Custom Painter para desenhar o boneco da forca
@@ -112,13 +113,7 @@ class HangmanGame extends StatefulWidget {
 class _HangmanGameState extends State<HangmanGame> {
   final StorageService _storage = StorageService();
   final AchievementService _achievementService = AchievementService();
-  
-  // Palavras bíblicas seguras
-  final List<String> words = [
-    "MOISES", "DANIEL", "JESUS", "RUTE", "ESTER", "ISAIAS",
-    "AMOR", "FE", "SALMO", "JOSE", "PAZ", "ABRAAO", "ORACAO",
-    "DAVI", "MARIA", "PEDRO", "PAULO", "JOAO", "ATOS", "GENESIS"
-  ];
+  final MinigameContentService _contentService = MinigameContentService();
 
   late String chosenWord;
   List<String> guessedLetters = [];
@@ -135,6 +130,7 @@ class _HangmanGameState extends State<HangmanGame> {
 
   void _restartGame() {
     AudioService().playClick();
+    final words = _contentService.hangmanWords;
     chosenWord = words[Random().nextInt(words.length)];
     guessedLetters = [];
     wrongLetters = [];

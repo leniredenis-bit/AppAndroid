@@ -3,6 +3,7 @@ import 'dart:async';
 import '../models/stats_service.dart';
 import '../widgets/emoji_text.dart';
 import '../services/audio_service.dart';
+import '../services/minigame_content_service.dart';
 
 class MemoryGameScreen extends StatefulWidget {
   const MemoryGameScreen({super.key});
@@ -27,146 +28,12 @@ class MemoryCard {
   });
 }
 
-// Classe com todos os temas disponíveis
+// Helper class para acessar temas do jogo da memória com suporte multi-idioma
 class MemoryThemes {
-  static const Map<String, List<Map<String, String>>> themes = {
-    'animais': [
-      {'emoji': '🐶', 'name': 'Cachorro'},
-      {'emoji': '🐱', 'name': 'Gato'},
-      {'emoji': '🐭', 'name': 'Rato'},
-      {'emoji': '🐹', 'name': 'Hamster'},
-      {'emoji': '🐰', 'name': 'Coelho'},
-      {'emoji': '🦊', 'name': 'Raposa'},
-      {'emoji': '🐻', 'name': 'Urso'},
-      {'emoji': '🐼', 'name': 'Panda'},
-      {'emoji': '🐨', 'name': 'Coalá'},
-      {'emoji': '🐯', 'name': 'Tigre'},
-      {'emoji': '🦁', 'name': 'Leão'},
-      {'emoji': '🐮', 'name': 'Vaca'},
-      {'emoji': '🐷', 'name': 'Porco'},
-      {'emoji': '🐸', 'name': 'Sapo'},
-      {'emoji': '🐵', 'name': 'Macaco'},
-    ],
-    'frutas': [
-      {'emoji': '🍎', 'name': 'Maçã'},
-      {'emoji': '🍌', 'name': 'Banana'},
-      {'emoji': '🍇', 'name': 'Uva'},
-      {'emoji': '🍓', 'name': 'Morango'},
-      {'emoji': '🍈', 'name': 'Melão'},
-      {'emoji': '🍒', 'name': 'Cereja'},
-      {'emoji': '🍑', 'name': 'Pêssego'},
-      {'emoji': '🥝', 'name': 'Kiwi'},
-      {'emoji': '🥭', 'name': 'Manga'},
-      {'emoji': '🥥', 'name': 'Coco'},
-      {'emoji': '🍉', 'name': 'Melancia'},
-      {'emoji': '🍊', 'name': 'Laranja'},
-      {'emoji': '🍋', 'name': 'Limão'},
-      {'emoji': '🍐', 'name': 'Pêra'},
-      {'emoji': '🍍', 'name': 'Abacaxi'},
-    ],
-    'transportes': [
-      {'emoji': '🚗', 'name': 'Carro'},
-      {'emoji': '🚕', 'name': 'Táxi'},
-      {'emoji': '🚌', 'name': 'Ônibus'},
-      {'emoji': '🚑', 'name': 'Ambulância'},
-      {'emoji': '🚓', 'name': 'Polícia'},
-      {'emoji': '🚚', 'name': 'Caminhão'},
-      {'emoji': '🚜', 'name': 'Trator'},
-      {'emoji': '🚲', 'name': 'Bicicleta'},
-      {'emoji': '🏍️', 'name': 'Moto'},
-      {'emoji': '✈️', 'name': 'Avião'},
-      {'emoji': '🚀', 'name': 'Foguete'},
-      {'emoji': '⛵', 'name': 'Barco'},
-      {'emoji': '🚢', 'name': 'Navio'},
-      {'emoji': '🚂', 'name': 'Trem'},
-      {'emoji': '🚁', 'name': 'Helicóptero'},
-    ],
-    'vida_marinha': [
-      {'emoji': '🐟', 'name': 'Peixe'},
-      {'emoji': '🐠', 'name': 'Peixe Tropical'},
-      {'emoji': '🐡', 'name': 'Baiacu'},
-      {'emoji': '🦈', 'name': 'Tubarão'},
-      {'emoji': '🐙', 'name': 'Polvo'},
-      {'emoji': '🦑', 'name': 'Lula'},
-      {'emoji': '🦞', 'name': 'Lagosta'},
-      {'emoji': '🦀', 'name': 'Caranguejo'},
-      {'emoji': '🐚', 'name': 'Concha'},
-      {'emoji': '🐋', 'name': 'Baleia'},
-      {'emoji': '🐳', 'name': 'Orca'},
-      {'emoji': '🦭', 'name': 'Foca'},
-      {'emoji': '🐢', 'name': 'Tartaruga'},
-      {'emoji': '🐊', 'name': 'Crocodilo'},
-      {'emoji': '🦎', 'name': 'Lagarto'},
-    ],
-    'aves': [
-      {'emoji': '🐦', 'name': 'Pássaro'},
-      {'emoji': '🦅', 'name': 'Águia'},
-      {'emoji': '🦉', 'name': 'Coruja'},
-      {'emoji': '🦆', 'name': 'Pato'},
-      {'emoji': '🦜', 'name': 'Papagaio'},
-      {'emoji': '🐔', 'name': 'Galinha'},
-      {'emoji': '🐧', 'name': 'Pinguim'},
-      {'emoji': '🦚', 'name': 'Pavão'},
-      {'emoji': '🦢', 'name': 'Cisne'},
-      {'emoji': '🦃', 'name': 'Peru'},
-      {'emoji': '🐓', 'name': 'Galo'},
-      {'emoji': '🦇', 'name': 'Morcego'},
-      {'emoji': '🦤', 'name': 'Dodô'},
-      {'emoji': '🦩', 'name': 'Flamingo'},
-      {'emoji': '🕊️', 'name': 'Pombo'},
-    ],
-    'numeros': [
-      {'emoji': '1️⃣', 'name': 'Um'},
-      {'emoji': '2️⃣', 'name': 'Dois'},
-      {'emoji': '3️⃣', 'name': 'Três'},
-      {'emoji': '4️⃣', 'name': 'Quatro'},
-      {'emoji': '5️⃣', 'name': 'Cinco'},
-      {'emoji': '6️⃣', 'name': 'Seis'},
-      {'emoji': '7️⃣', 'name': 'Sete'},
-      {'emoji': '8️⃣', 'name': 'Oito'},
-      {'emoji': '9️⃣', 'name': 'Nove'},
-      {'emoji': '🔟', 'name': 'Dez'},
-      {'emoji': '0️⃣', 'name': 'Zero'},
-      {'emoji': '➕', 'name': 'Mais'},
-      {'emoji': '➖', 'name': 'Menos'},
-      {'emoji': '✖️', 'name': 'Vezes'},
-      {'emoji': '➗', 'name': 'Dividir'},
-    ],
-    'objetos': [
-      {'emoji': '📱', 'name': 'Celular'},
-      {'emoji': '💻', 'name': 'Computador'},
-      {'emoji': '⌚', 'name': 'Relógio'},
-      {'emoji': '📷', 'name': 'Câmera'},
-      {'emoji': '📹', 'name': 'Vídeo'},
-      {'emoji': '📺', 'name': 'TV'},
-      {'emoji': '📻', 'name': 'Rádio'},
-      {'emoji': '💡', 'name': 'Lâmpada'},
-      {'emoji': '🔋', 'name': 'Bateria'},
-      {'emoji': '🔌', 'name': 'Tomada'},
-      {'emoji': '🧰', 'name': 'Ferramentas'},
-      {'emoji': '🔧', 'name': 'Chave'},
-      {'emoji': '🔨', 'name': 'Martelo'},
-      {'emoji': '✂️', 'name': 'Tesoura'},
-      {'emoji': '🔒', 'name': 'Cadeado'},
-    ],
-    'natureza': [
-      {'emoji': '🌸', 'name': 'Cerejeira'},
-      {'emoji': '🌺', 'name': 'Flor'},
-      {'emoji': '🌻', 'name': 'Girassol'},
-      {'emoji': '🌼', 'name': 'Margarida'},
-      {'emoji': '🌹', 'name': 'Rosa'},
-      {'emoji': '🍃', 'name': 'Folha'},
-      {'emoji': '☘️', 'name': 'Trevo'},
-      {'emoji': '🌳', 'name': 'Árvore'},
-      {'emoji': '🌲', 'name': 'Pinheiro'},
-      {'emoji': '🌴', 'name': 'Palmeira'},
-      {'emoji': '🌵', 'name': 'Cacto'},
-      {'emoji': '🌱', 'name': 'Broto'},
-      {'emoji': '🍄', 'name': 'Cogumelo'},
-      {'emoji': '🌙', 'name': 'Lua'},
-      {'emoji': '☀️', 'name': 'Sol'},
-    ],
-  };
+  static final MinigameContentService _contentService = MinigameContentService();
+  
+  // Retorna os temas do idioma atual
+  static Map<String, List<Map<String, String>>> get themes => _contentService.memoryThemes;
 
   // Retorna os itens do tema selecionado
   static List<Map<String, String>> getThemeItems(String theme) {
