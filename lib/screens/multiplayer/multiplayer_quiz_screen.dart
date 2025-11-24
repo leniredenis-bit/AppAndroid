@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../models/multiplayer/room.dart';
 import '../../models/question.dart';
-import '../../services/multiplayer/mock_multiplayer_service.dart';
+import '../../services/multiplayer/firebase_multiplayer_service.dart';
 import '../../models/quiz_service.dart';
 import '../../utils/timer_calculator.dart';
 import 'round_result_screen.dart';
@@ -65,7 +65,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
   }
 
   void _listenToRoomUpdates() {
-    _roomSubscription = MockMultiplayerService.roomStream(widget.roomCode).listen(
+    _roomSubscription = FirebaseMultiplayerService().roomStream(widget.roomCode).listen(
       (room) {
         setState(() {
           _currentRoom = room;
@@ -184,7 +184,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
     }
 
     try {
-      await MockMultiplayerService.submitAnswer(
+      await FirebaseMultiplayerService().submitAnswer(
         roomCode: widget.roomCode,
         playerId: widget.playerId,
         answerIndex: answerIndex ?? -1,

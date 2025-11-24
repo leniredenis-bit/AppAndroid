@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import '../../models/multiplayer/room.dart';
-import '../../services/multiplayer/mock_multiplayer_service.dart';
+import '../../services/multiplayer/firebase_multiplayer_service.dart';
 import 'multiplayer_quiz_screen.dart';
 
 /// Tela do Lobby - Sala de espera antes de iniciar o jogo
@@ -28,7 +28,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
   @override
   void initState() {
     super.initState();
-    MockMultiplayerService.initialize();
+    // Firebase não precisa de initialize()
     _listenToRoomUpdates();
   }
 
@@ -39,7 +39,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   void _listenToRoomUpdates() {
-    _roomSubscription = MockMultiplayerService.roomStream(widget.roomCode).listen(
+    _roomSubscription = FirebaseMultiplayerService().roomStream(widget.roomCode).listen(
       (room) {
         setState(() {
           _currentRoom = room;
@@ -90,7 +90,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
     setState(() => _isStarting = true);
 
     try {
-      await MockMultiplayerService.startGame(widget.roomCode);
+      await FirebaseMultiplayerService().startGame(widget.roomCode);
       // A navegação acontecerá automaticamente via stream
     } catch (e) {
       setState(() => _isStarting = false);
@@ -123,7 +123,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
     if (confirmed == true) {
       try {
-        await MockMultiplayerService.removePlayer(
+        await FirebaseMultiplayerService().removePlayer(
           roomCode: widget.roomCode,
           playerId: playerId,
         );
@@ -160,7 +160,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
     if (confirmed == true) {
       try {
-        await MockMultiplayerService.removePlayer(
+        await FirebaseMultiplayerService().removePlayer(
           roomCode: widget.roomCode,
           playerId: widget.playerId,
         );
@@ -196,7 +196,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
     if (confirmed == true) {
       try {
-        await MockMultiplayerService.closeRoom(widget.roomCode);
+        await FirebaseMultiplayerService().closeRoom(widget.roomCode);
         if (mounted) Navigator.pop(context);
       } catch (e) {
         _showErrorDialog('Erro ao encerrar: $e');

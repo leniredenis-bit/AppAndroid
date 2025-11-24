@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/multiplayer/mock_multiplayer_service.dart';
+import '../../services/multiplayer/firebase_multiplayer_service.dart';
 import '../../services/multiplayer/profanity_filter.dart';
 import 'lobby_screen.dart';
 
@@ -57,7 +57,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
       final hostId = DateTime.now().millisecondsSinceEpoch.toString();
       
       // Criar sala (roundTimeLimit será ignorado - tempo é calculado dinamicamente)
-      final room = await MockMultiplayerService.createRoom(
+      final room = await FirebaseMultiplayerService().createRoom(
         hostId: hostId,
         hostNickname: _nicknameController.text.trim(),
         totalQuestions: _totalQuestions,

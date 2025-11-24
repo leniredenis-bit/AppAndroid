@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../models/multiplayer/room.dart';
-import '../../services/multiplayer/mock_multiplayer_service.dart';
+import '../../services/multiplayer/firebase_multiplayer_service.dart';
 import 'multiplayer_quiz_screen.dart';
 import 'final_result_screen.dart';
 
@@ -52,16 +52,12 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
   }
 
   Future<void> _loadRoom() async {
-    final room = MockMultiplayerService.getRoom(widget.roomCode);
-    if (room != null) {
-      setState(() {
-        _currentRoom = room;
-      });
-    }
+    // Firebase usa stream, não precisa de getRoom()
+    // A sala será carregada via _listenToRoomUpdates()
   }
 
   void _listenToRoomUpdates() {
-    _roomSubscription = MockMultiplayerService.roomStream(widget.roomCode).listen(
+    _roomSubscription = FirebaseMultiplayerService().roomStream(widget.roomCode).listen(
       (room) {
         setState(() {
           _currentRoom = room;
@@ -118,7 +114,7 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
 
   Future<void> _nextQuestion() async {
     try {
-      await MockMultiplayerService.nextQuestion(widget.roomCode);
+      await FirebaseMultiplayerService().nextQuestion(widget.roomCode);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),

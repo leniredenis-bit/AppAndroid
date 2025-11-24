@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import '../../models/multiplayer/room.dart';
 import '../../models/multiplayer/player.dart';
-import '../../services/multiplayer/mock_multiplayer_service.dart';
+import '../../services/multiplayer/firebase_multiplayer_service.dart';
 import 'lobby_screen.dart';
 
 /// Tela de resultados finais com pódio e animações
@@ -88,16 +88,12 @@ class _FinalResultScreenState extends State<FinalResultScreen>
   }
 
   Future<void> _loadRoom() async {
-    final room = MockMultiplayerService.getRoom(widget.roomCode);
-    if (room != null) {
-      setState(() {
-        _currentRoom = room;
-      });
-    }
+    // Firebase usa stream, não precisa de getRoom()
+    // A sala será carregada via _listenToRoomUpdates()
   }
 
   void _listenToRoomUpdates() {
-    _roomSubscription = MockMultiplayerService.roomStream(widget.roomCode).listen(
+    _roomSubscription = FirebaseMultiplayerService().roomStream(widget.roomCode).listen(
       (room) {
         setState(() {
           _currentRoom = room;
@@ -170,7 +166,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
     });
 
     try {
-      await MockMultiplayerService.restartGame(widget.roomCode);
+      await FirebaseMultiplayerService().restartGame(widget.roomCode);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
@@ -212,7 +208,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
 
     if (confirm == true) {
       try {
-        await MockMultiplayerService.closeRoom(widget.roomCode);
+        await FirebaseMultiplayerService().closeRoom(widget.roomCode);
         Navigator.of(context).popUntil((route) => route.isFirst);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

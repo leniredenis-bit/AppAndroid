@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../services/multiplayer/mock_multiplayer_service.dart';
+import '../../services/multiplayer/firebase_multiplayer_service.dart';
 import '../../services/multiplayer/profanity_filter.dart';
 import 'lobby_screen.dart';
 
@@ -56,7 +56,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
       final playerId = DateTime.now().millisecondsSinceEpoch.toString();
       
       // Entrar na sala
-      await MockMultiplayerService.joinRoom(
+      await FirebaseMultiplayerService().joinRoom(
         roomCode: _codeController.text.trim(),
         playerId: playerId,
         nickname: _nicknameController.text.trim(),

@@ -20,104 +20,15 @@ class BibleReferenceButton extends StatelessWidget {
 
   /// Converte a referência textual para URL do JW.org
   /// 
-  /// Formato: https://www.jw.org/pt/biblioteca-biblica/biblia/nwt/livros/Genesis/6/
+  /// Formato de busca que funciona: https://www.jw.org/pt/busca/?q=Daniel+6%3A16&link=%2Fresults%2FT%2Fbible%3Fq%3D
   String _buildJWUrl() {
     final cleanRef = reference.trim();
     
-    // Mapeamento de nomes de livros para o formato JW.org
-    final Map<String, String> bookMap = {
-      'gênesis': 'Genesis', 'genesis': 'Genesis',
-      'êxodo': 'Exodus', 'exodo': 'Exodus',
-      'levítico': 'Leviticus', 'levitico': 'Leviticus',
-      'números': 'Numbers', 'numeros': 'Numbers',
-      'deuteronômio': 'Deuteronomy', 'deuteronomio': 'Deuteronomy',
-      'josué': 'Joshua', 'josue': 'Joshua',
-      'juízes': 'Judges', 'juizes': 'Judges',
-      'rute': 'Ruth',
-      '1 samuel': '1-Samuel', 'i samuel': '1-Samuel',
-      '2 samuel': '2-Samuel', 'ii samuel': '2-Samuel',
-      '1 reis': '1-Kings', 'i reis': '1-Kings',
-      '2 reis': '2-Kings', 'ii reis': '2-Kings',
-      '1 crônicas': '1-Chronicles', '1 cronicas': '1-Chronicles',
-      '2 crônicas': '2-Chronicles', '2 cronicas': '2-Chronicles',
-      'esdras': 'Ezra',
-      'neemias': 'Nehemiah',
-      'ester': 'Esther',
-      'jó': 'Job', 'jo': 'Job',
-      'salmos': 'Psalms', 'salmo': 'Psalms',
-      'provérbios': 'Proverbs', 'proverbios': 'Proverbs',
-      'eclesiastes': 'Ecclesiastes',
-      'cântico dos cânticos': 'Song-of-Solomon', 'cantico': 'Song-of-Solomon',
-      'isaías': 'Isaiah', 'isaias': 'Isaiah',
-      'jeremias': 'Jeremiah',
-      'lamentações': 'Lamentations', 'lamentacoes': 'Lamentations',
-      'ezequiel': 'Ezekiel',
-      'daniel': 'Daniel',
-      'oséias': 'Hosea', 'oseias': 'Hosea',
-      'joel': 'Joel',
-      'amós': 'Amos', 'amos': 'Amos',
-      'obadias': 'Obadiah',
-      'jonas': 'Jonah',
-      'miquéias': 'Micah', 'miqueias': 'Micah',
-      'naum': 'Nahum',
-      'habacuque': 'Habakkuk',
-      'sofonias': 'Zephaniah',
-      'ageu': 'Haggai',
-      'zacarias': 'Zechariah',
-      'malaquias': 'Malachi',
-      'mateus': 'Matthew',
-      'marcos': 'Mark',
-      'lucas': 'Luke',
-      'joão': 'John', 'joao': 'John',
-      'atos': 'Acts',
-      'romanos': 'Romans',
-      '1 coríntios': '1-Corinthians', '1 corintios': '1-Corinthians',
-      '2 coríntios': '2-Corinthians', '2 corintios': '2-Corinthians',
-      'gálatas': 'Galatians', 'galatas': 'Galatians',
-      'efésios': 'Ephesians', 'efesios': 'Ephesians',
-      'filipenses': 'Philippians',
-      'colossenses': 'Colossians',
-      '1 tessalonicenses': '1-Thessalonians',
-      '2 tessalonicenses': '2-Thessalonians',
-      '1 timóteo': '1-Timothy', '1 timoteo': '1-Timothy',
-      '2 timóteo': '2-Timothy', '2 timoteo': '2-Timothy',
-      'tito': 'Titus',
-      'filemom': 'Philemon', 'filemon': 'Philemon',
-      'hebreus': 'Hebrews',
-      'tiago': 'James',
-      '1 pedro': '1-Peter',
-      '2 pedro': '2-Peter',
-      '1 joão': '1-John', '1 joao': '1-John',
-      '2 joão': '2-John', '2 joao': '2-John',
-      '3 joão': '3-John', '3 joao': '3-John',
-      'judas': 'Jude',
-      'apocalipse': 'Revelation', 'revelação': 'Revelation',
-    };
+    // Encode da referência para URL (espaços viram +, : vira %3A)
+    final query = Uri.encodeComponent(cleanRef).replaceAll('%20', '+');
     
-    try {
-      // Regex para capturar: "Livro capítulo:versículo(s)"
-      final regex = RegExp(r'^([0-9\s]*[^\d:]+)\s*(\d+):(\d+)(?:-(\d+))?', caseSensitive: false);
-      final match = regex.firstMatch(cleanRef);
-      
-      if (match != null) {
-        final bookName = match.group(1)!.trim().toLowerCase();
-        final chapter = match.group(2)!;
-        final verse = match.group(3)!;
-        // verseEnd (match.group(4)) poderia ser usado para intervalos no futuro
-        
-        final jwBook = bookMap[bookName];
-        if (jwBook != null) {
-          // URL direta para o capítulo com âncora no versículo
-          return 'https://www.jw.org/pt/biblioteca-biblica/biblia/nwt/livros/$jwBook/$chapter/#v$chapter:$verse';
-        }
-      }
-    } catch (e) {
-      // Se parsing falhar, usa busca genérica
-    }
-    
-    // Fallback: busca genérica
-    final query = Uri.encodeComponent(cleanRef);
-    return 'https://www.jw.org/pt/biblioteca-biblica/biblia/busca/?q=$query';
+    // URL de busca do JW.org que redireciona corretamente para a Bíblia
+    return 'https://www.jw.org/pt/busca/?q=$query&link=%2Fresults%2FT%2Fbible%3Fq%3D';
   }
 
   /// Abre o link com preview usando Custom Tabs (melhor experiência)
@@ -256,8 +167,9 @@ class BibleReferenceLink extends StatelessWidget {
   });
 
   String _buildJWUrl() {
-    final query = Uri.encodeComponent(reference.trim());
-    return 'https://www.jw.org/pt/biblioteca-biblica/biblia/busca/?q=$query';
+    final cleanRef = reference.trim();
+    final query = Uri.encodeComponent(cleanRef).replaceAll('%20', '+');
+    return 'https://www.jw.org/pt/busca/?q=$query&link=%2Fresults%2FT%2Fbible%3Fq%3D';
   }
 
   Future<void> _openReference(BuildContext context) async {
