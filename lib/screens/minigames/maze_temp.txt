@@ -1,0 +1,65 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:math';
+import 'dart:ui' as ui;
+import '../../services/audio_service.dart';
+import '../../services/storage_service.dart';
+import '../../services/achievement_service.dart';
+import '../../widgets/achievement_unlock_dialog.dart';
+
+const int TILE_SIZE = 32;
+const int WALL = 1;
+const int PATH = 0;
+const int START = 2;
+const int END = 3;
+
+enum GameMode { campaign, quickPlay }
+
+class MazeGenerator {
+  static List<List<int>> generate(int rows, int cols, {double extraPathsChance = 0.15}) {
+    List<List<int>> maze = List.generate(rows, (_) => List.filled(cols, WALL));
+    final random = Random();
+    int startRow = 1;
+    int startCol = 1;
+    int endRow = rows - 2;
+    int endCol = cols - 2;
+    maze[startRow][startCol] = START;
+    int currentRow = startRow;
+    int currentCol = startCol;
+    while (currentRow != endRow || currentCol != endCol) {
+      maze[currentRow][currentCol] = PATH;
+      if (currentRow == startRow && currentCol == startCol) maze[currentRow][currentCol] = START;
+      List<Point<int>> possibleMoves = [];
+      if (currentRow < endRow) possibleMoves.add(Point(currentRow + 1, currentCol));
+      if (currentRow > 1 && random.nextDouble() > 0.7) possibleMoves.add(Point(currentRow - 1, currentCol));
+      if (currentCol < endCol) possibleMoves.add(Point(currentRow, currentCol + 1));
+      if (currentCol > 1 && random.nextDouble() > 0.7) possibleMoves.add(Point(currentRow, currentCol - 1));
+      if (possibleMoves.isEmpty) {
+         final directions = [Point(0, 1), Point(0, -1), Point(1, 0), Point(-1, 0)];
+         for (var dir in directions) {
+           int nextR = currentRow + dir.y;
+           int nextC = currentCol + dir.x;
+           if (nextR > 0 && nextR < rows -1 && nextC > 0 && nextC < cols - 1) {
+             possibleMoves.add(Point(nextR, nextC));
+           }
+         }
+      }
+      if (possibleMoves.isNotEmpty) {
+        final move = possibleMoves[random.nextInt(possibleMoves.length)];
+        currentRow = move.y;
+        currentCol = move.x;
+      } else {
+        break;
+      }
+    }
+    maze[endRow][endCol] = END;
+    for (int r = 1; r < rows - 1; r++) {
+      for (int c = 1; c < cols - 1; c++) {
+        if (maze[r][c] == WALL && random.nextDouble() < extraPathsChance) {
+           maze[r][c] = PATH;
+        }
+      }
+    }
+    return maze;
+  }
+}

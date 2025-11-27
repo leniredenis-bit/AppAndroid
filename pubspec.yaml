@@ -43,6 +43,7 @@ dependencies:
   url_launcher: ^6.3.1
   flutter_custom_tabs: ^2.1.0  # Para preview de links dentro do app
   intl: ^0.20.2  # Para formatação de datas e números
+  image_picker: ^1.1.2  # Para selecionar imagens da galeria (Quebra-Cabeça)
   
   # Firebase para multiplayer online
   firebase_core: ^2.24.2
@@ -77,6 +78,7 @@ flutter:
     - assets/audio/
     - assets/audio/sfx/
     - assets/data/
+    - assets/images/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

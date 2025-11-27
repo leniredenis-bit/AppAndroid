@@ -1,11 +1,100 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
+import 'dart:ui' as ui; // Necessário para efeitos visuais avançados
 import '../../services/audio_service.dart';
 import '../../services/storage_service.dart';
 import '../../services/achievement_service.dart';
 import '../../widgets/achievement_unlock_dialog.dart';
 
+// --- Constantes do Jogo ---
+const int TILE_SIZE = 32; // Tamanho visual de cada quadrado do labirinto
+const int WALL = 1;
+const int PATH = 0;
+const int START = 2;
+const int END = 3;
+
+// --- Enum para os Modos de Jogo ---
+enum GameMode { campaign, quickPlay }
+
+// --- Classe Geradora de Labirintos (Procedural) ---
+class MazeGenerator {
+  static List<List<int>> generate(int rows, int cols, {double extraPathsChance = 0.15}) {
+    // 1. Começa com tudo preenchido com paredes
+    List<List<int>> maze = List.generate(rows, (_) => List.filled(cols, WALL));
+    final random = Random();
+
+    // 2. Define Ponto Inicial (A) e Final (B) distantes
+    // Por simplicidade, canto superior esquerdo e canto inferior direito
+    // Garantimos uma margem de 1 bloco para não ficar na borda exata
+    int startRow = 1;
+    int startCol = 1;
+    int endRow = rows - 2;
+    int endCol = cols - 2;
+
+    maze[startRow][startCol] = START;
+    // O ponto final será marcado só no fim para não ser sobrescrito pelo escavador
+
+    // 3. O "Escavador Bêbado" (Garante o caminho principal)
+    int currentRow = startRow;
+    int currentCol = startCol;
+
+    // Enquanto não chegar perto do fim
+    while (currentRow != endRow || currentCol != endCol) {
+      maze[currentRow][currentCol] = PATH; // Transforma a posição atual em caminho (se não for start)
+      if (currentRow == startRow && currentCol == startCol) maze[currentRow][currentCol] = START;
+
+
+      // Decide para onde ir. Damos um "peso" maior para a direção do objetivo
+      List<Point<int>> possibleMoves = [];
+      // Tenta ir para baixo
+      if (currentRow < endRow) possibleMoves.add(Point(currentRow + 1, currentCol));
+      if (currentRow > 1 && random.nextDouble() > 0.7) possibleMoves.add(Point(currentRow - 1, currentCol)); // Chance menor de voltar
+
+      // Tenta ir para direita
+      if (currentCol < endCol) possibleMoves.add(Point(currentRow, currentCol + 1));
+      if (currentCol > 1 && random.nextDouble() > 0.7) possibleMoves.add(Point(currentRow, currentCol - 1)); // Chance menor de voltar
+
+      // Se ficar preso (raro com essa lógica, mas possível), força um movimento aleatório válido
+      if (possibleMoves.isEmpty) {
+         final directions = [Point(0, 1), Point(0, -1), Point(1, 0), Point(-1, 0)];
+         for (var dir in directions) {
+           int nextR = currentRow + dir.y;
+           int nextC = currentCol + dir.x;
+           if (nextR > 0 && nextR < rows -1 && nextC > 0 && nextC < cols - 1) {
+             possibleMoves.add(Point(nextR, nextC));
+           }
+         }
+      }
+
+      if (possibleMoves.isNotEmpty) {
+        final move = possibleMoves[random.nextInt(possibleMoves.length)];
+        currentRow = move.y;
+        currentCol = move.x;
+      } else {
+        // Fallback extremo se falhar (não deve acontecer)
+        break;
+      }
+    }
+    maze[endRow][endCol] = END; // Marca o fim
+
+    // 4. Adiciona o Caos (Linhas extras para loops e aspecto de caverna)
+    for (int r = 1; r < rows - 1; r++) {
+      for (int c = 1; c < cols - 1; c++) {
+        // Se for uma parede, tem uma chance de virar caminho
+        if (maze[r][c] == WALL && random.nextDouble() < extraPathsChance) {
+           // Verifica se não vai conectar o início ou fim de formas estranhas,
+           // mas para cavernas, conectar tudo bem.
+           maze[r][c] = PATH;
+        }
+      }
+    }
+
+    return maze;
+  }
+}
+
+// --- Widget Principal do Jogo ---
 class MazeGame extends StatefulWidget {
   const MazeGame({super.key});
 
@@ -13,351 +102,182 @@ class MazeGame extends StatefulWidget {
   State<MazeGame> createState() => _MazeGameState();
 }
 
-class _MazeGameState extends State<MazeGame> {
+class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin {
   final AudioService _audioService = AudioService();
   final StorageService _storage = StorageService();
   final AchievementService _achievementService = AchievementService();
-  
-  // Player position
+
+  // Estados do Jogo
+  bool _isPlaying = false;
+  GameMode _gameMode = GameMode.campaign;
+  int _campaignLevel = 1;
+  int _mazeRows = 15; // Tamanho inicial
+  int _mazeCols = 15;
+
+  // Dados da Partida Atual
+  List<List<int>> _maze = [];
   int _playerRow = 0;
   int _playerCol = 0;
-  
-  // Game state
   bool _isGameWon = false;
   int _moves = 0;
   DateTime? _gameStartTime;
-  
-  // Para repetição de movimento ao segurar botão
-  bool _isMoving = false;
-  int _moveDirection = 0; // 1=up, 2=down, 3=left, 4=right
-  
-  // Labirinto atual (será selecionado aleatoriamente)
-  late List<List<int>> _maze;
-  
-  // 10 labirintos diferentes (20x20) - 0 = caminho, 1 = parede, 2 = início, 3 = fim
-  static const List<List<List<int>>> _allMazes = [
-    // Labirinto 1 - Corredores Longos
-    [
-      [2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
-    ],
-    
-    // Labirinto 2 - Complexo com Múltiplos Caminhos
-    [
-      [2,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-      [1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
-      [1,1,1,1,1,1,1,1,1,1,1,0,1,0,0,0,0,0,0,1],
-      [1,0,0,0,0,0,0,0,0,0,1,0,1,0,1,1,1,1,0,1],
-      [1,0,1,1,1,1,1,1,1,0,1,0,1,0,1,0,0,1,0,1],
-      [1,0,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,1,0,1],
-      [1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,0,0,0,0,1],
-      [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1],
-      [1,0,1,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,0,1],
-      [1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,1,0,1],
-      [1,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,0,1,0,1],
-      [1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,1,0,1,0,1],
-      [1,0,1,0,1,0,1,0,0,0,0,0,0,0,0,1,0,1,0,1],
-      [1,0,1,0,1,0,1,1,1,1,1,1,1,1,0,1,0,1,0,1],
-      [1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1],
-      [1,1,1,0,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1],
-      [1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,1],
-      [1,0,1,1,1,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1],
-      [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1],
-      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1],
-    ],
-    
-    // Labirinto 3 - Labirinto Denso com Salas
-    [
-      [2,0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1],
-      [1,1,0,1,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,1],
-      [1,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,1],
-      [1,0,0,1,0,1,0,1,0,1,0,1,0,0,0,1,0,1,0,1],
-      [1,0,1,1,0,1,0,1,0,1,0,1,1,1,0,1,0,1,0,1],
-      [1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,1],
-      [1,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1],
-      [1,0,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1],
-      [1,0,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,0,0,0,0,0,1,0,1,0,0,0,1,0,1,0,1,0,1],
-      [1,0,1,1,1,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1],
-      [1,0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,1,0,1],
-      [1,1,1,1,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1],
-      [1,0,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,1,0,1],
-      [1,0,1,1,1,1,1,1,0,1,0,1,1,1,0,1,0,1,0,1],
-      [1,0,1,0,0,0,0,1,0,1,0,0,0,1,0,1,0,1,0,1],
-      [1,0,1,0,1,1,0,1,1,1,1,1,0,1,0,1,0,1,0,1],
-      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,1],
-    ],
-    
-    // Labirinto 4 - Labirinto Clássico
-    [
-      [2, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-      [1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 3],
-    ],
-    
-    // Labirinto 5 - Quartos
-    [
-      [2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
-      [1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1],
-      [1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1],
-      [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1],
-      [1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1],
-      [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-      [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
-    ],
-    
-    // Labirinto 6 - Cruz Central
-    [
-      [2, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
-      [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
-      [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
-      [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
-      [1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1],
-      [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1],
-      [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
-      [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
-      [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 3],
-    ],
-    
-    // Labirinto 7 - Caminhos Entrelaçados
-    [
-      [2,0,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,1,1],
-      [1,0,0,1,0,1,0,0,0,1,0,1,0,0,0,1,0,1,0,1],
-      [1,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1],
-      [1,0,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,1,0,1],
-      [1,0,1,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1],
-      [1,0,1,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
-      [1,0,1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1],
-      [1,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1],
-      [1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1],
-      [1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,1],
-      [1,0,1,1,0,1,1,1,1,1,0,1,1,1,0,1,0,1,0,1],
-      [1,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1],
-      [1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1],
-      [1,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1],
-      [1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1],
-      [1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0,0,1],
-      [1,1,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,0,1],
-      [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
-      [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1],
-      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,1],
-    ],
-    
-    // Labirinto 8 - Bifurcações
-    [
-      [2, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
-      [1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
-      [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-      [1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-      [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-      [1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1],
-      [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 3],
-    ],
-    
-    // Labirinto 9 - Caminho Tortuoso
-    [
-      [2, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
-      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 3],
-    ],
-    
-    // Labirinto 10 - Grande Desafio
-    [
-      [2, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1],
-      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1],
-      [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 3],
-    ],
-  ];
+  Point<int>? _endPoint;
+
+  // Controle de Movimento (Joystick Virtual)
+  Offset? _joystickStartLocalPosition;
+  Offset _joystickCurrentLocalPosition = Offset.zero;
+  bool _isJoystickActive = false;
+  int _lastMoveDirection = 0; // Para evitar spam de movimento na mesma direção
+
+  // Animação do Jogador
+  late AnimationController _playerAnimController;
+  double _playerBounceY = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _selectRandomMaze();
-    _gameStartTime = DateTime.now();
-    _audioService.playBackgroundMusic('quiz-home.mp3');
-  }
-  
-  /// Seleciona um labirinto aleatório da lista
-  void _selectRandomMaze() {
-    final random = Random();
-    final mazeIndex = random.nextInt(_allMazes.length);
-    _maze = List.generate(
-      _allMazes[mazeIndex].length,
-      (i) => List<int>.from(_allMazes[mazeIndex][i]),
-    );
+    // Configura animação de "caminhada" (um balanço simples)
+    _playerAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    )..addListener(() {
+      setState(() {
+        // Cria um movimento de sobe e desce suave (senoide)
+        _playerBounceY = sin(_playerAnimController.value * pi) * 4.0;
+      });
+    });
+
+    _audioService.playBackgroundMusic('cave_ambience.mp3'); // Sugestão: mude a música para algo mais "caverna"
   }
 
   @override
   void dispose() {
     _audioService.stopBackgroundMusic();
+    _playerAnimController.dispose();
     super.dispose();
   }
 
-  void _movePlayer(int deltaRow, int deltaCol) {
-    if (_isGameWon) return;
+  void _startGame() {
+    setState(() {
+      _isPlaying = true;
+      _isGameWon = false;
+      _moves = 0;
+      _gameStartTime = DateTime.now();
+
+      // Define tamanho baseado no modo/nível
+      if (_gameMode == GameMode.campaign) {
+        // Aumenta o tamanho a cada 2 níveis, até um limite
+        int sizeBonus = (_campaignLevel / 2).floor() * 2;
+        _mazeRows = min(10 + sizeBonus, 40); // Começa 10x10, máx 40x40
+        _mazeCols = min(10 + sizeBonus, 40);
+      }
+      // No quickPlay usa os valores dos sliders
+
+      // Gera o labirinto
+      // Níveis mais altos podem ter menos caminhos extras, ficando mais "labirínticos"
+      double chance = _gameMode == GameMode.campaign ? max(0.05, 0.20 - (_campaignLevel * 0.01)) : 0.15;
+      _maze = MazeGenerator.generate(_mazeRows, _mazeCols, extraPathsChance: chance);
+
+      // Encontra posição inicial e final
+      for(int r=0; r<_mazeRows; r++) {
+        for(int c=0; c<_mazeCols; c++) {
+          if (_maze[r][c] == START) {
+            _playerRow = r;
+            _playerCol = c;
+          } else if (_maze[r][c] == END) {
+            _endPoint = Point(r, c);
+          }
+        }
+      }
+    });
+  }
+
+  void _returnToMenu() {
+    setState(() {
+      _isPlaying = false;
+      _isGameWon = false;
+    });
+  }
+
+  // Lógica central de movimento
+  void _tryMove(int deltaRow, int deltaCol, int directionCode) {
+    if (_isGameWon || _maze.isEmpty) return;
+
+    // Evita mover na mesma direção se já tentou e bateu, a menos que o jogador mude a intenção
+    if (_lastMoveDirection == directionCode && !_playerAnimController.isAnimating) {
+        // Se parou a animação, permite tentar de novo
+    } else if (_lastMoveDirection == directionCode) {
+       // return; // Comentado: para um controle mais fluido, permitimos tentar. O bump na parede já é o feedback.
+    }
+
 
     int newRow = _playerRow + deltaRow;
     int newCol = _playerCol + deltaCol;
 
-    // Check boundaries
-    if (newRow < 0 || newRow >= _maze.length || newCol < 0 || newCol >= _maze[0].length) {
+    // Verifica limites do mapa
+    if (newRow < 0 || newRow >= _mazeRows || newCol < 0 || newCol >= _mazeCols) {
+      _audioService.playWrongAnswer(); // Som de "bump" na borda
+      _lastMoveDirection = directionCode;
       return;
     }
 
-    // Check if it's a wall
-    if (_maze[newRow][newCol] == 1) {
-      _audioService.playWrongAnswer();
+    // Verifica colisão com parede
+    if (_maze[newRow][newCol] == WALL) {
+      _audioService.playWrongAnswer(); // Som de "bump" na parede
+      _lastMoveDirection = directionCode;
       return;
     }
 
+    // Movimento Válido!
     setState(() {
       _playerRow = newRow;
       _playerCol = newCol;
       _moves++;
+      _lastMoveDirection = directionCode;
     });
+    
+    // Toca som de passo e inicia animação
+    if (!_playerAnimController.isAnimating) {
+        _audioService.playClick(); // Use um som de passo se tiver (ex: 'step.mp3')
+        _playerAnimController.forward(from: 0.0);
+    }
 
-    _audioService.playClick();
 
-    // Check if reached the end
-    if (_maze[newRow][newCol] == 3) {
-      setState(() {
-        _isGameWon = true;
-      });
-      _audioService.playVictory();
-      _saveGameResult();
+    // Verifica Vitória
+    if (_maze[newRow][newCol] == END) {
+      _handleVictory();
     }
   }
 
-  Future<void> _saveGameResult() async {
+  void _handleVictory() async {
+    setState(() {
+      _isGameWon = true;
+    });
+    _audioService.playVictory();
+    _playerAnimController.stop();
+
     final timeSpent = _gameStartTime != null
         ? DateTime.now().difference(_gameStartTime!).inSeconds
         : 0;
 
+    // Salva resultado base
     await _storage.saveMinigameRecord(
       'maze',
-      score: 1000 - (_moves * 5),
+      score: max(100, 1000 - (_moves * 2) + (_campaignLevel * 50)), // Pontuação ajustada
       won: true,
       timeInSeconds: timeSpent,
     );
 
+    // Lógica de Conquistas (Mantida do seu código original)
     final records = await _storage.getMinigameRecords();
     final mazeRecord = records.getRecord('maze');
-    
     final unlockedAchievements = await _achievementService.checkMinigameAchievements(
       gameId: 'maze',
       totalGamesPlayed: mazeRecord.gamesPlayed,
       won: true,
       timeInSeconds: timeSpent,
     );
-    
+
     if (mounted && unlockedAchievements.isNotEmpty) {
       for (final achievement in unlockedAchievements) {
         await showDialog(
@@ -367,363 +287,455 @@ class _MazeGameState extends State<MazeGame> {
         );
       }
     }
-  }
 
-  // Inicia movimento contínuo
-  void _startContinuousMove(int direction) {
-    if (_isMoving) return;
-    setState(() {
-      _isMoving = true;
-      _moveDirection = direction;
-    });
-    _continuousMove();
-  }
-
-  // Para movimento contínuo
-  void _stopContinuousMove() {
-    setState(() {
-      _isMoving = false;
-      _moveDirection = 0;
-    });
-  }
-
-  // Move continuamente enquanto botão estiver pressionado
-  void _continuousMove() async {
-    if (!_isMoving) return;
-
-    switch (_moveDirection) {
-      case 1: _movePlayer(-1, 0); break; // Up
-      case 2: _movePlayer(1, 0); break;  // Down
-      case 3: _movePlayer(0, -1); break; // Left
-      case 4: _movePlayer(0, 1); break;  // Right
-    }
-
-    await Future.delayed(const Duration(milliseconds: 150));
-    
-    if (_isMoving && mounted) {
-      _continuousMove();
+    // Prepara próximo nível se for campanha
+    if (_gameMode == GameMode.campaign) {
+      await Future.delayed(const Duration(seconds: 2)); // Espera um pouco para celebrar
+      if (mounted) {
+        setState(() {
+          _campaignLevel++;
+          _startGame(); // Inicia o próximo nível automaticamente
+        });
+      }
     }
   }
+  
+  // --- Lógica do Joystick Virtual ---
+  void _handleJoystickUpdate(Offset localPosition) {
+    // Calcula o vetor do centro do joystick até o dedo
+    Offset vector = localPosition - (_joystickStartLocalPosition ?? localPosition);
 
-  void _resetGame() {
-    setState(() {
-      _selectRandomMaze(); // Novo labirinto aleatório a cada reinício
-      _playerRow = 0;
-      _playerCol = 0;
-      _isGameWon = false;
-      _moves = 0;
-    });
-  }
-
-  Color _getCellColor(int row, int col) {
-    if (row == _playerRow && col == _playerCol) {
-      return Colors.blue; // Player
+    // Se o arrasto for muito curto, consideramos "zona morta" (nenhuma intenção clara)
+    if (vector.distance < 10.0) {
+        _lastMoveDirection = 0; // Reseta direção
+        return;
     }
-    
-    switch (_maze[row][col]) {
-      case 0:
-        return Colors.white; // Path
-      case 1:
-        return Colors.grey.shade800; // Wall
-      case 2:
-        return Colors.green; // Start
-      case 3:
-        return Colors.red; // End
-      default:
-        return Colors.white;
+
+    // Calcula o ângulo em graus (-180 a 180)
+    double angle = atan2(vector.dy, vector.dx) * 180 / pi;
+
+    // Determina a direção baseada no ângulo (com uma zona de histerese para não ficar trocando rápido demais)
+    if (angle > -45 && angle <= 45) {
+      _tryMove(0, 1, 4); // Direita
+    } else if (angle > 45 && angle <= 135) {
+      _tryMove(1, 0, 2); // Baixo
+    } else if (angle > 135 || angle <= -135) {
+      _tryMove(0, -1, 3); // Esquerda
+    } else if (angle > -135 && angle <= -45) {
+      _tryMove(-1, 0, 1); // Cima
     }
   }
 
-  String _getCellEmoji(int row, int col) {
-    if (row == _playerRow && col == _playerCol) {
-      return '😊';
-    }
-    if (_maze[row][col] == 2) {
-      return '🏁';
-    }
-    if (_maze[row][col] == 3) {
-      return '🏆';
-    }
-    return '';
-  }
 
-  // Controles circulares estilizados
-  Widget _buildCircularControls() {
-    return Container(
-      width: 200,
-      height: 200,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: 0.1),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 2),
+  // --- Telas ---
+  Widget _buildMenuScreen() {
+    return Center(
+      child: Card(
+        margin: const EdgeInsets.all(20),
+        color: Colors.brown.shade800.withValues(alpha: 0.9),
+        child: Padding(
+          padding: const EdgeInsets.all(30.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('🏔️ Caverna do Labirinto', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.orangeAccent)),
+              const SizedBox(height: 30),
+              
+              // Botão Modo Campanha
+              ElevatedButton.icon(
+                icon: const Icon(Icons.flag),
+                label: Text('Modo Campanha (Nível $_campaignLevel)'),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.brown.shade900,
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    textStyle: const TextStyle(fontSize: 18)
+                ),
+                onPressed: () {
+                  setState(() {
+                    _gameMode = GameMode.campaign;
+                  });
+                  _startGame();
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // Configurações Jogo Rápido
+              const Text('Jogo Rápido Personalizado', style: TextStyle(color: Colors.white70, fontSize: 16)),
+              const SizedBox(height: 10),
+              Row(
+                 mainAxisAlignment: MainAxisAlignment.center,
+                 children: [
+                   Text('Linhas: $_mazeRows ', style: const TextStyle(color: Colors.orangeAccent)),
+                   Slider(
+                     value: _mazeRows.toDouble(),
+                     min: 10,
+                     max: 50, // Permite mapas gigantes para teste
+                     divisions: 40,
+                     activeColor: Colors.orange,
+                     onChanged: (val) => setState(() => _mazeRows = val.toInt()),
+                   ),
+                 ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Colunas: $_mazeCols ', style: const TextStyle(color: Colors.orangeAccent)),
+                  Slider(
+                    value: _mazeCols.toDouble(),
+                    min: 10,
+                    max: 50,
+                    divisions: 40,
+                    activeColor: Colors.orange,
+                    onChanged: (val) => setState(() => _mazeCols = val.toInt()),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.play_arrow),
+                label: const Text('Jogar Partida Rápida'),
+                 style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade700,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                ),
+                onPressed: () {
+                  setState(() {
+                    _gameMode = GameMode.quickPlay;
+                  });
+                  _startGame();
+                },
+              ),
+            ],
+          ),
+        ),
       ),
-      child: Stack(
-        children: [
-          // Botão Cima
-          Positioned(
-            top: 10,
-            left: 75,
-            child: GestureDetector(
-              onTapDown: (_) => _startContinuousMove(1),
-              onTapUp: (_) => _stopContinuousMove(),
-              onTapCancel: () => _stopContinuousMove(),
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.8),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Icon(Icons.arrow_upward, color: Colors.white, size: 30),
-              ),
+    );
+  }
+
+  Widget _buildGameScreen() {
+    return Stack(
+      children: [
+        // 1. O Jogo Renderizado (CustomPaint) dentro de uma câmera interativa
+        InteractiveViewer(
+          // Configurações da câmera para seguir o jogador e permitir zoom limitado
+          constrained: false, // Permite que o conteúdo seja maior que a tela
+          boundaryMargin: const EdgeInsets.all(double.infinity), // Sem limites de pan
+          minScale: 0.5, // Zoom out máximo
+          maxScale: 2.0, // Zoom in máximo
+          // O ponto crucial: a transformação inicial para centralizar o jogador
+          transformationController: TransformationController(
+            Matrix4.identity()
+              // Translada a tela para que a posição do jogador fique no centro
+              ..translate(
+                 - (_playerCol * TILE_SIZE.toDouble()) + (MediaQuery.of(context).size.width / 2) - (TILE_SIZE/2),
+                 - (_playerRow * TILE_SIZE.toDouble()) + (MediaQuery.of(context).size.height / 2) - (TILE_SIZE/2)
+              )
+          ),
+          child: CustomPaint(
+            // O tamanho total do canvas é o tamanho do labirinto * tamanho do tile
+            size: Size(_mazeCols * TILE_SIZE.toDouble(), _mazeRows * TILE_SIZE.toDouble()),
+            painter: MazePainter(
+              maze: _maze,
+              playerRow: _playerRow,
+              playerCol: _playerCol,
+              rows: _mazeRows,
+              cols: _mazeCols,
+              endPoint: _endPoint,
+              playerBounceY: _playerBounceY, // Passa o valor da animação
             ),
           ),
-          
-          // Botão Baixo
-          Positioned(
-            bottom: 10,
-            left: 75,
-            child: GestureDetector(
-              onTapDown: (_) => _startContinuousMove(2),
-              onTapUp: (_) => _stopContinuousMove(),
-              onTapCancel: () => _stopContinuousMove(),
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.8),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: Offset(0, 4),
+        ),
+
+        // 2. Camada de Controle (Joystick Virtual)
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent, // Captura toques mesmo sendo transparente
+            onPanStart: (details) {
+              setState(() {
+                _isJoystickActive = true;
+                // Define onde o centro do joystick vai aparecer (onde o dedo tocou)
+                _joystickStartLocalPosition = details.localPosition;
+                _joystickCurrentLocalPosition = details.localPosition;
+              });
+            },
+            onPanUpdate: (details) {
+               setState(() {
+                   _joystickCurrentLocalPosition = details.localPosition;
+               });
+              // Chama a lógica de movimento continuamente enquanto arrasta
+              _handleJoystickUpdate(details.localPosition);
+            },
+            onPanEnd: (_) {
+              setState(() {
+                _isJoystickActive = false;
+                _joystickStartLocalPosition = null;
+                _lastMoveDirection = 0; // Para o movimento
+              });
+              _playerAnimController.stop(); // Para a animação de caminhada
+            },
+            // Desenha o joystick visualmente apenas se estiver ativo
+            child: _isJoystickActive && _joystickStartLocalPosition != null
+                ? CustomPaint(
+                    painter: JoystickPainter(
+                      startPos: _joystickStartLocalPosition!,
+                      currentPos: _joystickCurrentLocalPosition,
                     ),
-                  ],
-                ),
-                child: Icon(Icons.arrow_downward, color: Colors.white, size: 30),
-              ),
-            ),
+                  )
+                : Container(), // Se não estiver ativo, não desenha nada na camada de gesto
           ),
-          
-          // Botão Esquerda
-          Positioned(
-            left: 10,
-            top: 75,
-            child: GestureDetector(
-              onTapDown: (_) => _startContinuousMove(3),
-              onTapUp: (_) => _stopContinuousMove(),
-              onTapCancel: () => _stopContinuousMove(),
-              child: Container(
-                width: 50,
-                height: 50,
+        ),
+
+        // 3. Interface do Usuário (HUD)
+        Positioned(
+          top: 40,
+          left: 20,
+          right: 20,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Botão Voltar
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 30),
+                onPressed: _returnToMenu,
+                style: IconButton.styleFrom(backgroundColor: Colors.black45),
+              ),
+              // Contador de Movimentos
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.8),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
+                  color: Colors.black45,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.orangeAccent.withValues(alpha: 0.5))
                 ),
-                child: Icon(Icons.arrow_back, color: Colors.white, size: 30),
-              ),
-            ),
-          ),
-          
-          // Botão Direita
-          Positioned(
-            right: 10,
-            top: 75,
-            child: GestureDetector(
-              onTapDown: (_) => _startContinuousMove(4),
-              onTapUp: (_) => _stopContinuousMove(),
-              onTapCancel: () => _stopContinuousMove(),
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.8),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
+                child: Text(
+                  'Movimentos: $_moves',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orangeAccent),
                 ),
-                child: Icon(Icons.arrow_forward, color: Colors.white, size: 30),
               ),
-            ),
+            ],
           ),
-          
-          // Centro decorativo
+        ),
+
+        // 4. Tela de Vitória (se ganhou)
+        if (_isGameWon && _gameMode == GameMode.quickPlay)
           Center(
             child: Container(
-              width: 40,
-              height: 40,
+              padding: const EdgeInsets.all(30),
               decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.5),
-                shape: BoxShape.circle,
+                color: Colors.green.shade800,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [BoxShadow(color: Colors.black54, blurRadius: 15, spreadRadius: 5)],
               ),
-              child: Icon(Icons.navigation, color: Colors.white, size: 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                   const Text('✨ ESCAPOU! ✨', style: TextStyle(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold)),
+                   const SizedBox(height: 20),
+                   Text('Você completou o labirinto em $_moves movimentos.', style: const TextStyle(fontSize: 18, color: Colors.white70)),
+                   const SizedBox(height: 30),
+                   ElevatedButton(
+                     onPressed: _returnToMenu,
+                     style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.green.shade900),
+                     child: const Text('Voltar ao Menu'),
+                   )
+                ],
+              ),
             ),
           ),
-        ],
-      ),
+           // Tela de transição de nível na campanha
+        if (_isGameWon && _gameMode == GameMode.campaign)
+           Center(
+            child: Container(
+              padding: const EdgeInsets.all(30),
+              decoration: BoxDecoration(color: Colors.orange.shade800.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(20)),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                 Text('Nível $_campaignLevel Concluído!', style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)),
+                 const SizedBox(height: 10),
+                 const CircularProgressIndicator(color: Colors.white),
+                 const SizedBox(height: 10),
+                 const Text('Carregando próxima caverna...', style: TextStyle(color: Colors.white70)),
+              ]),
+            ),
+          ),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardListener(
-      focusNode: FocusNode()..requestFocus(),
-      autofocus: true,
-      onKeyEvent: (KeyEvent event) {
-        if (event is KeyDownEvent && !_isMoving) {
-          // Inicia movimento contínuo com teclas do teclado
-          if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-            _startContinuousMove(1);
-          } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-            _startContinuousMove(2);
-          } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-            _startContinuousMove(3);
-          } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-            _startContinuousMove(4);
-          }
-        } else if (event is KeyUpEvent) {
-          // Para movimento quando soltar a tecla
-          _stopContinuousMove();
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('🧩 Labirinto'),
-          backgroundColor: Colors.orange,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: Text(
-                  'Movimentos: $_moves',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
-        ),
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.orange.shade200, Colors.orange.shade600],
-            ),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (_isGameWon)
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Column(
-                      children: [
-                        const Text(
-                          '🎉 PARABÉNS! 🎉',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'Você completou em $_moves movimentos!',
-                          style: const TextStyle(color: Colors.white, fontSize: 18),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                // Maze grid - ajustado para não causar overflow
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Column(
-                      children: List.generate(_maze.length, (row) {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(_maze[row].length, (col) {
-                            return Container(
-                              width: 15,
-                              height: 15,
-                              margin: const EdgeInsets.all(0.5),
-                              decoration: BoxDecoration(
-                                color: _getCellColor(row, col),
-                                borderRadius: BorderRadius.circular(2),
-                                border: Border.all(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  width: 0.5,
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  _getCellEmoji(row, col),
-                                  style: const TextStyle(fontSize: 8),
-                                ),
-                              ),
-                            );
-                          }),
-                        );
-                      }),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Controles circulares
-                _buildCircularControls(),
-
-                const SizedBox(height: 20),
-
-                // Reset button
-                ElevatedButton.icon(
-                  onPressed: _resetGame,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Reiniciar'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    // Usa KeyboardListener apenas como fallback ou para testes em emulador
+    return Scaffold(
+      backgroundColor: Colors.brown.shade900, // Fundo escuro da caverna
+      body: _isPlaying ? _buildGameScreen() : _buildMenuScreen(),
     );
+  }
+}
+
+
+// --- Pintor do Labirinto e Elementos (Renderização Avançada) ---
+class MazePainter extends CustomPainter {
+  final List<List<int>> maze;
+  final int playerRow;
+  final int playerCol;
+  final int rows;
+  final int cols;
+  final Point<int>? endPoint;
+  final double playerBounceY; // Valor da animação de pulo
+
+  MazePainter({
+    required this.maze,
+    required this.playerRow,
+    required this.playerCol,
+    required this.rows,
+    required this.cols,
+    required this.endPoint,
+    required this.playerBounceY,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint wallPaint = Paint()..color = Colors.brown.shade800; // Cor da rocha
+    final Paint floorPaint = Paint()..color = Colors.brown.shade600; // Cor do chão de terra
+    final Paint startPaint = Paint()..color = Colors.greenAccent.withValues(alpha: 0.5);
+
+    // 1. Desenha o Mapa (Chão e Paredes)
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < cols; c++) {
+        final rect = Rect.fromLTWH(c * TILE_SIZE.toDouble(), r * TILE_SIZE.toDouble(), TILE_SIZE.toDouble(), TILE_SIZE.toDouble());
+        
+        if (maze[r][c] == WALL) {
+          // Desenha parede com uma textura simples (um retângulo menor mais claro em cima para dar volume)
+          canvas.drawRect(rect, wallPaint);
+           canvas.drawRect(rect.deflate(4.0), Paint()..color = Colors.brown.shade700);
+        } else {
+          // Desenha chão
+          canvas.drawRect(rect, floorPaint);
+          // Opcional: adicionar pontinhos ou textura de terra aqui
+        }
+
+        if (maze[r][c] == START) {
+           canvas.drawCircle(rect.center, TILE_SIZE / 3, startPaint);
+        }
+      }
+    }
+    
+    // 2. Desenha a Saída Iluminada
+    if (endPoint != null) {
+       final endRect = Rect.fromLTWH(endPoint!.x * TILE_SIZE.toDouble(), endPoint!.y * TILE_SIZE.toDouble(), TILE_SIZE.toDouble(), TILE_SIZE.toDouble());
+       
+       // Cria o efeito de brilho (gradiente radial)
+       final glowPaint = Paint()
+       ..shader = ui.Gradient.radial(
+           endRect.center,
+           TILE_SIZE.toDouble() * 1.5, // Raio do brilho
+           [Colors.yellowAccent.withValues(alpha: 0.6), Colors.orange.withValues(alpha: 0.0)], // Cores do centro pra fora
+           [0.0, 1.0], // Paradas do gradiente
+           TileMode.clamp
+       );
+       // Desenha o brilho maior que a célula
+       canvas.drawCircle(endRect.center, TILE_SIZE.toDouble() * 1.5, glowPaint);
+       
+       // Desenha um ícone de saída no centro (pode ser uma escada, um buraco de luz, etc)
+       // Usando um círculo brilhante sólido por enquanto
+       canvas.drawCircle(endRect.center, TILE_SIZE / 3, Paint()..color = Colors.yellow..maskFilter = const MaskFilter.blur(BlurStyle.solid, 5));
+    }
+
+    // 3. Desenha o Jogador Animado
+    drawPlayer(canvas);
+  }
+
+  void drawPlayer(Canvas canvas) {
+      final centerX = (playerCol * TILE_SIZE.toDouble()) + (TILE_SIZE / 2);
+      // Aplica a animação de "bounce" na posição Y
+      final centerY = (playerRow * TILE_SIZE.toDouble()) + (TILE_SIZE / 2) + playerBounceY;
+
+      // --- Bonequinho Simples (Estilo Explorador) ---
+      // Corpo
+      final bodyPaint = Paint()..color = Colors.blue.shade400;
+      canvas.drawCircle(Offset(centerX, centerY), TILE_SIZE / 3, bodyPaint);
+
+      // Capacete (Um semi-círculo amarelo em cima)
+      final helmetPaint = Paint()..color = Colors.amber;
+      canvas.drawArc(
+          Rect.fromCenter(center: Offset(centerX, centerY - (TILE_SIZE/6)), width: TILE_SIZE/1.8, height: TILE_SIZE/2),
+          pi, // Começa em 180 graus
+          pi, // Desenha 180 graus (semi-círculo)
+          true, // Usa o centro
+          helmetPaint
+      );
+      
+      // Luz do capacete (um pequeno círculo branco brilhante)
+      canvas.drawCircle(Offset(centerX, centerY - (TILE_SIZE/3.5)), 3, Paint()..color = Colors.white..maskFilter = const MaskFilter.blur(BlurStyle.solid, 2));
+
+      // Olhos (dois pontinhos pretos)
+      final eyePaint = Paint()..color = Colors.black;
+      canvas.drawCircle(Offset(centerX - 4, centerY - 2), 2, eyePaint);
+      canvas.drawCircle(Offset(centerX + 4, centerY - 2), 2, eyePaint);
+
+      // Sombra do pé (para dar a impressão que ele está pulando)
+      canvas.drawOval(Rect.fromCenter(center: Offset(centerX, centerY + (TILE_SIZE/2.5) - playerBounceY), width: TILE_SIZE/2, height: TILE_SIZE/5), Paint()..color = Colors.black.withValues(alpha: 0.3));
+  }
+
+  @override
+  bool shouldRepaint(covariant MazePainter oldDelegate) {
+    // Repinta sempre que qualquer estado mudar (posição, animação, mapa)
+    return oldDelegate.playerRow != playerRow ||
+           oldDelegate.playerCol != playerCol ||
+           oldDelegate.playerBounceY != playerBounceY ||
+           oldDelegate.maze != maze;
+  }
+}
+
+
+// --- Pintor do Joystick Virtual ---
+class JoystickPainter extends CustomPainter {
+    final Offset startPos; // Centro do joystick
+    final Offset currentPos; // Onde o dedo está agora
+
+    JoystickPainter({required this.startPos, required this.currentPos});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+      // Configurações visuais do joystick
+      const double baseRadius = 60.0;
+      const double knobRadius = 25.0;
+
+      // Pinta a base (círculo externo transparente)
+      final basePaint = Paint()
+        ..color = Colors.white.withValues(alpha: 0.2)
+        ..style = PaintingStyle.fill;
+       canvas.drawCircle(startPos, baseRadius, basePaint);
+       
+       // Pinta a borda da base
+       final baseBorderPaint = Paint()
+        ..color = Colors.white.withValues(alpha: 0.4)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0;
+       canvas.drawCircle(startPos, baseRadius, baseBorderPaint);
+
+       // Calcula a posição do "knob" (o círculo interno que segue o dedo)
+       // Ele não pode sair de dentro da base.
+       Offset delta = currentPos - startPos;
+       double distance = delta.distance;
+       Offset knobPos = currentPos;
+
+       // Se o dedo arrastou para fora da base, limita o knob na borda
+       if (distance > baseRadius) {
+           knobPos = startPos + (delta / distance) * baseRadius;
+       }
+
+       // Pinta o knob (círculo interno)
+       final knobPaint = Paint()..color = Colors.orangeAccent.withValues(alpha: 0.8);
+       canvas.drawCircle(knobPos, knobRadius, knobPaint);
+
+       // (Opcional) Desenha uma linha do centro até o knob para indicar direção visualmente
+       // canvas.drawLine(startPos, knobPos, Paint()..color = Colors.white30..strokeWidth = 2);
+  }
+
+  @override
+  bool shouldRepaint(covariant JoystickPainter oldDelegate) {
+      return oldDelegate.startPos != startPos || oldDelegate.currentPos != currentPos;
   }
 }

@@ -121,6 +121,9 @@ class _HangmanGameState extends State<HangmanGame> {
   int maxErrors = 6;
   DateTime? _gameStartTime;
 
+  // Key para animações de nova partida
+  Key _gameKey = UniqueKey();
+
   @override
   void initState() {
     super.initState();
@@ -130,6 +133,7 @@ class _HangmanGameState extends State<HangmanGame> {
 
   void _restartGame() {
     AudioService().playClick();
+    _gameKey = UniqueKey();
     final words = _contentService.hangmanWords;
     chosenWord = words[Random().nextInt(words.length)];
     guessedLetters = [];
@@ -301,8 +305,22 @@ class _HangmanGameState extends State<HangmanGame> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFF101A2C),
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: 500),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: Offset(0.0, 0.1),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          ),
+        );
+      },
+      child: Scaffold(
+        key: _gameKey,
       appBar: AppBar(
         title: const Text("Jogo da Forca", style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF162447),
@@ -354,6 +372,7 @@ class _HangmanGameState extends State<HangmanGame> {
             ),
             const SizedBox(height: 20),
           ],
+        ),
         ),
       ),
     );

@@ -6,6 +6,7 @@ import 'minigames/word_search_game.dart';
 import 'minigames/maze_game.dart';
 import 'minigames/sequence_game.dart';
 import 'minigames/puzzle_game.dart';
+import 'minigames/jigsaw_puzzle_game.dart';
 import 'memory_game_screen.dart';
 
 class MinigamesMenuScreen extends StatelessWidget {
@@ -61,6 +62,13 @@ class MinigamesMenuScreen extends StatelessWidget {
       'color': Color(0xFF3498DB),
       'screen': 'PuzzleGame',
     },
+    {
+      'emoji': '🖼️',
+      'title': 'Quebra-Cabeça Foto',
+      'desc': 'Monte imagens reais!',
+      'color': Color(0xFF16A085),
+      'screen': 'JigsawPuzzleGame',
+    },
   ];
 
   Widget _getGameScreen(String screenName) {
@@ -79,6 +87,8 @@ class MinigamesMenuScreen extends StatelessWidget {
         return const SequenceGame();
       case 'PuzzleGame':
         return const PuzzleGame();
+      case 'JigsawPuzzleGame':
+        return const JigsawPuzzleGame();
       default:
         return const TicTacToeGame();
     }

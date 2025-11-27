@@ -964,6 +964,18 @@ abstract class AppLocalizations {
   /// **'Erro de conexão. Verifique sua internet.'**
   String get errorConnection;
 
+  /// No description provided for @bibleReadFullText.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque para ler o texto completo'**
+  String get bibleReadFullText;
+
+  /// No description provided for @bibleOpenError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível abrir a referência.'**
+  String get bibleOpenError;
+
   /// No description provided for @gameWon.
   ///
   /// In pt, this message translates to:
@@ -1011,6 +1023,390 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Tempo decorrido: {time}'**
   String gameTimeElapsed(String time);
+
+  /// No description provided for @memoryGameTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'🧠 Jogo da Memória'**
+  String get memoryGameTitle;
+
+  /// No description provided for @memoryGameDifficulty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dificuldade'**
+  String get memoryGameDifficulty;
+
+  /// No description provided for @memoryGameEasy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fácil (6 pares)'**
+  String get memoryGameEasy;
+
+  /// No description provided for @memoryGameMedium.
+  ///
+  /// In pt, this message translates to:
+  /// **'Médio (10 pares)'**
+  String get memoryGameMedium;
+
+  /// No description provided for @memoryGameHard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Difícil (15 pares)'**
+  String get memoryGameHard;
+
+  /// No description provided for @memoryGameTheme.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tema'**
+  String get memoryGameTheme;
+
+  /// No description provided for @memoryGamePlayers.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogadores'**
+  String get memoryGamePlayers;
+
+  /// No description provided for @memoryGameStartGame.
+  ///
+  /// In pt, this message translates to:
+  /// **'Iniciar Jogo'**
+  String get memoryGameStartGame;
+
+  /// No description provided for @memoryGameAttempts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tentativas'**
+  String get memoryGameAttempts;
+
+  /// No description provided for @memoryGameMatches.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pares'**
+  String get memoryGameMatches;
+
+  /// No description provided for @memoryGameTime.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tempo'**
+  String get memoryGameTime;
+
+  /// No description provided for @memoryGamePlayerTurn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vez do Jogador {player}'**
+  String memoryGamePlayerTurn(int player);
+
+  /// No description provided for @memoryGameScore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pontos: {score}'**
+  String memoryGameScore(int score);
+
+  /// No description provided for @memoryGameCongrats.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parabéns! 🎉'**
+  String get memoryGameCongrats;
+
+  /// No description provided for @memoryGamePlayAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogar Novamente'**
+  String get memoryGamePlayAgain;
+
+  /// No description provided for @ticTacToeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'⭕ Jogo da Velha'**
+  String get ticTacToeTitle;
+
+  /// No description provided for @ticTacToeMode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Modo'**
+  String get ticTacToeMode;
+
+  /// No description provided for @ticTacToeTwoPlayers.
+  ///
+  /// In pt, this message translates to:
+  /// **'2 Jogadores'**
+  String get ticTacToeTwoPlayers;
+
+  /// No description provided for @ticTacToeVsAI.
+  ///
+  /// In pt, this message translates to:
+  /// **'vs IA'**
+  String get ticTacToeVsAI;
+
+  /// No description provided for @ticTacToeDifficulty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dificuldade da IA'**
+  String get ticTacToeDifficulty;
+
+  /// No description provided for @ticTacToeEasy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fácil'**
+  String get ticTacToeEasy;
+
+  /// No description provided for @ticTacToeImpossible.
+  ///
+  /// In pt, this message translates to:
+  /// **'Impossível'**
+  String get ticTacToeImpossible;
+
+  /// No description provided for @ticTacToePlayerX.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogador X'**
+  String get ticTacToePlayerX;
+
+  /// No description provided for @ticTacToePlayerO.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogador O'**
+  String get ticTacToePlayerO;
+
+  /// No description provided for @ticTacToeYourTurn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sua vez!'**
+  String get ticTacToeYourTurn;
+
+  /// No description provided for @ticTacToeWins.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vitórias'**
+  String get ticTacToeWins;
+
+  /// No description provided for @ticTacToeDraws.
+  ///
+  /// In pt, this message translates to:
+  /// **'Empates'**
+  String get ticTacToeDraws;
+
+  /// No description provided for @ticTacToeResetScores.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resetar Placar'**
+  String get ticTacToeResetScores;
+
+  /// No description provided for @ticTacToeNewGame.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo Jogo'**
+  String get ticTacToeNewGame;
+
+  /// No description provided for @hangmanTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'🎯 Forca Bíblica'**
+  String get hangmanTitle;
+
+  /// No description provided for @hangmanCategory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Categoria'**
+  String get hangmanCategory;
+
+  /// No description provided for @hangmanAttempts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tentativas restantes'**
+  String get hangmanAttempts;
+
+  /// No description provided for @hangmanGuess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adivinhe a letra'**
+  String get hangmanGuess;
+
+  /// No description provided for @hangmanWin.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você ganhou! 🎉'**
+  String get hangmanWin;
+
+  /// No description provided for @hangmanLose.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fim de jogo!'**
+  String get hangmanLose;
+
+  /// No description provided for @hangmanTheWordWas.
+  ///
+  /// In pt, this message translates to:
+  /// **'A palavra era:'**
+  String get hangmanTheWordWas;
+
+  /// No description provided for @hangmanPlayAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogar Novamente'**
+  String get hangmanPlayAgain;
+
+  /// No description provided for @wordSearchTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'🔍 Caça-Palavras'**
+  String get wordSearchTitle;
+
+  /// No description provided for @wordSearchWordsFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Palavras encontradas: {found}/{total}'**
+  String wordSearchWordsFound(int found, int total);
+
+  /// No description provided for @wordSearchTimeElapsed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tempo: {time}'**
+  String wordSearchTimeElapsed(String time);
+
+  /// No description provided for @wordSearchComplete.
+  ///
+  /// In pt, this message translates to:
+  /// **'Completado! 🎉'**
+  String get wordSearchComplete;
+
+  /// No description provided for @wordSearchNewGame.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo Jogo'**
+  String get wordSearchNewGame;
+
+  /// No description provided for @mazeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'🗺️ Labirinto'**
+  String get mazeTitle;
+
+  /// No description provided for @mazeMoves.
+  ///
+  /// In pt, this message translates to:
+  /// **'Movimentos'**
+  String get mazeMoves;
+
+  /// No description provided for @mazeTime.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tempo'**
+  String get mazeTime;
+
+  /// No description provided for @mazeControls.
+  ///
+  /// In pt, this message translates to:
+  /// **'Controles'**
+  String get mazeControls;
+
+  /// No description provided for @mazeUseButtons.
+  ///
+  /// In pt, this message translates to:
+  /// **'Use os botões ou teclas de seta'**
+  String get mazeUseButtons;
+
+  /// No description provided for @mazeGoal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Encontre a saída!'**
+  String get mazeGoal;
+
+  /// No description provided for @mazeVictory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saída encontrada! 🎉'**
+  String get mazeVictory;
+
+  /// No description provided for @mazePlayAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogar Novamente'**
+  String get mazePlayAgain;
+
+  /// No description provided for @sequenceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'🎵 Sequência de Cores'**
+  String get sequenceTitle;
+
+  /// No description provided for @sequenceLevel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nível'**
+  String get sequenceLevel;
+
+  /// No description provided for @sequenceHighScore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recorde'**
+  String get sequenceHighScore;
+
+  /// No description provided for @sequenceWatchSequence.
+  ///
+  /// In pt, this message translates to:
+  /// **'Observe a sequência...'**
+  String get sequenceWatchSequence;
+
+  /// No description provided for @sequenceYourTurn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sua vez!'**
+  String get sequenceYourTurn;
+
+  /// No description provided for @sequenceGameOver.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fim de jogo!'**
+  String get sequenceGameOver;
+
+  /// No description provided for @sequenceReached.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você chegou ao nível {level}!'**
+  String sequenceReached(int level);
+
+  /// No description provided for @sequenceNewRecord.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo recorde! 🏆'**
+  String get sequenceNewRecord;
+
+  /// No description provided for @sequenceTryAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tentar Novamente'**
+  String get sequenceTryAgain;
+
+  /// No description provided for @puzzleTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'🧩 Quebra-Cabeça'**
+  String get puzzleTitle;
+
+  /// No description provided for @puzzleMoves.
+  ///
+  /// In pt, this message translates to:
+  /// **'Movimentos'**
+  String get puzzleMoves;
+
+  /// No description provided for @puzzleDragPieces.
+  ///
+  /// In pt, this message translates to:
+  /// **'Arraste as peças para os lugares corretos'**
+  String get puzzleDragPieces;
+
+  /// No description provided for @puzzleComplete.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quebra-cabeça completo! 🎉'**
+  String get puzzleComplete;
+
+  /// No description provided for @puzzleNewGame.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo Jogo'**
+  String get puzzleNewGame;
 }
 
 class _AppLocalizationsDelegate

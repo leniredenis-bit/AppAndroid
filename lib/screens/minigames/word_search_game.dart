@@ -32,6 +32,9 @@ class _WordSearchGameState extends State<WordSearchGame> {
   Point<int>? _dragStart;
   DateTime? _gameStartTime;
   
+  // Key para animação de nova partida
+  Key _gameKey = UniqueKey();
+  
   @override
   void initState() {
     super.initState();
@@ -311,142 +314,159 @@ class _WordSearchGameState extends State<WordSearchGame> {
         ),
         child: Center(
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Victory message
-                if (_foundWords.length == _words.length)
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: const Text(
-                      '🎉 Parabéns! Você encontrou todas as palavras! 🎉',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.0, 0.1),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: Column(
+                key: _gameKey,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Victory message
+                  if (_foundWords.length == _words.length)
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-
-                // Word list
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    alignment: WrapAlignment.center,
-                    children: _words.map((word) {
-                      bool found = _foundWords.contains(word);
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: found ? Colors.green : Colors.white.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(20),
+                      child: const Text(
+                        '🎉 Parabéns! Você encontrou todas as palavras! 🎉',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
-                        child: Text(
-                          word,
-                          style: TextStyle(
-                            color: found ? Colors.white : Colors.white70,
-                            fontWeight: FontWeight.bold,
-                            decoration: found ? TextDecoration.lineThrough : null,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+
+                  // Word list
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      alignment: WrapAlignment.center,
+                      children: _words.map((word) {
+                        bool found = _foundWords.contains(word);
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: found ? Colors.green : Colors.white.withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                // Grid with global gesture detector
-                GestureDetector(
-                  onPanStart: (details) {
-                    _handlePanStart(details.localPosition);
-                  },
-                  onPanUpdate: (details) {
-                    _handlePanUpdate(details.localPosition);
-                  },
-                  onPanEnd: (_) {
-                    _onCellDragEnd();
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(10),
+                          child: Text(
+                            word,
+                            style: TextStyle(
+                              color: found ? Colors.white : Colors.white70,
+                              fontWeight: FontWeight.bold,
+                              decoration: found ? TextDecoration.lineThrough : null,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ),
-                    child: Column(
-                      children: List.generate(gridSize, (row) {
-                        return Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: List.generate(gridSize, (col) {
-                            bool isSelected = _isCellSelected(row, col);
-                            bool isFound = _foundWordCells.contains(Point(row, col));
-                            
-                            // Cor de fundo: amarelo se selecionado, verde claro se encontrado, branco caso contrário
-                            Color backgroundColor;
-                            if (isSelected) {
-                              backgroundColor = Colors.yellow.withValues(alpha: 0.7);
-                            } else if (isFound) {
-                              // Verde claro visível, mas ainda bem suave
-                              backgroundColor = const Color(0xFFE0FFE0); // Verde menta claro
-                            } else {
-                              backgroundColor = Colors.white.withValues(alpha: 0.9);
-                            }
-                            
-                            return Container(
-                              width: 28,
-                              height: 28,
-                              margin: const EdgeInsets.all(1),
-                              decoration: BoxDecoration(
-                                color: backgroundColor,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  _grid[row][col],
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: isSelected ? Colors.black : Colors.black87,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Grid with global gesture detector
+                  GestureDetector(
+                    onPanStart: (details) {
+                      _handlePanStart(details.localPosition);
+                    },
+                    onPanUpdate: (details) {
+                      _handlePanUpdate(details.localPosition);
+                    },
+                    onPanEnd: (_) {
+                      _onCellDragEnd();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        children: List.generate(gridSize, (row) {
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(gridSize, (col) {
+                              bool isSelected = _isCellSelected(row, col);
+                              bool isFound = _foundWordCells.contains(Point(row, col));
+                              
+                              // Cor de fundo: amarelo se selecionado, verde claro se encontrado, branco caso contrário
+                              Color backgroundColor;
+                              if (isSelected) {
+                                backgroundColor = Colors.yellow.withValues(alpha: 0.7);
+                              } else if (isFound) {
+                                // Verde claro visível, mas ainda bem suave
+                                backgroundColor = const Color(0xFFE0FFE0); // Verde menta claro
+                              } else {
+                                backgroundColor = Colors.white.withValues(alpha: 0.9);
+                              }
+                              
+                              return Container(
+                                width: 28,
+                                height: 28,
+                                margin: const EdgeInsets.all(1),
+                                decoration: BoxDecoration(
+                                  color: backgroundColor,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    _grid[row][col],
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: isSelected ? Colors.black : Colors.black87,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          }),
-                        );
-                      }),
+                              );
+                            }),
+                          );
+                        }),
+                      ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                // Reset button
-                ElevatedButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _foundWords.clear();
-                      _foundWordCells.clear(); // Limpa as células marcadas
-                      _selectRandomWords(); // Seleciona novas palavras aleatórias
-                      _generateGrid();
-                    });
-                  },
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Novo Jogo'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  // Reset button
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _gameKey = UniqueKey(); // Nova key para animação
+                        _foundWords.clear();
+                        _foundWordCells.clear(); // Limpa as células marcadas
+                        _selectRandomWords(); // Seleciona novas palavras aleatórias
+                        _generateGrid();
+                      });
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Novo Jogo'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

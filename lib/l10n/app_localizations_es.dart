@@ -460,6 +460,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errorConnection => 'Error de conexión. Verifica tu internet.';
 
   @override
+  String get bibleReadFullText => 'Toca para leer el texto completo';
+
+  @override
+  String get bibleOpenError => 'No se pudo abrir la referencia.';
+
+  @override
   String get gameWon => '¡Ganaste!';
 
   @override
@@ -484,4 +490,207 @@ class AppLocalizationsEs extends AppLocalizations {
   String gameTimeElapsed(String time) {
     return 'Tiempo transcurrido: $time';
   }
+
+  @override
+  String get memoryGameTitle => '🧠 Juego de Memoria';
+
+  @override
+  String get memoryGameDifficulty => 'Dificultad';
+
+  @override
+  String get memoryGameEasy => 'Fácil (4x4)';
+
+  @override
+  String get memoryGameMedium => 'Medio (6x6)';
+
+  @override
+  String get memoryGameHard => 'Difícil (8x8)';
+
+  @override
+  String get memoryGameTheme => 'Tema';
+
+  @override
+  String get memoryGamePlayers => 'Jugadores';
+
+  @override
+  String get memoryGameStartGame => 'Iniciar Jogo';
+
+  @override
+  String get memoryGameAttempts => 'Intentos';
+
+  @override
+  String get memoryGameMatches => 'Aciertos';
+
+  @override
+  String get memoryGameTime => 'Tempo';
+
+  @override
+  String memoryGamePlayerTurn(int player) {
+    return 'Vez do Jogador $player';
+  }
+
+  @override
+  String memoryGameScore(int score) {
+    return 'Puntuación: $score';
+  }
+
+  @override
+  String get memoryGameCongrats => 'Parabéns! 🎉';
+
+  @override
+  String get memoryGamePlayAgain => 'Jogar Novamente';
+
+  @override
+  String get ticTacToeTitle => '⭕❌ Tres en Raya';
+
+  @override
+  String get ticTacToeMode => 'Modo';
+
+  @override
+  String get ticTacToeTwoPlayers => 'Dos Jugadores';
+
+  @override
+  String get ticTacToeVsAI => 'vs IA';
+
+  @override
+  String get ticTacToeDifficulty => 'Dificultad';
+
+  @override
+  String get ticTacToeEasy => 'Fácil';
+
+  @override
+  String get ticTacToeImpossible => 'Impossível';
+
+  @override
+  String get ticTacToePlayerX => 'Jugador X';
+
+  @override
+  String get ticTacToePlayerO => 'Jugador O';
+
+  @override
+  String get ticTacToeYourTurn => 'Sua vez!';
+
+  @override
+  String get ticTacToeWins => 'Victorias';
+
+  @override
+  String get ticTacToeDraws => 'Empates';
+
+  @override
+  String get ticTacToeResetScores => 'Resetar Placar';
+
+  @override
+  String get ticTacToeNewGame => 'Novo Jogo';
+
+  @override
+  String get hangmanTitle => '🔤 Ahorcado';
+
+  @override
+  String get hangmanCategory => 'Categoría';
+
+  @override
+  String get hangmanAttempts => 'Intentos restantes: null';
+
+  @override
+  String get hangmanGuess => 'Adivina la letra';
+
+  @override
+  String get hangmanWin => '¡Felicitaciones! ¡Ganaste!';
+
+  @override
+  String get hangmanLose => '¡Juego terminado! La palabra era: null';
+
+  @override
+  String get hangmanTheWordWas => 'A palavra era:';
+
+  @override
+  String get hangmanPlayAgain => 'Jogar Novamente';
+
+  @override
+  String get wordSearchTitle => '🔍 Sopa de Letras';
+
+  @override
+  String wordSearchWordsFound(int found, int total) {
+    return 'Palabras encontradas: $found/$total';
+  }
+
+  @override
+  String wordSearchTimeElapsed(String time) {
+    return 'Tiempo: $time';
+  }
+
+  @override
+  String get wordSearchComplete => 'Completado! 🎉';
+
+  @override
+  String get wordSearchNewGame => 'Novo Jogo';
+
+  @override
+  String get mazeTitle => '🌀 Laberinto';
+
+  @override
+  String get mazeMoves => 'Movimientos: null';
+
+  @override
+  String get mazeTime => 'Tiempo: null';
+
+  @override
+  String get mazeControls => 'Usa las flechas para moverte';
+
+  @override
+  String get mazeUseButtons => 'Use os botões ou teclas de seta';
+
+  @override
+  String get mazeGoal => 'Encontre a saída!';
+
+  @override
+  String get mazeVictory => '¡Encontraste la salida!';
+
+  @override
+  String get mazePlayAgain => 'Jogar Novamente';
+
+  @override
+  String get sequenceTitle => '🎯 Secuencia';
+
+  @override
+  String get sequenceLevel => 'Nivel: null';
+
+  @override
+  String get sequenceHighScore => 'Puntuación Máxima: null';
+
+  @override
+  String get sequenceWatchSequence => 'Observe a sequência...';
+
+  @override
+  String get sequenceYourTurn => '¡Tu turno!';
+
+  @override
+  String get sequenceGameOver => '¡Juego Terminado!';
+
+  @override
+  String sequenceReached(int level) {
+    return 'Você chegou ao nível $level!';
+  }
+
+  @override
+  String get sequenceNewRecord => '¡Nuevo récord!';
+
+  @override
+  String get sequenceTryAgain => 'Tentar Novamente';
+
+  @override
+  String get puzzleTitle => '🧩 Rompecabezas';
+
+  @override
+  String get puzzleMoves => 'Movimientos: null';
+
+  @override
+  String get puzzleDragPieces =>
+      'Arrastra las piezas para resolver el rompecabezas';
+
+  @override
+  String get puzzleComplete => '¡Rompecabezas completado!';
+
+  @override
+  String get puzzleNewGame => 'Novo Jogo';
 }

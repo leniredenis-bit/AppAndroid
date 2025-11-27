@@ -75,6 +75,9 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
   int secondsElapsed = 0;
   bool isProcessing = false;
 
+  // Key para animações de nova partida
+  Key _gameKey = UniqueKey();
+
   // Configurações do jogo
   bool showConfig = true; // Mostra tela de config primeiro
   String selectedTheme = 'animais';
@@ -440,6 +443,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
 
   void resetGame() {
     setState(() {
+      _gameKey = UniqueKey();
       showConfig = true; // Volta para tela de configuração
       _timer?.cancel();
     });
@@ -763,8 +767,22 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
       fontSize = 10;
     }
 
-    return Scaffold(
-      backgroundColor: Color(0xFF101A2C),
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: 500),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: Offset(0.0, 0.1),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          ),
+        );
+      },
+      child: Scaffold(
+        key: _gameKey,
       appBar: AppBar(
         title: Text(
           numPlayers > 1 
@@ -1002,6 +1020,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

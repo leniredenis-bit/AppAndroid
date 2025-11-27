@@ -8,7 +8,7 @@ from deep_translator import GoogleTranslator
 # 'traduzir_en' -> Traduz do PT para Inglês (com glossário NWT)
 # 'traduzir_es' -> Traduz do PT para Espanhol (com glossário NWT)
 # 'revisar_pt'  -> Não traduz, apenas corrige termos do PT para o padrão NWT
-MODO_OPERACAO = 'traduzir_en' 
+MODO_OPERACAO = 'traduzir_es' 
 
 ARQUIVO_ENTRADA = 'assets/data/perguntas.json'  # Seu arquivo original
 # O nome do arquivo de saída será gerado automaticamente baseado no modo
