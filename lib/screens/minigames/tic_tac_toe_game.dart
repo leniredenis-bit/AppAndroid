@@ -129,6 +129,8 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
       }
       infoText = 'Jogador ${playerToString(result)} venceu!';
       setState(() {});
+      // Show victory dialog
+      _showVictoryDialog(result);
       return;
     }
 
@@ -139,6 +141,8 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
       infoText = 'Empate!';
       _saveGameResult(false);
       setState(() {});
+      // Show draw dialog
+      _showDrawDialog();
       return;
     }
 
@@ -146,6 +150,194 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
     current = (current == Player.X) ? Player.O : Player.X;
     infoText = 'Vez: ${playerToString(current)}';
     setState(() {});
+  }
+
+  void _showVictoryDialog(Player winner) {
+    if (!mounted) return;
+    
+    final color = winner == Player.X ? Colors.blue : Colors.red;
+    final icon = winner == Player.X ? Icons.close : Icons.radio_button_unchecked;
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [color.withValues(alpha: 0.9), color.withValues(alpha: 0.7)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: 0.5),
+                blurRadius: 20,
+                spreadRadius: 5,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.emoji_events,
+                size: 80,
+                color: Colors.white,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Vitória!',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Jogador',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Icon(icon, size: 32, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Text(
+                      playerToString(winner),
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        resetBoard();
+                      },
+                      icon: const Icon(Icons.replay, size: 20),
+                      label: const Text('Jogar Novamente'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: color,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDrawDialog() {
+    if (!mounted) return;
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.grey.shade700, Colors.grey.shade600],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.5),
+                blurRadius: 20,
+                spreadRadius: 5,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.handshake,
+                size: 80,
+                color: Colors.white,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Empate!',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Ninguém ganhou desta vez',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        resetBoard();
+                      },
+                      icon: const Icon(Icons.replay, size: 20),
+                      label: const Text('Jogar Novamente'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.grey.shade700,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _saveGameResult(bool won) async {
@@ -315,11 +507,19 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
-            child: Text(
-              p == Player.none ? '' : playerToString(p),
-              key: ValueKey(p),
-              style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: color),
-            ),
+            child: p == Player.none
+                ? const SizedBox()
+                : Text(
+                    playerToString(p),
+                    key: ValueKey(p),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                      height: 1.0, // Ensures proper vertical centering
+                    ),
+                  ),
           ),
         ),
       ),

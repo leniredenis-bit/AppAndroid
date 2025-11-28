@@ -45,5 +45,10 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Permissões para image_picker -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Este app precisa acessar sua galeria de fotos para você escolher imagens para o quebra-cabeça.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Este app precisa acessar sua câmera para tirar fotos para o quebra-cabeça.</string>
 </dict>
 </plist>
