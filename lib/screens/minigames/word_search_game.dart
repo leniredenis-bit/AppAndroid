@@ -413,7 +413,7 @@ class _WordSearchGameState extends State<WordSearchGame> {
                                 backgroundColor = Colors.yellow.withValues(alpha: 0.7);
                               } else if (isFound) {
                                 // Verde claro visível, mas ainda bem suave
-                                backgroundColor = const Color(0xFFE0FFE0); // Verde menta claro
+                                backgroundColor = const Color.fromARGB(255, 71, 173, 71); // Verde menta claro
                               } else {
                                 backgroundColor = Colors.white.withValues(alpha: 0.9);
                               }
