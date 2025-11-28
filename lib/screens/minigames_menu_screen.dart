@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../services/audio_service.dart';
 import 'minigames/tic_tac_toe_game.dart';
+import 'minigames/tic_tac_toe_neon.dart' as neon;
 import 'minigames/hangman_game.dart';
 import 'minigames/word_search_game.dart';
+import 'minigames/word_search_enhanced.dart' as enhanced;
 import 'minigames/maze_game.dart';
 import 'minigames/sequence_game.dart';
 import 'minigames/sequence_game_crystal.dart' as crystal;
@@ -29,6 +31,13 @@ class MinigamesMenuScreen extends StatelessWidget {
       'screen': 'TicTacToeGame',
     },
     {
+      'emoji': '🌟',
+      'title': 'Jogo da Velha Neon',
+      'desc': 'Versão neon com animações!',
+      'color': Color(0xFF00F0FF),
+      'screen': 'TicTacToeNeon',
+    },
+    {
       'emoji': '🎯',
       'title': 'Forca',
       'desc': 'Adivinhe a palavra bíblica!',
@@ -41,6 +50,13 @@ class MinigamesMenuScreen extends StatelessWidget {
       'desc': 'Encontre palavras escondidas!',
       'color': Color(0xFF50C878),
       'screen': 'WordSearchGame',
+    },
+    {
+      'emoji': '🎨',
+      'title': 'Caça-Palavras Enhanced',
+      'desc': 'Versão com linhas coloridas!',
+      'color': Color(0xFFFF00AA),
+      'screen': 'WordSearchEnhanced',
     },
     {
       'emoji': '🌀',
@@ -85,10 +101,14 @@ class MinigamesMenuScreen extends StatelessWidget {
         return const MemoryGameScreen();
       case 'TicTacToeGame':
         return const TicTacToeGame();
+      case 'TicTacToeNeon':
+        return const neon.TicTacToeGame();
       case 'HangmanGame':
         return const HangmanGame();
       case 'WordSearchGame':
         return const WordSearchGame();
+      case 'WordSearchEnhanced':
+        return const enhanced.WordSearchGame();
       case 'MazeGame':
         return const MazeGame();
       case 'SequenceGame':
