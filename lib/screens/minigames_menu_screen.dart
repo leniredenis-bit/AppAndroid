@@ -5,6 +5,7 @@ import 'minigames/hangman_game.dart';
 import 'minigames/word_search_game.dart';
 import 'minigames/maze_game.dart';
 import 'minigames/sequence_game.dart';
+import 'minigames/sequence_game_crystal.dart' as crystal;
 import 'minigames/puzzle_game.dart';
 import 'minigames/jigsaw_puzzle_game.dart';
 import 'memory_game_screen.dart';
@@ -56,6 +57,13 @@ class MinigamesMenuScreen extends StatelessWidget {
       'screen': 'SequenceGame',
     },
     {
+      'emoji': '💠',
+      'title': 'Sequência Cristal',
+      'desc': 'Versão cristal com brilhos!',
+      'color': Color(0xFF1C1C1C),
+      'screen': 'SequenceCrystal',
+    },
+    {
       'emoji': '🧩',
       'title': 'Quebra-Cabeça Jigsaw',
       'desc': 'Arraste e monte!',
@@ -85,6 +93,8 @@ class MinigamesMenuScreen extends StatelessWidget {
         return const MazeGame();
       case 'SequenceGame':
         return const SequenceGame();
+      case 'SequenceCrystal':
+        return const crystal.SequenceGame();
       case 'PuzzleGame':
         return const PuzzleGame();
       case 'JigsawPuzzleGame':
