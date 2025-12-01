@@ -12,8 +12,14 @@ import 'l10n/app_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Inicializar Firebase
-  await Firebase.initializeApp();
+  // Inicializar Firebase com tratamento de erro
+  try {
+    await Firebase.initializeApp();
+    debugPrint('Firebase inicializado com sucesso!');
+  } catch (e) {
+    debugPrint('Erro ao inicializar Firebase: $e');
+    debugPrint('O app continuará usando o modo offline/mock.');
+  }
   
   // Inicializar serviço multiplayer
   MockMultiplayerService.initialize();
