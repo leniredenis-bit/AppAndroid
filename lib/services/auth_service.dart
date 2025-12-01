@@ -1,46 +1,34 @@
-import 'package:firebase_auth/firebase_auth.dart';
+// ============================================================
+// VERSÃO MOCK TEMPORÁRIA - Firebase desabilitado para teste web
+// Ver docs/FIREBASE_BACKUP.md para código original
+// ============================================================
+
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
   AuthService._internal();
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  User? _currentUser;
+  String? _mockUserId;
 
-  /// Retorna o usuário atual ou faz login anônimo
-  Future<User?> getCurrentUser() async {
-    if (_currentUser != null) {
-      return _currentUser;
+  /// Retorna o usuário atual (mock)
+  Future<dynamic> getCurrentUser() async {
+    if (_mockUserId == null) {
+      _mockUserId = const Uuid().v4();
+      debugPrint('AuthService (MOCK): Usuário criado: $_mockUserId');
     }
-
-    // Verificar se já existe usuário autenticado
-    _currentUser = _auth.currentUser;
-    if (_currentUser != null) {
-      debugPrint('AuthService: Usuário já autenticado: ${_currentUser!.uid}');
-      return _currentUser;
-    }
-
-    // Fazer login anônimo
-    try {
-      final userCredential = await _auth.signInAnonymously();
-      _currentUser = userCredential.user;
-      debugPrint('AuthService: Login anônimo bem-sucedido: ${_currentUser!.uid}');
-      return _currentUser;
-    } catch (e) {
-      debugPrint('AuthService: Erro no login anônimo: $e');
-      return null;
-    }
+    return _mockUserId;
   }
 
   /// Retorna o ID do usuário atual
-  String? get userId => _currentUser?.uid ?? _auth.currentUser?.uid;
+  String? get userId => _mockUserId;
 
-  /// Faz logout
+  /// Faz logout (mock)
   Future<void> signOut() async {
-    await _auth.signOut();
-    _currentUser = null;
-    debugPrint('AuthService: Logout realizado');
+    _mockUserId = null;
+    debugPrint('AuthService (MOCK): Logout realizado');
   }
 }

@@ -46,9 +46,10 @@ dependencies:
   image_picker: ^1.1.2  # Para selecionar imagens da galeria (Quebra-Cabeça)
   
   # Firebase para multiplayer online
-  firebase_core: ^2.24.2
-  firebase_database: ^10.4.0
-  firebase_auth: ^4.15.3
+  # DESABILITADO TEMPORARIAMENTE PARA TESTE WEB - Ver docs/FIREBASE_BACKUP.md
+  # firebase_core: ^2.24.2
+  # firebase_database: ^10.4.0
+  # firebase_auth: ^4.15.3
 
 dev_dependencies:
   flutter_test:

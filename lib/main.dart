@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_core/firebase_core.dart'; // DESABILITADO PARA TESTE WEB
 import 'screens/welcome_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/multiplayer/mock_multiplayer_service.dart';
@@ -12,14 +12,18 @@ import 'l10n/app_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Inicializar Firebase com tratamento de erro
-  try {
-    await Firebase.initializeApp();
-    debugPrint('Firebase inicializado com sucesso!');
-  } catch (e) {
-    debugPrint('Erro ao inicializar Firebase: $e');
-    debugPrint('O app continuará usando o modo offline/mock.');
-  }
+  // ============================================================
+  // FIREBASE DESABILITADO TEMPORARIAMENTE PARA TESTE NO NAVEGADOR
+  // Ver docs/FIREBASE_BACKUP.md para restaurar
+  // ============================================================
+  // try {
+  //   await Firebase.initializeApp();
+  //   debugPrint('Firebase inicializado com sucesso!');
+  // } catch (e) {
+  //   debugPrint('Erro ao inicializar Firebase: $e');
+  //   debugPrint('O app continuará usando o modo offline/mock.');
+  // }
+  debugPrint('Modo de teste: Firebase desabilitado, usando MockMultiplayerService');
   
   // Inicializar serviço multiplayer
   MockMultiplayerService.initialize();
