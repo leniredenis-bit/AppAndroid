@@ -1,6 +1,6 @@
 # 📱 Como Criar APK para Testar no Android
 
-**Guia completo passo a passo para gerar APK de testes**
+**Guia completo passo a passo para gerar APK de testes do JW Splash Games**
 
 ---
 
@@ -108,7 +108,7 @@ Agora sim! Com o Android SDK configurado, execute:
 ### Opção 1: APK Debug (Rápido para testes)
 
 ```powershell
-cd "C:\Users\NOTEBOOK 63\Desktop\Bot Benefícios\jw_quiz_flutter"
+cd "C:\Users\NOTEBOOK 63\Desktop\BotBeneficios\jw_splash"
 flutter build apk --debug
 ```
 
@@ -202,7 +202,7 @@ Se você não tem um celular Android, pode usar um emulador:
 ### 3. Executar o App
 
 ```powershell
-cd "C:\Users\NOTEBOOK 63\Desktop\Bot Benefícios\jw_quiz_flutter"
+cd "C:\Users\NOTEBOOK 63\Desktop\BotBeneficios\jw_splash"
 flutter run
 ```
 

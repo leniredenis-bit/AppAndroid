@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.jw_quiz_flutter"
+    namespace = "com.jwsplashgames.quiz"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,8 +21,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.jw_quiz_flutter"
+        applicationId = "com.jwsplashgames.quiz"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

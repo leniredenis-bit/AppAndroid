@@ -1,0 +1,502 @@
+import 'package:flutter/material.dart';
+import 'dart:math';
+import 'dart:ui' as ui;
+import '../../services/audio_service.dart';
+import '../../services/storage_service.dart';
+import '../../services/achievement_service.dart';
+import '../../services/minigame_content_service.dart';
+import '../../widgets/achievement_unlock_dialog.dart';
+
+// --- Painter Avançado da Forca ---
+class HighQualityHangmanPainter extends CustomPainter {
+  final int errors;
+  final double swingAngle; // Para animação de balanço
+  final Color primaryColor;
+  final Color dangerColor;
+
+  HighQualityHangmanPainter({
+    required this.errors,
+    this.swingAngle = 0.0,
+    required this.primaryColor,
+    required this.dangerColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = primaryColor
+      ..strokeWidth = 4.0
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    final ropePaint = Paint()
+      ..color = Colors.brown.shade400
+      ..strokeWidth = 3.0
+      ..style = PaintingStyle.stroke;
+
+    // Dimensões relativas
+    final w = size.width;
+    final h = size.height;
+
+    // 1. A Forca (Estrutura)
+    // Base
+    canvas.drawLine(Offset(w * 0.1, h * 0.95), Offset(w * 0.4, h * 0.95), paint);
+    // Poste Vertical
+    canvas.drawLine(Offset(w * 0.25, h * 0.95), Offset(w * 0.25, h * 0.1), paint);
+    // Haste Horizontal
+    canvas.drawLine(Offset(w * 0.25, h * 0.1), Offset(w * 0.7, h * 0.1), paint);
+    // Suporte angular
+    canvas.drawLine(Offset(w * 0.25, h * 0.25), Offset(w * 0.4, h * 0.1), paint);
+    
+    // Corda (Sempre desenhada, mas o boneco se conecta a ela)
+    final ropeEnd = Offset(w * 0.7, h * 0.25);
+    canvas.drawLine(Offset(w * 0.7, h * 0.1), ropeEnd, ropePaint);
+
+    // Se não houver erros, paramos aqui (só a forca vazia)
+    if (errors == 0) return;
+
+    // --- Desenho do Boneco (Com Rotação/Balanço) ---
+    canvas.save();
+    // Move o ponto de origem para o fim da corda para aplicar a rotação
+    canvas.translate(ropeEnd.dx, ropeEnd.dy);
+    canvas.rotate(swingAngle); // Aplica o balanço se houver
+
+    final bodyPaint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    // Coordenadas relativas ao ponto de pivô (0,0 agora é o fim da corda)
+    
+    // 1. Cabeça (Erro >= 1)
+    if (errors >= 1) {
+      canvas.drawCircle(const Offset(0, 20), 15, bodyPaint);
+      
+      // Expressão Facial (Muda se perdeu)
+      if (errors >= 6) {
+        // Olhos X X
+        final eyePaint = Paint()..color = dangerColor ..strokeWidth = 2;
+        _drawCross(canvas, const Offset(-5, 18), 3, eyePaint);
+        _drawCross(canvas, const Offset(5, 18), 3, eyePaint);
+        // Boca triste
+         canvas.drawArc(
+          Rect.fromCenter(center: const Offset(0, 28), width: 10, height: 6),
+          pi, pi, false, eyePaint..style = PaintingStyle.stroke
+        );
+      }
+    }
+
+    // 2. Corpo (Erro >= 2)
+    if (errors >= 2) {
+      canvas.drawLine(const Offset(0, 35), const Offset(0, 80), bodyPaint);
+    }
+
+    // 3. Braço Esquerdo (Erro >= 3)
+    if (errors >= 3) {
+      // Curva suave para o braço
+      final path = Path();
+      path.moveTo(0, 45);
+      path.quadraticBezierTo(-20, 55, -25, 70);
+      canvas.drawPath(path, bodyPaint);
+    }
+
+    // 4. Braço Direito (Erro >= 4)
+    if (errors >= 4) {
+      final path = Path();
+      path.moveTo(0, 45);
+      path.quadraticBezierTo(20, 55, 25, 70);
+      canvas.drawPath(path, bodyPaint);
+    }
+
+    // 5. Perna Esquerda (Erro >= 5)
+    if (errors >= 5) {
+      final path = Path();
+      path.moveTo(0, 80);
+      path.quadraticBezierTo(-10, 95, -15, 110);
+      canvas.drawPath(path, bodyPaint);
+    }
+
+    // 6. Perna Direita (Erro >= 6)
+    if (errors >= 6) {
+      final path = Path();
+      path.moveTo(0, 80);
+      path.quadraticBezierTo(10, 95, 15, 110);
+      canvas.drawPath(path, bodyPaint);
+    }
+
+    canvas.restore();
+  }
+
+  void _drawCross(Canvas canvas, Offset center, double size, Paint paint) {
+    canvas.drawLine(center - Offset(size, size), center + Offset(size, size), paint);
+    canvas.drawLine(center - Offset(-size, size), center + Offset(-size, size), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant HighQualityHangmanPainter oldDelegate) {
+    return oldDelegate.errors != errors || oldDelegate.swingAngle != swingAngle;
+  }
+}
+
+class HangmanGame extends StatefulWidget {
+  const HangmanGame({super.key});
+
+  @override
+  State<HangmanGame> createState() => _HangmanGameState();
+}
+
+class _HangmanGameState extends State<HangmanGame> with SingleTickerProviderStateMixin {
+  final StorageService _storage = StorageService();
+  final AchievementService _achievementService = AchievementService();
+  final MinigameContentService _contentService = MinigameContentService();
+
+  // Estado do Jogo
+  late String chosenWord;
+  late String chosenTip; // Se seu ContentService suportar dicas, senão remova
+  List<String> guessedLetters = [];
+  List<String> wrongLetters = [];
+  int maxErrors = 6;
+  DateTime? _gameStartTime;
+  
+  // Animação de Game Over (Balanço do boneco)
+  late AnimationController _swingController;
+  late Animation<double> _swingAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _swingController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+    // Animação de pêndulo amortecido
+    _swingAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.15).chain(CurveTween(curve: Curves.easeOut)), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 0.15, end: -0.1).chain(CurveTween(curve: Curves.easeInOut)), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -0.1, end: 0.05).chain(CurveTween(curve: Curves.easeInOut)), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 0.05, end: 0.0).chain(CurveTween(curve: Curves.easeIn)), weight: 1),
+    ]).animate(_swingController);
+
+    _restartGame();
+  }
+
+  @override
+  void dispose() {
+    _swingController.dispose();
+    super.dispose();
+  }
+
+  void _restartGame() {
+    _swingController.reset();
+    _gameStartTime = DateTime.now();
+    
+    // Lógica para pegar palavra
+    final words = _contentService.hangmanWords;
+    // Se seu service retornar apenas List<String>, use a lógica simples. 
+    // Se retornar Map ou Objetos com dicas, adapte aqui.
+    chosenWord = words[Random().nextInt(words.length)].toUpperCase(); 
+    
+    guessedLetters = [];
+    wrongLetters = [];
+    setState(() {});
+  }
+
+  bool get hasWon => chosenWord.split('').every((letter) => guessedLetters.contains(letter));
+  bool get hasLost => wrongLetters.length >= maxErrors;
+
+  void _guessLetter(String letter) {
+    if (guessedLetters.contains(letter) || wrongLetters.contains(letter) || hasWon || hasLost) {
+      return;
+    }
+
+    // Feedback Tátil/Sonoro
+    AudioService().playClick();
+
+    setState(() {
+      if (chosenWord.contains(letter)) {
+        guessedLetters.add(letter);
+        if (hasWon) {
+          AudioService().playVictory();
+          _saveGameResult(won: true);
+        } else {
+          // Pequeno som de acerto
+          AudioService().playCorrectAnswer();
+        }
+      } else {
+        wrongLetters.add(letter);
+        if (hasLost) {
+          AudioService().playGameOver();
+          _swingController.repeat(reverse: true); // Começa a balançar o boneco
+          _saveGameResult(won: false);
+        } else {
+          AudioService().playWrongAnswer();
+        }
+      }
+    });
+  }
+
+  Future<void> _saveGameResult({required bool won}) async {
+    final timeSpent = _gameStartTime != null
+        ? DateTime.now().difference(_gameStartTime!).inSeconds
+        : 0;
+
+    await _storage.saveMinigameRecord(
+      'hangman',
+      score: won ? (100 - wrongLetters.length * 10) : 0,
+      won: won,
+      timeInSeconds: timeSpent,
+    );
+
+    if (won) {
+       // Lógica de conquistas mantida
+      final records = await _storage.getMinigameRecords();
+      final hangmanRecord = records.getRecord('hangman');
+      
+      final unlockedAchievements = await _achievementService.checkMinigameAchievements(
+        gameId: 'hangman',
+        totalGamesPlayed: hangmanRecord.gamesPlayed,
+        won: won,
+        timeInSeconds: timeSpent,
+      );
+      
+      if (mounted && unlockedAchievements.isNotEmpty) {
+        for (final achievement in unlockedAchievements) {
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AchievementUnlockDialog(achievement: achievement),
+          );
+        }
+      }
+    }
+  }
+
+  // --- Widgets de UI Refinados ---
+
+  Widget _buildWordSlot(String letter, bool revealed) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      width: 40,
+      height: 50,
+      decoration: BoxDecoration(
+        color: revealed ? Colors.white : Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: revealed ? Colors.green.shade400 : Colors.white30,
+          width: 2
+        ),
+        boxShadow: revealed ? [
+          BoxShadow(color: Colors.green.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))
+        ] : [],
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        revealed ? letter : "",
+        style: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: Colors.grey.shade900,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildKeyboardKey(String letter) {
+    bool isGuessed = guessedLetters.contains(letter);
+    bool isWrong = wrongLetters.contains(letter);
+    bool isDisabled = isGuessed || isWrong || hasWon || hasLost;
+
+    Color bgColor = Colors.white;
+    Color textColor = Colors.grey.shade800;
+    
+    if (isGuessed) {
+      bgColor = Colors.green.shade400;
+      textColor = Colors.white;
+    } else if (isWrong) {
+      bgColor = Colors.red.shade400.withValues(alpha: 0.5); // Desabilitado visualmente
+      textColor = Colors.white70;
+    }
+
+    return Container(
+      margin: const EdgeInsets.all(3),
+      width: 38, // Tamanho fixo para alinhamento perfeito
+      height: 45,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: isDisabled ? null : () => _guessLetter(letter),
+          borderRadius: BorderRadius.circular(6),
+          child: Ink(
+            decoration: BoxDecoration(
+              color: isDisabled ? bgColor : Colors.white,
+              borderRadius: BorderRadius.circular(6),
+              boxShadow: isDisabled ? [] : [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.2), offset: const Offset(0, 2), blurRadius: 0) // Efeito 3D simples
+              ],
+            ),
+            child: Center(
+              child: Text(
+                letter,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isDisabled ? textColor : Colors.grey.shade900,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQWERTYKeyboard() {
+    // Layout QWERTY para melhor UX
+    const row1 = "QWERTYUIOP";
+    const row2 = "ASDFGHJKL";
+    const row3 = "ZXCVBNM";
+
+    return Column(
+      children: [
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: row1.split('').map(_buildKeyboardKey).toList()),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: row2.split('').map(_buildKeyboardKey).toList()),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: row3.split('').map(_buildKeyboardKey).toList()),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF1a202c), // Dark Navy moderno
+      appBar: AppBar(
+        title: const Text('FORCA', style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Center(child: 
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
+                child: Text("${wrongLetters.length}/$maxErrors", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent)),
+              )
+            ),
+          )
+        ],
+      ),
+      extendBodyBehindAppBar: true,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: const Alignment(0, -0.2),
+            radius: 1.2,
+            colors: [
+              const Color(0xFF2d3748), // Lighter center
+              const Color(0xFF1a202c), // Darker edges
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // 1. Área do Desenho (Com animação)
+              Expanded(
+                flex: 4,
+                child: Center(
+                  child: AnimatedBuilder(
+                    animation: _swingAnimation,
+                    builder: (context, child) {
+                      return CustomPaint(
+                        size: const Size(220, 250),
+                        painter: HighQualityHangmanPainter(
+                          errors: wrongLetters.length,
+                          swingAngle: hasLost ? _swingAnimation.value : 0.0,
+                          primaryColor: Colors.blueGrey.shade100,
+                          dangerColor: Colors.redAccent,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+
+              // 2. Área da Palavra
+              Expanded(
+                flex: 2,
+                child: Center(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: chosenWord.split('').map((char) {
+                         return _buildWordSlot(char, guessedLetters.contains(char) || hasLost);
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ),
+
+              // 3. Feedback de Status (Vitória/Derrota)
+              if (hasWon || hasLost)
+                 Padding(
+                   padding: const EdgeInsets.only(bottom: 10.0),
+                   child: AnimatedOpacity(
+                     duration: const Duration(milliseconds: 500),
+                     opacity: 1.0,
+                     child: Container(
+                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                       decoration: BoxDecoration(
+                         color: hasWon ? Colors.green : Colors.red,
+                         borderRadius: BorderRadius.circular(20),
+                         boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0,4))]
+                       ),
+                       child: Text(
+                         hasWon ? "VOCÊ VENCEU!" : "GAME OVER",
+                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                       ),
+                     ),
+                   ),
+                 ),
+
+              // 4. Teclado e Controles
+              Expanded(
+                flex: 4,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (!hasWon && !hasLost)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: _buildQWERTYKeyboard(),
+                      ),
+                    
+                    if (hasWon || hasLost)
+                       Padding(
+                         padding: const EdgeInsets.only(bottom: 40),
+                         child: ElevatedButton.icon(
+                            onPressed: _restartGame,
+                            icon: const Icon(Icons.refresh),
+                            label: const Text("JOGAR NOVAMENTE"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: const Color(0xFF1a202c),
+                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                              elevation: 5,
+                            ),
+                         ),
+                       ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
