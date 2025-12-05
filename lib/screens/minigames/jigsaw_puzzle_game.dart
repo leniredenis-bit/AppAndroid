@@ -10,7 +10,7 @@ import '../../widgets/achievement_unlock_dialog.dart';
 
 // --- Configurações do Quebra-Cabeça ---
 const int DEFAULT_GRID_SIZE = 3; // 3x3 (fácil: 3, médio: 4, difícil: 5)
-const double SNAP_SENSITIVITY = 40.0; // Distância para a peça "grudar"
+const double SNAP_THRESHOLD_PERCENT = 0.95; // 95% de proximidade para encaixar
 
 // --- Estrutura da Peça ---
 class JigsawPiece {
@@ -94,12 +94,13 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
     return Scaffold(
       backgroundColor: Colors.brown.shade800, // Mesa de madeira
       appBar: AppBar(
-        title: const Text('🧩 Quebra-Cabeça'),
-        backgroundColor: Colors.brown.shade900,
+        title: const Text('🧩 Quebra-Cabeça', style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFF162447),
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           if (_isGameStarted)
             IconButton(
-              icon: Icon(_showPreview ? Icons.visibility : Icons.visibility_off),
+              icon: Icon(_showPreview ? Icons.visibility : Icons.visibility_off, color: Colors.white),
               onPressed: () {
                 setState(() => _showPreview = !_showPreview);
                 _audioService.playClick();
@@ -108,7 +109,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
             ),
           if (_isGameStarted)
             IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh, color: Colors.white),
               onPressed: () {
                 setState(() {
                   _isGameStarted = false;
@@ -121,7 +122,9 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
             ),
         ],
       ),
-      body: _isGameStarted ? _buildGameBoard() : _buildMenu(),
+      body: SafeArea(
+        child: _isGameStarted ? _buildGameBoard() : _buildMenu(),
+      ),
     );
   }
 
@@ -441,7 +444,6 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
 
     // Calcula offset do tabuleiro para spawnar peças fora dele
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
     double boardX = (screenWidth - boardSize.width) / 2;
     double boardY = 100; // Aproximado (HUD + margem)
 
@@ -459,23 +461,25 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
           boardY + (r * pieceSize),
         );
         
-        // Posição inicial espalhada FORA do tabuleiro
-        double randomX, randomY;
+        // Posição inicial na ÁREA DE PEÇAS (parte superior da tela)
+        // Área de peças ocupa os primeiros ~120px da tela
+        double pieceAreaHeight = 100.0;
+        double piecePadding = 10.0;
         
-        // Espalha nas bordas laterais ou acima/abaixo do tabuleiro
-        if (_random.nextBool()) {
-          // Lados (esquerda ou direita)
-          randomX = _random.nextBool() 
-            ? _random.nextDouble() * (boardX - 60) // Esquerda
-            : boardX + boardSize.width + _random.nextDouble() * (screenWidth - boardX - boardSize.width - 60); // Direita
-          randomY = boardY + _random.nextDouble() * boardSize.height;
-        } else {
-          // Acima ou abaixo
-          randomX = boardX + _random.nextDouble() * boardSize.width;
-          randomY = _random.nextBool()
-            ? max(0, boardY - 100 + _random.nextDouble() * 80) // Acima
-            : min(screenHeight - 100, boardY + boardSize.height + _random.nextDouble() * 100); // Abaixo
-        }
+        // Distribui as peças em uma grade na área superior
+        int piecesPerRow = (_gridSize * 2).clamp(4, 8); // Mais peças por linha para caber
+        int pieceIndex = r * _gridSize + c;
+        
+        double miniPieceSize = min(
+          (screenWidth - piecePadding * 2) / piecesPerRow - piecePadding,
+          (pieceAreaHeight - piecePadding) / 2 - piecePadding
+        );
+        
+        int rowInArea = pieceIndex ~/ piecesPerRow;
+        int colInArea = pieceIndex % piecesPerRow;
+        
+        double randomX = piecePadding + colInArea * (miniPieceSize + piecePadding) + _random.nextDouble() * 10;
+        double randomY = piecePadding + rowInArea * (miniPieceSize + piecePadding) + _random.nextDouble() * 10;
         
         newPieces.add(JigsawPiece(
           id: r * _gridSize + c,
@@ -501,9 +505,13 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
   }
 
   void _checkSnap(JigsawPiece piece) {
+    // Calcula a distância máxima aceitável baseada no tamanho da peça
+    double pieceSize = _boardSize!.width / _gridSize;
+    double maxSnapDistance = pieceSize * (1 - SNAP_THRESHOLD_PERCENT) * 2; // ~5% do tamanho da peça
+    
     double dist = (piece.currentPos - piece.correctPos).distance;
 
-    if (dist < SNAP_SENSITIVITY) {
+    if (dist < maxSnapDistance) {
       // SNAP!
       setState(() {
         piece.currentPos = piece.correctPos;

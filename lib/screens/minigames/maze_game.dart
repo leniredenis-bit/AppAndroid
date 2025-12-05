@@ -17,75 +17,89 @@ const int END = 3;
 // --- Enum para os Modos de Jogo ---
 enum GameMode { campaign, quickPlay }
 
-// --- Classe Geradora de Labirintos (Procedural) ---
+// --- Classe Geradora de Labirintos (Procedural com Backtracking) ---
 class MazeGenerator {
-  static List<List<int>> generate(int rows, int cols, {double extraPathsChance = 0.15}) {
+  static List<List<int>> generate(int rows, int cols, {double extraPathsChance = 0.05}) {
     // 1. Começa com tudo preenchido com paredes
     List<List<int>> maze = List.generate(rows, (_) => List.filled(cols, WALL));
     final random = Random();
 
-    // 2. Define Ponto Inicial (A) e Final (B) distantes
-    // Por simplicidade, canto superior esquerdo e canto inferior direito
-    // Garantimos uma margem de 1 bloco para não ficar na borda exata
+    // 2. Usa Recursive Backtracking para criar labirinto com caminho único garantido
+    // Isso cria labirintos com muitas curvas e voltas
+    
+    // Certifica que dimensões são ímpares para o algoritmo funcionar melhor
+    int effectiveRows = rows.isOdd ? rows : rows - 1;
+    int effectiveCols = cols.isOdd ? cols : cols - 1;
+    
+    // Ponto inicial (canto superior esquerdo, posição ímpar)
     int startRow = 1;
     int startCol = 1;
-    int endRow = rows - 2;
-    int endCol = cols - 2;
-
-    maze[startRow][startCol] = START;
-    // O ponto final será marcado só no fim para não ser sobrescrito pelo escavador
-
-    // 3. O "Escavador Bêbado" (Garante o caminho principal)
-    int currentRow = startRow;
-    int currentCol = startCol;
-
-    // Enquanto não chegar perto do fim
-    while (currentRow != endRow || currentCol != endCol) {
-      maze[currentRow][currentCol] = PATH; // Transforma a posição atual em caminho (se não for start)
-      if (currentRow == startRow && currentCol == startCol) maze[currentRow][currentCol] = START;
-
-
-      // Decide para onde ir. Damos um "peso" maior para a direção do objetivo
-      List<Point<int>> possibleMoves = [];
-      // Tenta ir para baixo
-      if (currentRow < endRow) possibleMoves.add(Point(currentRow + 1, currentCol));
-      if (currentRow > 1 && random.nextDouble() > 0.7) possibleMoves.add(Point(currentRow - 1, currentCol)); // Chance menor de voltar
-
-      // Tenta ir para direita
-      if (currentCol < endCol) possibleMoves.add(Point(currentRow, currentCol + 1));
-      if (currentCol > 1 && random.nextDouble() > 0.7) possibleMoves.add(Point(currentRow, currentCol - 1)); // Chance menor de voltar
-
-      // Se ficar preso (raro com essa lógica, mas possível), força um movimento aleatório válido
-      if (possibleMoves.isEmpty) {
-         final directions = [Point(0, 1), Point(0, -1), Point(1, 0), Point(-1, 0)];
-         for (var dir in directions) {
-           int nextR = currentRow + dir.y;
-           int nextC = currentCol + dir.x;
-           if (nextR > 0 && nextR < rows -1 && nextC > 0 && nextC < cols - 1) {
-             possibleMoves.add(Point(nextR, nextC));
-           }
-         }
-      }
-
-      if (possibleMoves.isNotEmpty) {
-        final move = possibleMoves[random.nextInt(possibleMoves.length)];
-        currentRow = move.y;
-        currentCol = move.x;
-      } else {
-        // Fallback extremo se falhar (não deve acontecer)
-        break;
+    
+    // Ponto final (canto inferior direito, posição ímpar)
+    int endRow = effectiveRows - 2;
+    int endCol = effectiveCols - 2;
+    
+    // Função recursiva de escavação usando backtracking
+    void carve(int row, int col) {
+      maze[row][col] = PATH;
+      
+      // Direções: cima, baixo, esquerda, direita (pulando 2 células)
+      List<List<int>> directions = [
+        [-2, 0], // cima
+        [2, 0],  // baixo
+        [0, -2], // esquerda
+        [0, 2],  // direita
+      ];
+      
+      // Embaralha direções para criar caminhos aleatórios
+      directions.shuffle(random);
+      
+      for (var dir in directions) {
+        int newRow = row + dir[0];
+        int newCol = col + dir[1];
+        
+        // Verifica se a nova posição é válida e ainda é parede
+        if (newRow > 0 && newRow < effectiveRows - 1 &&
+            newCol > 0 && newCol < effectiveCols - 1 &&
+            maze[newRow][newCol] == WALL) {
+          // Escava a parede entre a posição atual e a nova
+          maze[row + dir[0] ~/ 2][col + dir[1] ~/ 2] = PATH;
+          // Continua escavando recursivamente
+          carve(newRow, newCol);
+        }
       }
     }
-    maze[endRow][endCol] = END; // Marca o fim
-
-    // 4. Adiciona o Caos (Linhas extras para loops e aspecto de caverna)
-    for (int r = 1; r < rows - 1; r++) {
-      for (int c = 1; c < cols - 1; c++) {
-        // Se for uma parede, tem uma chance de virar caminho
+    
+    // Inicia a escavação do labirinto a partir do ponto inicial
+    carve(startRow, startCol);
+    
+    // Marca início e fim
+    maze[startRow][startCol] = START;
+    maze[endRow][endCol] = END;
+    
+    // Garante que há caminho até o fim (pode não estar conectado se dimensões pares)
+    // Cria um caminho forçado se necessário
+    if (maze[endRow][endCol - 1] == WALL && maze[endRow - 1][endCol] == WALL) {
+      // Abre caminho para o fim
+      if (endCol - 1 > 0) maze[endRow][endCol - 1] = PATH;
+    }
+    
+    // 3. Adiciona alguns caminhos falsos extras (becos sem saída)
+    // Mas NÃO sobrescreve o caminho principal já criado
+    for (int r = 1; r < effectiveRows - 1; r++) {
+      for (int c = 1; c < effectiveCols - 1; c++) {
         if (maze[r][c] == WALL && random.nextDouble() < extraPathsChance) {
-           // Verifica se não vai conectar o início ou fim de formas estranhas,
-           // mas para cavernas, conectar tudo bem.
-           maze[r][c] = PATH;
+          // Verifica se tem pelo menos um caminho adjacente
+          int adjacentPaths = 0;
+          if (r > 0 && maze[r-1][c] == PATH) adjacentPaths++;
+          if (r < effectiveRows - 1 && maze[r+1][c] == PATH) adjacentPaths++;
+          if (c > 0 && maze[r][c-1] == PATH) adjacentPaths++;
+          if (c < effectiveCols - 1 && maze[r][c+1] == PATH) adjacentPaths++;
+          
+          // Só abre se tiver exatamente 1 caminho adjacente (cria beco sem saída)
+          if (adjacentPaths == 1) {
+            maze[r][c] = PATH;
+          }
         }
       }
     }
@@ -127,7 +141,8 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
   Offset? _joystickStartLocalPosition;
   Offset _joystickCurrentLocalPosition = Offset.zero;
   bool _isJoystickActive = false;
-  int _lastMoveDirection = 0; // Para evitar spam de movimento na mesma direção
+  DateTime? _lastMoveTime; // Controle de cooldown entre movimentos
+  static const int _moveCooldownMs = 200; // Tempo mínimo entre movimentos (ms)
 
   // Animação do Jogador
   late AnimationController _playerAnimController;
@@ -199,17 +214,16 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
     });
   }
 
-  // Lógica central de movimento
+  // Lógica central de movimento - agora move apenas 1 quadrado por vez
   void _tryMove(int deltaRow, int deltaCol, int directionCode) {
     if (_isGameWon || _maze.isEmpty) return;
 
-    // Evita mover na mesma direção se já tentou e bateu, a menos que o jogador mude a intenção
-    if (_lastMoveDirection == directionCode && !_playerAnimController.isAnimating) {
-        // Se parou a animação, permite tentar de novo
-    } else if (_lastMoveDirection == directionCode) {
-       // return; // Comentado: para um controle mais fluido, permitimos tentar. O bump na parede já é o feedback.
+    // Cooldown entre movimentos para não andar vários quadrados de uma vez
+    final now = DateTime.now();
+    if (_lastMoveTime != null && 
+        now.difference(_lastMoveTime!).inMilliseconds < _moveCooldownMs) {
+      return; // Ainda em cooldown, ignora o movimento
     }
-
 
     int newRow = _playerRow + deltaRow;
     int newCol = _playerCol + deltaCol;
@@ -217,14 +231,12 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
     // Verifica limites do mapa
     if (newRow < 0 || newRow >= _mazeRows || newCol < 0 || newCol >= _mazeCols) {
       _audioService.playWrongAnswer(); // Som de "bump" na borda
-      _lastMoveDirection = directionCode;
       return;
     }
 
     // Verifica colisão com parede
     if (_maze[newRow][newCol] == WALL) {
       _audioService.playWrongAnswer(); // Som de "bump" na parede
-      _lastMoveDirection = directionCode;
       return;
     }
 
@@ -233,7 +245,7 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
       _playerRow = newRow;
       _playerCol = newCol;
       _moves++;
-      _lastMoveDirection = directionCode;
+      _lastMoveTime = now; // Atualiza o tempo do último movimento
     });
     
     // Toca som de passo e inicia animação
@@ -306,9 +318,8 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
     Offset vector = localPosition - (_joystickStartLocalPosition ?? localPosition);
 
     // Se o arrasto for muito curto, consideramos "zona morta" (nenhuma intenção clara)
-    if (vector.distance < 10.0) {
-        _lastMoveDirection = 0; // Reseta direção
-        return;
+    if (vector.distance < 20.0) {
+        return; // Zona morta aumentada para evitar movimentos acidentais
     }
 
     // Calcula o ângulo em graus (-180 a 180)
@@ -471,7 +482,6 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
               setState(() {
                 _isJoystickActive = false;
                 _joystickStartLocalPosition = null;
-                _lastMoveDirection = 0; // Para o movimento
               });
               _playerAnimController.stop(); // Para a animação de caminhada
             },
@@ -568,7 +578,18 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
     // Usa KeyboardListener apenas como fallback ou para testes em emulador
     return Scaffold(
       backgroundColor: Colors.brown.shade900, // Fundo escuro da caverna
-      body: _isPlaying ? _buildGameScreen() : _buildMenuScreen(),
+      appBar: _isPlaying ? null : AppBar(
+        title: const Text('Labirinto', style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFF162447),
+        iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SafeArea(
+        child: _isPlaying ? _buildGameScreen() : _buildMenuScreen(),
+      ),
     );
   }
 }

@@ -398,7 +398,7 @@ class _SequenceGameState extends State<SequenceGame> {
       backgroundColor: const Color(0xFF0A0A0A), // Caverna muito escura
       appBar: AppBar(
         title: const Text('🧠 Sequência Rápida', style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF1C1C1C), // Rocha mais clara para o topo
+        backgroundColor: const Color(0xFF162447),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           Padding(
@@ -412,7 +412,8 @@ class _SequenceGameState extends State<SequenceGame> {
           ),
         ],
       ),
-      body: Container(
+      body: SafeArea(
+        child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -517,6 +518,7 @@ class _SequenceGameState extends State<SequenceGame> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

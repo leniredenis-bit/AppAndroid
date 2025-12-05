@@ -31,8 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     {'emoji': '🧠', 'title': 'Quiz Clássico', 'desc': 'Responda perguntas e marque pontos!'},
     {'emoji': '🥧', 'title': 'Quiz Torta na Cara', 'desc': 'Duelo 1v1 local - quem errar perde!'},
     {'emoji': '🌐', 'title': 'Partida Online', 'desc': 'Jogue com amigos em tempo real!'},
-    {'emoji': '🕹️', 'title': 'Jogo da Memória', 'desc': 'Encontre pares bíblicos!'},
-    {'emoji': '🎮', 'title': 'Minigames', 'desc': '7 jogos divertidos te aguardam!'},
+    {'emoji': '🎮', 'title': 'Minigames', 'desc': 'Jogos divertidos te aguardam!'},
     {'emoji': '📊', 'title': 'Estatísticas', 'desc': 'Veja seu desempenho e conquistas!'},
   ];
 

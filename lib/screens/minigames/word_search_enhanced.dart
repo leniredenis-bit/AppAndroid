@@ -327,24 +327,25 @@ class _WordSearchGameState extends State<WordSearchGame> with TickerProviderStat
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: const Text("CAÇA PALAVRAS", style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.black87)),
-        backgroundColor: Colors.white,
+        title: const Text("Caça-Palavras", style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.white)),
+        backgroundColor: const Color(0xFF162447),
         elevation: 0,
         centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.black87),
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
             Center(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 20),
                   child: Text(
                       "${_foundWords.length}/${_words.length}",
-                      style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.w900, fontSize: 18),
+                      style: const TextStyle(color: Colors.orangeAccent, fontWeight: FontWeight.w900, fontSize: 18),
                   ),
                 ),
             )
         ],
       ),
-      body: Column(
+      body: SafeArea(
+        child: Column(
         children: [
           // 1. O Tabuleiro
           Expanded(
@@ -435,6 +436,7 @@ class _WordSearchGameState extends State<WordSearchGame> with TickerProviderStat
             ),
           ),
         ],
+      ),
       ),
     );
   }

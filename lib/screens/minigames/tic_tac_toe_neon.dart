@@ -366,10 +366,11 @@ class _TicTacToeGameState extends State<TicTacToeGame> with TickerProviderStateM
     return Scaffold(
       backgroundColor: kBackground,
       appBar: AppBar(
-        title: const Text("TIC TAC TOE", style: TextStyle(letterSpacing: 3, fontWeight: FontWeight.bold, fontSize: 16)),
-        backgroundColor: Colors.transparent,
+        title: const Text("Jogo da Velha Neon", style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
+        backgroundColor: const Color(0xFF162447),
         elevation: 0,
         centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SafeArea(
         child: Padding(

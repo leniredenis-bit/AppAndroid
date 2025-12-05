@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/audio_service.dart';
+import '../l10n/app_localizations.dart';
 import 'minigames/tic_tac_toe_game.dart';
 import 'minigames/tic_tac_toe_neon.dart' as neon;
 import 'minigames/hangman_game.dart';
@@ -126,10 +127,12 @@ class MinigamesMenuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
       appBar: AppBar(
-        title: Text('Outros Minigames', style: TextStyle(color: Colors.white)),
+        title: Text(l10n.minigamesTitle, style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF162447),
         iconTheme: IconThemeData(color: Colors.white),
         leading: IconButton(
@@ -140,8 +143,9 @@ class MinigamesMenuScreen extends StatelessWidget {
           },
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
         child: GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
@@ -217,6 +221,7 @@ class MinigamesMenuScreen extends StatelessWidget {
               ),
             );
           },
+        ),
         ),
       ),
     );

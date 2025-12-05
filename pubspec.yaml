@@ -44,6 +44,7 @@ dependencies:
   flutter_custom_tabs: ^2.1.0  # Para preview de links dentro do app
   intl: ^0.20.2  # Para formatação de datas e números
   image_picker: ^1.1.2  # Para selecionar imagens da galeria (Quebra-Cabeça)
+  permission_handler: ^11.3.1  # Para solicitar permissões em runtime (Android 13+)
   
   # Firebase para multiplayer online
   # DESABILITADO TEMPORARIAMENTE PARA TESTE WEB - Ver docs/FIREBASE_BACKUP.md

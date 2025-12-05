@@ -1,7 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Permissão de Internet (necessária para google_fonts, etc) -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    
     <!-- Permissões para image_picker -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
     
     <application
         android:label="JW Splash Games"
