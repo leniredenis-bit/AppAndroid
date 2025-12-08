@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/services.dart'; // Para HapticFeedback
 import '../../services/audio_service.dart';
 import '../../services/storage_service.dart';
+import '../../l10n/app_localizations.dart';
 
 // --- Configuração das Cores ---
 // Definimos a paleta máxima (9 cores)
@@ -19,9 +20,7 @@ final List<Color> _allColors = [
   Colors.pink,       // 8
 ];
 
-final List<String> _colorNames = [
-  'Vermelho', 'Azul', 'Verde', 'Amarelo', 'Roxo', 'Laranja', 'Ciano', 'Lima', 'Rosa',
-];
+// Nomes das cores são obtidos via l10n dentro do widget
 
 // --- Opções de Dificuldade ---
 enum GameDifficulty {
@@ -64,6 +63,21 @@ class _SequenceGameState extends State<SequenceGame> {
   int _consecutiveCorrect = 0; // Para o modo progressivo
   static const int maxActiveColors = 9;
   static const int streakToUpgrade = 3; // Aumenta cor a cada 3 acertos
+
+  // Método helper para obter nomes das cores traduzidos
+  List<String> _getColorNames(AppLocalizations l10n) {
+    return [
+      l10n.colorRed,
+      l10n.colorBlue,
+      l10n.colorGreen,
+      l10n.colorYellow,
+      l10n.colorPurple,
+      l10n.colorOrange,
+      l10n.colorCyan,
+      l10n.colorLime,
+      l10n.colorPink,
+    ];
+  }
 
   @override
   void initState() {
@@ -236,30 +250,32 @@ class _SequenceGameState extends State<SequenceGame> {
   // --- UI: Seletor de Dificuldade ---
 
   Future<void> _showDifficultySelector() async {
+    final l10n = AppLocalizations.of(context)!;
+    
     await showDialog(
       context: context,
       barrierDismissible: true,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Escolha a Dificuldade', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: Text(l10n.sequenceChooseDifficulty, style: const TextStyle(fontWeight: FontWeight.bold)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildDifficultyOption(GameDifficulty.easy, 'Fácil (4 Cores)'),
-              _buildDifficultyOption(GameDifficulty.medium, 'Médio (6 Cores)'),
-              _buildDifficultyOption(GameDifficulty.hard, 'Difícil (9 Cores)'),
+              _buildDifficultyOption(GameDifficulty.easy, l10n.sequenceEasyColors(4)),
+              _buildDifficultyOption(GameDifficulty.medium, l10n.sequenceMediumColors(6)),
+              _buildDifficultyOption(GameDifficulty.hard, l10n.sequenceHardColors(9)),
               const Divider(),
               _buildDifficultyOption(
                 GameDifficulty.progressive, 
-                'PROGRESSIVO (4 -> 9 Cores)',
-                subtitle: 'Aumenta uma cor a cada 3 acertos seguidos.',
+                l10n.sequenceProgressive(4, 9),
+                subtitle: l10n.sequenceProgressiveDesc(3),
               ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Voltar'),
+              child: Text(l10n.back),
             ),
           ],
         );
@@ -286,17 +302,18 @@ class _SequenceGameState extends State<SequenceGame> {
 
   // --- UI: Botão de Cor (Estilo Cristal) ---
 
-  Widget _buildColorButton(int index) {
+  Widget _buildColorButton(int index, AppLocalizations l10n) {
     bool isHighlighted = (_isShowingSequence && _currentShowIndex == index) || (_lastTappedColor == index);
     
     // O botão fica desativado (sem brilho) se a cor não estiver ativa na dificuldade progressiva
     bool isAvailable = index < _activeColorCount;
+    final colorNames = _getColorNames(l10n);
 
     return _buildCrystalButton(
       baseColor: _allColors[index],
       isLit: isAvailable && isHighlighted,
       isAvailable: isAvailable,
-      label: isAvailable ? _colorNames[index] : 'Bloqueado',
+      label: isAvailable ? colorNames[index] : l10n.colorLocked,
       onPressed: isAvailable ? () => _onColorTap(index) : () {},
     );
   }
@@ -313,18 +330,16 @@ class _SequenceGameState extends State<SequenceGame> {
     final Color glowColor = isLit 
         ? baseColor.withValues(alpha: 0.9) 
         : (isAvailable ? baseColor.withValues(alpha: 0.4) : Colors.grey.shade800.withValues(alpha: 0.3));
-    final Color shadowColor = isLit ? baseColor.withValues(alpha: 0.8) : Colors.black;
 
     return GestureDetector(
       onTap: isAvailable ? onPressed : null,
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(8.0),
         child: Container(
           decoration: BoxDecoration(
             color: const Color(0xFF151515), // Rocha de fundo
             borderRadius: BorderRadius.circular(15.0),
             boxShadow: [
-              // Sombra da rocha para dar profundidade de "incrustação"
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.5),
                 blurRadius: 8.0,
@@ -335,51 +350,29 @@ class _SequenceGameState extends State<SequenceGame> {
           child: Center(
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
-              width: double.infinity,
-              height: double.infinity,
-              margin: const EdgeInsets.all(10), // Espaço para o "rocha" em volta
-              decoration: BoxDecoration(
-                // Forma do cristal (poligonal/angular é melhor, mas um círculo já simula bem)
-                shape: BoxShape.circle,
-                // Gradiente para dar a sensação 3D/facetada
-                gradient: RadialGradient(
-                  colors: [
-                    Colors.white.withValues(alpha: isLit ? 0.9 : (isAvailable ? 0.3 : 0.1)), // Centro mais claro
-                    glowColor,
-                  ],
-                  stops: const [0.0, 1.0],
+              margin: const EdgeInsets.all(8),
+              child: CustomPaint(
+                painter: CrystalPainter(
+                  baseColor: baseColor,
+                  glowColor: glowColor,
+                  isLit: isLit,
+                  isAvailable: isAvailable,
                 ),
-                // Brilho intenso (Glow)
-                boxShadow: [
-                  BoxShadow(
-                    color: shadowColor,
-                    blurRadius: isLit ? 30.0 : 5.0, // Brilha mais quando ativado
-                    spreadRadius: isLit ? 5.0 : 0.0,
-                    offset: const Offset(0, 0),
-                  ),
-                  BoxShadow(
-                    color: baseColor.withValues(alpha: 0.3),
-                    blurRadius: isLit ? 20.0 : 0.0,
-                    spreadRadius: isLit ? 2.0 : 0.0,
-                    offset: const Offset(0, 0),
-                  ),
-                ],
-                border: Border.all(
-                  color: isLit ? Colors.white70 : (isAvailable ? Colors.white24 : Colors.transparent),
-                  width: 2.0,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: isAvailable ? Colors.white : Colors.white38,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    shadows: const [
-                      Shadow(color: Colors.black, offset: Offset(1, 1), blurRadius: 3),
-                    ],
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: isAvailable ? Colors.white : Colors.white38,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        shadows: const [
+                          Shadow(color: Colors.black, offset: Offset(1, 1), blurRadius: 3),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -394,10 +387,12 @@ class _SequenceGameState extends State<SequenceGame> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A), // Caverna muito escura
       appBar: AppBar(
-        title: const Text('🧠 Sequência Rápida', style: TextStyle(color: Colors.white)),
+        title: Text('🧠 ${l10n.minigamesSequence}', style: const TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF162447),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
@@ -405,7 +400,7 @@ class _SequenceGameState extends State<SequenceGame> {
             padding: const EdgeInsets.all(16.0),
             child: Center(
               child: Text(
-                'Recorde: $_highScore',
+                l10n.sequenceHighScoreLabel(_highScore),
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
               ),
             ),
@@ -439,10 +434,10 @@ class _SequenceGameState extends State<SequenceGame> {
                   ),
                   child: Column(
                       children: [
-                        Text('CORES ATIVAS: $_activeColorCount / $maxActiveColors',
+                        Text(l10n.sequenceActiveColors(_activeColorCount, maxActiveColors),
                             style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                         if (_difficulty == GameDifficulty.progressive)
-                            Text('SEQUÊNCIA: $_consecutiveCorrect / $streakToUpgrade',
+                            Text(l10n.sequenceStreak(_consecutiveCorrect, streakToUpgrade),
                                 style: const TextStyle(color: Colors.white70, fontSize: 14)),
                       ],
                   ),
@@ -453,17 +448,17 @@ class _SequenceGameState extends State<SequenceGame> {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      const Text('NÍVEL', style: TextStyle(color: Colors.white70, fontSize: 20, fontWeight: FontWeight.bold)),
+                      Text(l10n.level.toUpperCase(), style: const TextStyle(color: Colors.white70, fontSize: 20, fontWeight: FontWeight.bold)),
                       Text('$_currentLevel', style: const TextStyle(color: Colors.white, fontSize: 48, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 10),
                       if (_showSuccessAnimation)
-                        const Text('✨ Correto! Próximo Nível! ✨', style: TextStyle(color: Colors.greenAccent, fontSize: 20, fontWeight: FontWeight.bold))
+                        Text(l10n.sequenceCorrect, style: const TextStyle(color: Colors.greenAccent, fontSize: 20, fontWeight: FontWeight.bold))
                       else if (_isShowingSequence)
-                        const Text('👀 Observe a sequência...', style: TextStyle(color: Colors.white, fontSize: 20))
+                        Text(l10n.sequenceObserve, style: const TextStyle(color: Colors.white, fontSize: 20))
                       else if (_isPlayerTurn)
-                        const Text('👆 Sua vez! Repita a sequência', style: TextStyle(color: Colors.yellowAccent, fontSize: 20, fontWeight: FontWeight.bold))
+                        Text(l10n.sequenceRepeat, style: const TextStyle(color: Colors.yellowAccent, fontSize: 20, fontWeight: FontWeight.bold))
                       else if (_gameOver)
-                        Text('❌ Fim de Jogo! Você chegou ao nível ${_currentLevel - 1}',
+                        Text(l10n.sequenceGameOverLevel(_currentLevel - 1),
                              style: const TextStyle(color: Colors.redAccent, fontSize: 24, fontWeight: FontWeight.bold))
                     ],
                   ),
@@ -489,7 +484,7 @@ class _SequenceGameState extends State<SequenceGame> {
                         // Só exibe botões que estão dentro do limite de cores ativas
                         if (index >= maxActiveColors) return const SizedBox.shrink();
 
-                        return _buildColorButton(index);
+                        return _buildColorButton(index, l10n);
                       },
                     ),
                   ),
@@ -502,7 +497,7 @@ class _SequenceGameState extends State<SequenceGame> {
                     onPressed: _showDifficultySelector,
                     icon: const Icon(Icons.settings, size: 28),
                     label: Text(
-                      _gameOver ? 'Reiniciar Jogo' : 'Iniciar/Dificuldade',
+                      _gameOver ? l10n.sequenceRestartGame : l10n.sequenceStartDifficulty,
                       style: const TextStyle(fontSize: 20),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -522,4 +517,124 @@ class _SequenceGameState extends State<SequenceGame> {
       ),
     );
   }
-}   
+}
+
+// --- Painter para desenhar forma de cristal/diamante ---
+class CrystalPainter extends CustomPainter {
+  final Color baseColor;
+  final Color glowColor;
+  final bool isLit;
+  final bool isAvailable;
+
+  CrystalPainter({
+    required this.baseColor,
+    required this.glowColor,
+    required this.isLit,
+    required this.isAvailable,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final double w = size.width * 0.85;
+    final double h = size.height * 0.85;
+    
+    // Pontos do cristal (forma de diamante/hexágono alongado)
+    final path = Path();
+    
+    // Forma de cristal com 6 pontos (hexágono vertical alongado)
+    path.moveTo(center.dx, center.dy - h / 2); // Topo
+    path.lineTo(center.dx + w / 2, center.dy - h / 4); // Superior direito
+    path.lineTo(center.dx + w / 2, center.dy + h / 4); // Inferior direito
+    path.lineTo(center.dx, center.dy + h / 2); // Base
+    path.lineTo(center.dx - w / 2, center.dy + h / 4); // Inferior esquerdo
+    path.lineTo(center.dx - w / 2, center.dy - h / 4); // Superior esquerdo
+    path.close();
+
+    // Glow/sombra externa quando ativado
+    if (isLit) {
+      final glowPaint = Paint()
+        ..color = baseColor.withValues(alpha: 0.6)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
+      canvas.drawPath(path, glowPaint);
+    }
+
+    // Preenchimento com gradiente
+    final gradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Colors.white.withValues(alpha: isLit ? 0.8 : (isAvailable ? 0.4 : 0.1)),
+        glowColor,
+        baseColor.withValues(alpha: isLit ? 0.9 : 0.5),
+      ],
+      stops: const [0.0, 0.3, 1.0],
+    );
+
+    final fillPaint = Paint()
+      ..shader = gradient.createShader(Rect.fromCenter(center: center, width: w, height: h));
+    canvas.drawPath(path, fillPaint);
+
+    // Facetas internas do cristal (linhas de reflexo)
+    final facetPaint = Paint()
+      ..color = Colors.white.withValues(alpha: isLit ? 0.5 : 0.2)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    // Linha central vertical
+    canvas.drawLine(
+      Offset(center.dx, center.dy - h / 2),
+      Offset(center.dx, center.dy + h / 2),
+      facetPaint,
+    );
+
+    // Linhas diagonais do topo
+    canvas.drawLine(
+      Offset(center.dx, center.dy - h / 2),
+      Offset(center.dx + w / 2, center.dy - h / 4),
+      facetPaint,
+    );
+    canvas.drawLine(
+      Offset(center.dx, center.dy - h / 2),
+      Offset(center.dx - w / 2, center.dy - h / 4),
+      facetPaint,
+    );
+
+    // Linhas para o centro
+    canvas.drawLine(
+      Offset(center.dx + w / 2, center.dy - h / 4),
+      center,
+      facetPaint,
+    );
+    canvas.drawLine(
+      Offset(center.dx - w / 2, center.dy - h / 4),
+      center,
+      facetPaint,
+    );
+
+    // Borda externa
+    final borderPaint = Paint()
+      ..color = isLit ? Colors.white70 : (isAvailable ? Colors.white30 : Colors.white10)
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+    canvas.drawPath(path, borderPaint);
+
+    // Brilho no canto superior (reflexo)
+    if (isAvailable) {
+      final shinePaint = Paint()
+        ..color = Colors.white.withValues(alpha: isLit ? 0.7 : 0.3);
+      canvas.drawCircle(
+        Offset(center.dx - w / 5, center.dy - h / 4),
+        isLit ? 6 : 4,
+        shinePaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CrystalPainter oldDelegate) {
+    return oldDelegate.isLit != isLit || 
+           oldDelegate.isAvailable != isAvailable ||
+           oldDelegate.baseColor != baseColor;
+  }
+}

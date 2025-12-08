@@ -51,6 +51,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moves => 'Moves';
 
   @override
+  String get pieces => 'Pieces';
+
+  @override
+  String get level => 'Level';
+
+  @override
+  String get difficulty => 'Difficulty';
+
+  @override
+  String get easy => 'Easy';
+
+  @override
+  String get medium => 'Medium';
+
+  @override
+  String get hard => 'Hard';
+
+  @override
   String get attempts => 'Attempts';
 
   @override
@@ -58,6 +76,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get defeat => 'Defeat';
+
+  @override
+  String get complete => 'COMPLETE!';
 
   @override
   String get tryAgain => 'Try Again';
@@ -195,40 +216,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get minigamesTitle => '🎮 Bible Minigames';
 
   @override
+  String get minigamesMemory => '🧠 Memory Game';
+
+  @override
+  String get minigamesMemoryDesc => 'Find biblical pairs!';
+
+  @override
   String get minigamesPuzzle => '🧩 Jigsaw Puzzle';
 
   @override
   String get minigamesPuzzleDesc => 'Complete the puzzle';
 
   @override
+  String get minigamesJigsaw => '🖼️ Photo Puzzle';
+
+  @override
+  String get minigamesJigsawDesc => 'Assemble real images!';
+
+  @override
   String get minigamesHangman => '🎯 Bible Hangman';
 
   @override
-  String get minigamesHangmanDesc => 'Guess the word';
+  String get minigamesHangmanDesc => 'Guess the biblical word!';
 
   @override
   String get minigamesWordSearch => '🔍 Word Search';
 
   @override
-  String get minigamesWordSearchDesc => 'Find the words';
+  String get minigamesWordSearchDesc => 'Find hidden words!';
 
   @override
-  String get minigamesMaze => '🗺️ Maze';
+  String get minigamesMaze => '🌀 Maze';
 
   @override
-  String get minigamesMazeDesc => 'Find the exit';
+  String get minigamesMazeDesc => 'Find the exit!';
 
   @override
-  String get minigamesSequence => '🎵 Sequence';
+  String get minigamesSequence => '� Quick Sequence';
 
   @override
-  String get minigamesSequenceDesc => 'Repeat the sequence';
+  String get minigamesSequenceDesc => 'Memorize the color pattern!';
+
+  @override
+  String get minigamesSequenceCrystal => '💠 Crystal Sequence';
+
+  @override
+  String get minigamesSequenceCrystalDesc => 'Crystal version with sparkles!';
 
   @override
   String get minigamesTicTacToe => '⭕ Tic-Tac-Toe';
 
   @override
-  String get minigamesTicTacToeDesc => 'Against AI';
+  String get minigamesTicTacToeDesc => '2 players or vs AI!';
 
   @override
   String get achievementsTitle => '🏆 Achievements';
@@ -582,7 +621,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticTacToeNewGame => 'Novo Jogo';
 
   @override
-  String get hangmanTitle => '🔤 Hangman';
+  String get hangmanTitle => 'Hangman';
 
   @override
   String get hangmanCategory => 'Category';
@@ -603,7 +642,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hangmanTheWordWas => 'A palavra era:';
 
   @override
-  String get hangmanPlayAgain => 'Jogar Novamente';
+  String get hangmanPlayAgain => 'Play Again';
+
+  @override
+  String hangmanErrors(int errors, int max) {
+    return 'Errors: $errors / $max';
+  }
+
+  @override
+  String get hangmanCongrats => '🎉 Congratulations! You got it!';
+
+  @override
+  String get hangmanYouLost => '😢 You lost!';
+
+  @override
+  String hangmanWordWas(String word) {
+    return 'The word was: $word';
+  }
+
+  @override
+  String hangmanWrongLetters(String letters) {
+    return 'Wrong letters: $letters';
+  }
 
   @override
   String get wordSearchTitle => '🔍 Word Search';
@@ -631,6 +691,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mazeMoves => 'Moves: null';
 
   @override
+  String mazeMovesCount(int count) {
+    return 'Moves: $count';
+  }
+
+  @override
   String get mazeTime => 'Time: null';
 
   @override
@@ -647,6 +712,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mazePlayAgain => 'Jogar Novamente';
+
+  @override
+  String get mazeCavern => '🏔️ Maze Cavern';
+
+  @override
+  String mazeCampaignMode(int level) {
+    return 'Campaign Mode (Level $level)';
+  }
+
+  @override
+  String get mazeQuickPlayCustom => 'Custom Quick Play';
+
+  @override
+  String mazeRows(int count) {
+    return 'Rows: $count';
+  }
+
+  @override
+  String mazeColumns(int count) {
+    return 'Columns: $count';
+  }
+
+  @override
+  String get mazePlayQuick => 'Play Quick Game';
+
+  @override
+  String get mazeEscaped => '✨ ESCAPED! ✨';
+
+  @override
+  String mazeCompletedIn(int moves) {
+    return 'You completed the maze in $moves moves.';
+  }
+
+  @override
+  String get mazeBackToMenu => 'Back to Menu';
+
+  @override
+  String mazeLevelComplete(int level) {
+    return 'Level $level Complete!';
+  }
+
+  @override
+  String get mazeLoadingNextCavern => 'Loading next cavern...';
 
   @override
   String get sequenceTitle => '🎯 Sequence';
@@ -678,6 +786,99 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sequenceTryAgain => 'Tentar Novamente';
 
   @override
+  String sequenceActiveColors(int active, int max) {
+    return 'ACTIVE COLORS: $active / $max';
+  }
+
+  @override
+  String sequenceStreak(int current, int target) {
+    return 'STREAK: $current / $target';
+  }
+
+  @override
+  String get sequenceCorrect => '✨ Correct! Next Level! ✨';
+
+  @override
+  String get sequenceObserve => '👀 Watch the sequence...';
+
+  @override
+  String get sequenceRepeat => '👆 Your turn! Repeat the sequence';
+
+  @override
+  String sequenceGameOverLevel(int level) {
+    return '❌ Game Over! You reached level $level';
+  }
+
+  @override
+  String get sequenceRestartGame => 'Restart Game';
+
+  @override
+  String get sequenceStartDifficulty => 'Start/Difficulty';
+
+  @override
+  String get sequenceChooseDifficulty => 'Choose Difficulty';
+
+  @override
+  String sequenceEasyColors(int count) {
+    return 'Easy ($count Colors)';
+  }
+
+  @override
+  String sequenceMediumColors(int count) {
+    return 'Medium ($count Colors)';
+  }
+
+  @override
+  String sequenceHardColors(int count) {
+    return 'Hard ($count Colors)';
+  }
+
+  @override
+  String sequenceProgressive(int start, int end) {
+    return 'PROGRESSIVE ($start -> $end Colors)';
+  }
+
+  @override
+  String sequenceProgressiveDesc(int count) {
+    return 'Adds one color every $count consecutive correct answers.';
+  }
+
+  @override
+  String sequenceHighScoreLabel(int score) {
+    return 'High Score: $score';
+  }
+
+  @override
+  String get colorRed => 'Red';
+
+  @override
+  String get colorBlue => 'Blue';
+
+  @override
+  String get colorGreen => 'Green';
+
+  @override
+  String get colorYellow => 'Yellow';
+
+  @override
+  String get colorPurple => 'Purple';
+
+  @override
+  String get colorOrange => 'Orange';
+
+  @override
+  String get colorCyan => 'Cyan';
+
+  @override
+  String get colorLime => 'Lime';
+
+  @override
+  String get colorPink => 'Pink';
+
+  @override
+  String get colorLocked => 'Locked';
+
+  @override
   String get puzzleTitle => '🧩 Puzzle';
 
   @override
@@ -691,4 +892,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get puzzleNewGame => 'Novo Jogo';
+
+  @override
+  String completedInMoves(Object moves) {
+    return 'Completed in $moves moves';
+  }
+
+  @override
+  String get newGame => 'New Game';
 }

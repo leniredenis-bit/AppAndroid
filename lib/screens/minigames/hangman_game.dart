@@ -5,6 +5,7 @@ import '../../services/storage_service.dart';
 import '../../services/achievement_service.dart';
 import '../../services/minigame_content_service.dart';
 import '../../widgets/achievement_unlock_dialog.dart';
+import '../../l10n/app_localizations.dart';
 
 // Custom Painter para desenhar o boneco da forca
 class HangmanPainter extends CustomPainter {
@@ -16,85 +17,234 @@ class HangmanPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.white
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
+      ..strokeWidth = 3.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
 
     final fillPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
 
-    // 1. Cabeça
+    final shadowPaint = Paint()
+      ..color = Colors.white24
+      ..strokeWidth = 6
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    double centerX = size.width / 2;
+    double headY = size.height * 0.22;
+    double headRadius = 28.0;
+    
+    // 1. Cabeça com detalhes
     if (errors >= 1) {
+      // Sombra da cabeça
       canvas.drawCircle(
-        Offset(size.width / 2, size.height * 0.25),
-        25,
+        Offset(centerX + 2, headY + 2),
+        headRadius,
+        shadowPaint,
+      );
+      
+      // Cabeça
+      canvas.drawCircle(
+        Offset(centerX, headY),
+        headRadius,
         paint,
       );
       
-      // Olhos tristes
-      canvas.drawCircle(
-        Offset(size.width / 2 - 8, size.height * 0.23),
-        3,
-        fillPaint,
+      // Cabelo (mechas simples)
+      final hairPaint = Paint()
+        ..color = Colors.white70
+        ..strokeWidth = 2
+        ..style = PaintingStyle.stroke;
+      
+      canvas.drawArc(
+        Rect.fromCircle(center: Offset(centerX - 10, headY - 20), radius: 12),
+        3.14, 1.5, false, hairPaint,
       );
-      canvas.drawCircle(
-        Offset(size.width / 2 + 8, size.height * 0.23),
-        3,
-        fillPaint,
+      canvas.drawArc(
+        Rect.fromCircle(center: Offset(centerX + 5, headY - 22), radius: 10),
+        3.14, 1.2, false, hairPaint,
       );
       
-      // Boca triste
+      // Olhos - mudam conforme erros
+      if (errors < 6) {
+        // Olhos preocupados (círculos)
+        canvas.drawCircle(
+          Offset(centerX - 9, headY - 3),
+          4,
+          fillPaint,
+        );
+        canvas.drawCircle(
+          Offset(centerX + 9, headY - 3),
+          4,
+          fillPaint,
+        );
+        
+        // Sobrancelhas preocupadas
+        canvas.drawLine(
+          Offset(centerX - 15, headY - 12),
+          Offset(centerX - 5, headY - 10),
+          hairPaint,
+        );
+        canvas.drawLine(
+          Offset(centerX + 15, headY - 12),
+          Offset(centerX + 5, headY - 10),
+          hairPaint,
+        );
+      } else {
+        // Olhos X (morto)
+        final xPaint = Paint()
+          ..color = Colors.white
+          ..strokeWidth = 2.5
+          ..style = PaintingStyle.stroke;
+        
+        canvas.drawLine(
+          Offset(centerX - 12, headY - 6),
+          Offset(centerX - 5, headY + 1),
+          xPaint,
+        );
+        canvas.drawLine(
+          Offset(centerX - 12, headY + 1),
+          Offset(centerX - 5, headY - 6),
+          xPaint,
+        );
+        canvas.drawLine(
+          Offset(centerX + 5, headY - 6),
+          Offset(centerX + 12, headY + 1),
+          xPaint,
+        );
+        canvas.drawLine(
+          Offset(centerX + 5, headY + 1),
+          Offset(centerX + 12, headY - 6),
+          xPaint,
+        );
+      }
+      
+      // Boca - muda conforme erros
       final mouthPath = Path();
-      mouthPath.moveTo(size.width / 2 - 10, size.height * 0.28);
-      mouthPath.quadraticBezierTo(
-        size.width / 2, size.height * 0.26,
-        size.width / 2 + 10, size.height * 0.28,
-      );
-      canvas.drawPath(mouthPath, paint);
+      if (errors < 3) {
+        // Boca neutra/preocupada
+        mouthPath.moveTo(centerX - 8, headY + 10);
+        mouthPath.lineTo(centerX + 8, headY + 10);
+      } else if (errors < 6) {
+        // Boca triste
+        mouthPath.moveTo(centerX - 10, headY + 13);
+        mouthPath.quadraticBezierTo(
+          centerX, headY + 8,
+          centerX + 10, headY + 13,
+        );
+      } else {
+        // Boca com língua pra fora
+        mouthPath.moveTo(centerX - 10, headY + 10);
+        mouthPath.quadraticBezierTo(
+          centerX, headY + 6,
+          centerX + 10, headY + 10,
+        );
+        // Língua
+        final tonguePaint = Paint()
+          ..color = Colors.pinkAccent.withValues(alpha: 0.7)
+          ..style = PaintingStyle.fill;
+        canvas.drawOval(
+          Rect.fromCenter(center: Offset(centerX, headY + 16), width: 8, height: 10),
+          tonguePaint,
+        );
+      }
+      canvas.drawPath(mouthPath, paint..strokeWidth = 2);
+      paint.strokeWidth = 3.5;
     }
 
-    // 2. Corpo
+    double neckY = headY + headRadius + 2;
+    double bodyEndY = size.height * 0.52;
+
+    // 2. Corpo (torso)
     if (errors >= 2) {
+      // Sombra
       canvas.drawLine(
-        Offset(size.width / 2, size.height * 0.32),
-        Offset(size.width / 2, size.height * 0.55),
+        Offset(centerX + 2, neckY + 2),
+        Offset(centerX + 2, bodyEndY + 2),
+        shadowPaint,
+      );
+      // Corpo
+      canvas.drawLine(
+        Offset(centerX, neckY),
+        Offset(centerX, bodyEndY),
         paint,
       );
     }
 
-    // 3. Braço esquerdo
+    double armY = neckY + 15;
+
+    // 3. Braço esquerdo com mão
     if (errors >= 3) {
+      double armEndX = centerX - 30;
+      double armEndY = size.height * 0.42;
+      
       canvas.drawLine(
-        Offset(size.width / 2, size.height * 0.38),
-        Offset(size.width / 2 - 25, size.height * 0.48),
+        Offset(centerX, armY),
+        Offset(armEndX, armEndY),
         paint,
+      );
+      
+      // Mão (círculo pequeno)
+      canvas.drawCircle(
+        Offset(armEndX - 3, armEndY + 2),
+        5,
+        fillPaint,
       );
     }
 
-    // 4. Braço direito
+    // 4. Braço direito com mão
     if (errors >= 4) {
+      double armEndX = centerX + 30;
+      double armEndY = size.height * 0.42;
+      
       canvas.drawLine(
-        Offset(size.width / 2, size.height * 0.38),
-        Offset(size.width / 2 + 25, size.height * 0.48),
+        Offset(centerX, armY),
+        Offset(armEndX, armEndY),
         paint,
+      );
+      
+      // Mão
+      canvas.drawCircle(
+        Offset(armEndX + 3, armEndY + 2),
+        5,
+        fillPaint,
       );
     }
 
-    // 5. Perna esquerda
+    // 5. Perna esquerda com pé
     if (errors >= 5) {
+      double legEndX = centerX - 22;
+      double legEndY = size.height * 0.72;
+      
       canvas.drawLine(
-        Offset(size.width / 2, size.height * 0.55),
-        Offset(size.width / 2 - 20, size.height * 0.75),
+        Offset(centerX, bodyEndY),
+        Offset(legEndX, legEndY),
         paint,
+      );
+      
+      // Pé (oval horizontal)
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(legEndX - 5, legEndY + 3), width: 14, height: 8),
+        fillPaint,
       );
     }
 
-    // 6. Perna direita - GAME OVER
+    // 6. Perna direita com pé - GAME OVER
     if (errors >= 6) {
+      double legEndX = centerX + 22;
+      double legEndY = size.height * 0.72;
+      
       canvas.drawLine(
-        Offset(size.width / 2, size.height * 0.55),
-        Offset(size.width / 2 + 20, size.height * 0.75),
+        Offset(centerX, bodyEndY),
+        Offset(legEndX, legEndY),
         paint,
+      );
+      
+      // Pé
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(legEndX + 5, legEndY + 3), width: 14, height: 8),
+        fillPaint,
       );
     }
   }
@@ -209,12 +359,12 @@ class _HangmanGameState extends State<HangmanGame> {
     }
   }
 
-  Widget _buildHangmanDrawing() {
+  Widget _buildHangmanDrawing(AppLocalizations l10n) {
     int errors = wrongLetters.length;
 
     return Column(
       children: [
-        Text("Erros: $errors / $maxErrors",
+        Text(l10n.hangmanErrors(errors, maxErrors),
             style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
         const SizedBox(height: 20),
         Center(
@@ -224,7 +374,7 @@ class _HangmanGameState extends State<HangmanGame> {
             alignment: Alignment.center,
             child: CustomPaint(
               painter: HangmanPainter(errors),
-              size: Size(200, 200),
+              size: const Size(200, 200),
             ),
           ),
         ),
@@ -303,16 +453,19 @@ class _HangmanGameState extends State<HangmanGame> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return AnimatedSwitcher(
-      duration: Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500),
       transitionBuilder: (Widget child, Animation<double> animation) {
         return FadeTransition(
           opacity: animation,
           child: SlideTransition(
             position: Tween<Offset>(
-              begin: Offset(0.0, 0.1),
+              begin: const Offset(0.0, 0.1),
               end: Offset.zero,
             ).animate(animation),
             child: child,
@@ -322,36 +475,36 @@ class _HangmanGameState extends State<HangmanGame> {
       child: Scaffold(
         key: _gameKey,
       appBar: AppBar(
-        title: const Text("Jogo da Forca", style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF162447),
-        iconTheme: IconThemeData(color: Colors.white),
+        title: Text(l10n.hangmanTitle, style: const TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF162447),
+        iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildHangmanDrawing(),
+            _buildHangmanDrawing(l10n),
             const SizedBox(height: 20),
             _buildWordDisplay(),
             const SizedBox(height: 20),
             if (hasWon)
-              const Text(
-                "🎉 Parabéns! Você acertou!",
-                style: TextStyle(fontSize: 24, color: Colors.green, fontWeight: FontWeight.bold),
+              Text(
+                l10n.hangmanCongrats,
+                style: const TextStyle(fontSize: 24, color: Colors.green, fontWeight: FontWeight.bold),
               ),
             if (hasLost)
               Column(
                 children: [
                   Text(
-                    "😢 Você perdeu!\nA palavra era: $chosenWord",
+                    "${l10n.hangmanYouLost}\n${l10n.hangmanWordWas(chosenWord)}",
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 24, color: Colors.red, fontWeight: FontWeight.bold),
                   ),
                   if (wrongLetters.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Text(
-                      "Letras erradas: ${wrongLetters.join(', ')}",
+                      l10n.hangmanWrongLetters(wrongLetters.join(', ')),
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 16, color: Colors.red, fontWeight: FontWeight.w500),
                     ),
@@ -363,11 +516,11 @@ class _HangmanGameState extends State<HangmanGame> {
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: _restartGame,
-              icon: Icon(Icons.refresh),
-              label: const Text("Jogar Novamente"),
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n.hangmanPlayAgain),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFE24A4A),
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                backgroundColor: const Color(0xFFE24A4A),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
             ),
             const SizedBox(height: 20),

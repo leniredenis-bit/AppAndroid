@@ -184,6 +184,42 @@ abstract class AppLocalizations {
   /// **'Movimentos'**
   String get moves;
 
+  /// No description provided for @pieces.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peças'**
+  String get pieces;
+
+  /// No description provided for @level.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nível'**
+  String get level;
+
+  /// No description provided for @difficulty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dificuldade'**
+  String get difficulty;
+
+  /// No description provided for @easy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fácil'**
+  String get easy;
+
+  /// No description provided for @medium.
+  ///
+  /// In pt, this message translates to:
+  /// **'Médio'**
+  String get medium;
+
+  /// No description provided for @hard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Difícil'**
+  String get hard;
+
   /// No description provided for @attempts.
   ///
   /// In pt, this message translates to:
@@ -201,6 +237,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Derrota'**
   String get defeat;
+
+  /// No description provided for @complete.
+  ///
+  /// In pt, this message translates to:
+  /// **'COMPLETO!'**
+  String get complete;
 
   /// No description provided for @tryAgain.
   ///
@@ -448,6 +490,18 @@ abstract class AppLocalizations {
   /// **'🎮 Minigames Bíblicos'**
   String get minigamesTitle;
 
+  /// No description provided for @minigamesMemory.
+  ///
+  /// In pt, this message translates to:
+  /// **'🧠 Jogo da Memória'**
+  String get minigamesMemory;
+
+  /// No description provided for @minigamesMemoryDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Encontre pares bíblicos!'**
+  String get minigamesMemoryDesc;
+
   /// No description provided for @minigamesPuzzle.
   ///
   /// In pt, this message translates to:
@@ -460,6 +514,18 @@ abstract class AppLocalizations {
   /// **'Monte o quebra-cabeça'**
   String get minigamesPuzzleDesc;
 
+  /// No description provided for @minigamesJigsaw.
+  ///
+  /// In pt, this message translates to:
+  /// **'🖼️ Quebra-Cabeça Foto'**
+  String get minigamesJigsaw;
+
+  /// No description provided for @minigamesJigsawDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Monte imagens reais!'**
+  String get minigamesJigsawDesc;
+
   /// No description provided for @minigamesHangman.
   ///
   /// In pt, this message translates to:
@@ -469,7 +535,7 @@ abstract class AppLocalizations {
   /// No description provided for @minigamesHangmanDesc.
   ///
   /// In pt, this message translates to:
-  /// **'Adivinhe a palavra'**
+  /// **'Adivinhe a palavra bíblica!'**
   String get minigamesHangmanDesc;
 
   /// No description provided for @minigamesWordSearch.
@@ -481,32 +547,44 @@ abstract class AppLocalizations {
   /// No description provided for @minigamesWordSearchDesc.
   ///
   /// In pt, this message translates to:
-  /// **'Encontre as palavras'**
+  /// **'Encontre palavras escondidas!'**
   String get minigamesWordSearchDesc;
 
   /// No description provided for @minigamesMaze.
   ///
   /// In pt, this message translates to:
-  /// **'🗺️ Labirinto'**
+  /// **'🌀 Labirinto'**
   String get minigamesMaze;
 
   /// No description provided for @minigamesMazeDesc.
   ///
   /// In pt, this message translates to:
-  /// **'Encontre a saída'**
+  /// **'Encontre a saída!'**
   String get minigamesMazeDesc;
 
   /// No description provided for @minigamesSequence.
   ///
   /// In pt, this message translates to:
-  /// **'🎵 Sequência'**
+  /// **'� Sequência Rápida'**
   String get minigamesSequence;
 
   /// No description provided for @minigamesSequenceDesc.
   ///
   /// In pt, this message translates to:
-  /// **'Repita a sequência'**
+  /// **'Memorize o padrão de cores!'**
   String get minigamesSequenceDesc;
+
+  /// No description provided for @minigamesSequenceCrystal.
+  ///
+  /// In pt, this message translates to:
+  /// **'💠 Sequência Cristal'**
+  String get minigamesSequenceCrystal;
+
+  /// No description provided for @minigamesSequenceCrystalDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Versão cristal com brilhos!'**
+  String get minigamesSequenceCrystalDesc;
 
   /// No description provided for @minigamesTicTacToe.
   ///
@@ -517,7 +595,7 @@ abstract class AppLocalizations {
   /// No description provided for @minigamesTicTacToeDesc.
   ///
   /// In pt, this message translates to:
-  /// **'Contra a IA'**
+  /// **'Duelo 2 jogadores ou vs IA!'**
   String get minigamesTicTacToeDesc;
 
   /// No description provided for @achievementsTitle.
@@ -1201,7 +1279,7 @@ abstract class AppLocalizations {
   /// No description provided for @hangmanTitle.
   ///
   /// In pt, this message translates to:
-  /// **'🎯 Forca Bíblica'**
+  /// **'Jogo da Forca'**
   String get hangmanTitle;
 
   /// No description provided for @hangmanCategory.
@@ -1246,6 +1324,36 @@ abstract class AppLocalizations {
   /// **'Jogar Novamente'**
   String get hangmanPlayAgain;
 
+  /// No description provided for @hangmanErrors.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erros: {errors} / {max}'**
+  String hangmanErrors(int errors, int max);
+
+  /// No description provided for @hangmanCongrats.
+  ///
+  /// In pt, this message translates to:
+  /// **'🎉 Parabéns! Você acertou!'**
+  String get hangmanCongrats;
+
+  /// No description provided for @hangmanYouLost.
+  ///
+  /// In pt, this message translates to:
+  /// **'😢 Você perdeu!'**
+  String get hangmanYouLost;
+
+  /// No description provided for @hangmanWordWas.
+  ///
+  /// In pt, this message translates to:
+  /// **'A palavra era: {word}'**
+  String hangmanWordWas(String word);
+
+  /// No description provided for @hangmanWrongLetters.
+  ///
+  /// In pt, this message translates to:
+  /// **'Letras erradas: {letters}'**
+  String hangmanWrongLetters(String letters);
+
   /// No description provided for @wordSearchTitle.
   ///
   /// In pt, this message translates to:
@@ -1288,6 +1396,12 @@ abstract class AppLocalizations {
   /// **'Movimentos'**
   String get mazeMoves;
 
+  /// No description provided for @mazeMovesCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Movimentos: {count}'**
+  String mazeMovesCount(int count);
+
   /// No description provided for @mazeTime.
   ///
   /// In pt, this message translates to:
@@ -1323,6 +1437,72 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Jogar Novamente'**
   String get mazePlayAgain;
+
+  /// No description provided for @mazeCavern.
+  ///
+  /// In pt, this message translates to:
+  /// **'🏔️ Caverna do Labirinto'**
+  String get mazeCavern;
+
+  /// No description provided for @mazeCampaignMode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Modo Campanha (Nível {level})'**
+  String mazeCampaignMode(int level);
+
+  /// No description provided for @mazeQuickPlayCustom.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogo Rápido Personalizado'**
+  String get mazeQuickPlayCustom;
+
+  /// No description provided for @mazeRows.
+  ///
+  /// In pt, this message translates to:
+  /// **'Linhas: {count}'**
+  String mazeRows(int count);
+
+  /// No description provided for @mazeColumns.
+  ///
+  /// In pt, this message translates to:
+  /// **'Colunas: {count}'**
+  String mazeColumns(int count);
+
+  /// No description provided for @mazePlayQuick.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogar Partida Rápida'**
+  String get mazePlayQuick;
+
+  /// No description provided for @mazeEscaped.
+  ///
+  /// In pt, this message translates to:
+  /// **'✨ ESCAPOU! ✨'**
+  String get mazeEscaped;
+
+  /// No description provided for @mazeCompletedIn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você completou o labirinto em {moves} movimentos.'**
+  String mazeCompletedIn(int moves);
+
+  /// No description provided for @mazeBackToMenu.
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar ao Menu'**
+  String get mazeBackToMenu;
+
+  /// No description provided for @mazeLevelComplete.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nível {level} Concluído!'**
+  String mazeLevelComplete(int level);
+
+  /// No description provided for @mazeLoadingNextCavern.
+  ///
+  /// In pt, this message translates to:
+  /// **'Carregando próxima caverna...'**
+  String get mazeLoadingNextCavern;
 
   /// No description provided for @sequenceTitle.
   ///
@@ -1378,6 +1558,156 @@ abstract class AppLocalizations {
   /// **'Tentar Novamente'**
   String get sequenceTryAgain;
 
+  /// No description provided for @sequenceActiveColors.
+  ///
+  /// In pt, this message translates to:
+  /// **'CORES ATIVAS: {active} / {max}'**
+  String sequenceActiveColors(int active, int max);
+
+  /// No description provided for @sequenceStreak.
+  ///
+  /// In pt, this message translates to:
+  /// **'SEQUÊNCIA: {current} / {target}'**
+  String sequenceStreak(int current, int target);
+
+  /// No description provided for @sequenceCorrect.
+  ///
+  /// In pt, this message translates to:
+  /// **'✨ Correto! Próximo Nível! ✨'**
+  String get sequenceCorrect;
+
+  /// No description provided for @sequenceObserve.
+  ///
+  /// In pt, this message translates to:
+  /// **'👀 Observe a sequência...'**
+  String get sequenceObserve;
+
+  /// No description provided for @sequenceRepeat.
+  ///
+  /// In pt, this message translates to:
+  /// **'👆 Sua vez! Repita a sequência'**
+  String get sequenceRepeat;
+
+  /// No description provided for @sequenceGameOverLevel.
+  ///
+  /// In pt, this message translates to:
+  /// **'❌ Fim de Jogo! Você chegou ao nível {level}'**
+  String sequenceGameOverLevel(int level);
+
+  /// No description provided for @sequenceRestartGame.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reiniciar Jogo'**
+  String get sequenceRestartGame;
+
+  /// No description provided for @sequenceStartDifficulty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Iniciar/Dificuldade'**
+  String get sequenceStartDifficulty;
+
+  /// No description provided for @sequenceChooseDifficulty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha a Dificuldade'**
+  String get sequenceChooseDifficulty;
+
+  /// No description provided for @sequenceEasyColors.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fácil ({count} Cores)'**
+  String sequenceEasyColors(int count);
+
+  /// No description provided for @sequenceMediumColors.
+  ///
+  /// In pt, this message translates to:
+  /// **'Médio ({count} Cores)'**
+  String sequenceMediumColors(int count);
+
+  /// No description provided for @sequenceHardColors.
+  ///
+  /// In pt, this message translates to:
+  /// **'Difícil ({count} Cores)'**
+  String sequenceHardColors(int count);
+
+  /// No description provided for @sequenceProgressive.
+  ///
+  /// In pt, this message translates to:
+  /// **'PROGRESSIVO ({start} -> {end} Cores)'**
+  String sequenceProgressive(int start, int end);
+
+  /// No description provided for @sequenceProgressiveDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aumenta uma cor a cada {count} acertos seguidos.'**
+  String sequenceProgressiveDesc(int count);
+
+  /// No description provided for @sequenceHighScoreLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recorde: {score}'**
+  String sequenceHighScoreLabel(int score);
+
+  /// No description provided for @colorRed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vermelho'**
+  String get colorRed;
+
+  /// No description provided for @colorBlue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Azul'**
+  String get colorBlue;
+
+  /// No description provided for @colorGreen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Verde'**
+  String get colorGreen;
+
+  /// No description provided for @colorYellow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Amarelo'**
+  String get colorYellow;
+
+  /// No description provided for @colorPurple.
+  ///
+  /// In pt, this message translates to:
+  /// **'Roxo'**
+  String get colorPurple;
+
+  /// No description provided for @colorOrange.
+  ///
+  /// In pt, this message translates to:
+  /// **'Laranja'**
+  String get colorOrange;
+
+  /// No description provided for @colorCyan.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ciano'**
+  String get colorCyan;
+
+  /// No description provided for @colorLime.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lima'**
+  String get colorLime;
+
+  /// No description provided for @colorPink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rosa'**
+  String get colorPink;
+
+  /// No description provided for @colorLocked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bloqueado'**
+  String get colorLocked;
+
   /// No description provided for @puzzleTitle.
   ///
   /// In pt, this message translates to:
@@ -1407,6 +1737,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Novo Jogo'**
   String get puzzleNewGame;
+
+  /// No description provided for @completedInMoves.
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluído em {moves} movimentos'**
+  String completedInMoves(Object moves);
+
+  /// No description provided for @newGame.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova Partida'**
+  String get newGame;
 }
 
 class _AppLocalizationsDelegate

@@ -7,6 +7,7 @@ import '../../services/audio_service.dart';
 import '../../services/storage_service.dart';
 import '../../services/achievement_service.dart';
 import '../../widgets/achievement_unlock_dialog.dart';
+import '../../l10n/app_localizations.dart';
 
 // --- Configurações do Quebra-Cabeça ---
 const int DEFAULT_GRID_SIZE = 3; // 3x3 (fácil: 3, médio: 4, difícil: 5)
@@ -149,13 +150,13 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
               padding: const EdgeInsets.all(15),
               child: Column(
                 children: [
-                  const Text('Dificuldade', style: TextStyle(color: Colors.white70, fontSize: 18)),
+                  Text(AppLocalizations.of(context)!.difficulty, style: const TextStyle(color: Colors.white70, fontSize: 18)),
                   const SizedBox(height: 10),
                   SegmentedButton<int>(
-                    segments: const [
-                      ButtonSegment(value: 3, label: Text('Fácil\n3x3')),
-                      ButtonSegment(value: 4, label: Text('Médio\n4x4')),
-                      ButtonSegment(value: 5, label: Text('Difícil\n5x5')),
+                    segments: [
+                      ButtonSegment(value: 3, label: Text('${AppLocalizations.of(context)!.easy}\n3x3')),
+                      ButtonSegment(value: 4, label: Text('${AppLocalizations.of(context)!.medium}\n4x4')),
+                      ButtonSegment(value: 5, label: Text('${AppLocalizations.of(context)!.hard}\n5x5')),
                     ],
                     selected: {_gridSize},
                     onSelectionChanged: (Set<int> newSelection) {
@@ -270,8 +271,8 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildStatCard('Movimentos', _moves.toString(), Icons.touch_app),
-                    _buildStatCard('Peças', '${_pieces.where((p) => p.isLocked).length}/${_pieces.length}', Icons.extension),
+                    _buildStatCard(AppLocalizations.of(context)!.moves, _moves.toString(), Icons.touch_app),
+                    _buildStatCard(AppLocalizations.of(context)!.pieces, '${_pieces.where((p) => p.isLocked).length}/${_pieces.length}', Icons.extension),
                   ],
                 ),
               ),
@@ -316,20 +317,24 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
         ),
 
         // 3. As Peças (Renderizadas como Stack items móveis)
-        ..._pieces.map((piece) {
+        // Primeiro as peças locked (ficam por baixo), depois as soltas (por cima)
+        ..._getSortedPieces().map((piece) {
           return Positioned(
             left: piece.currentPos.dx,
             top: piece.currentPos.dy,
-            child: GestureDetector(
-              onPanStart: (_) {
-                if (!piece.isLocked && !_isGameWon) {
-                  // Move a peça para o topo da pilha (renderiza por último)
-                  setState(() {
-                    _pieces.remove(piece);
-                    _pieces.add(piece);
-                  });
-                }
-              },
+            // Peças travadas ignoram toques completamente
+            child: IgnorePointer(
+              ignoring: piece.isLocked,
+              child: GestureDetector(
+                onPanStart: (_) {
+                  if (!piece.isLocked && !_isGameWon) {
+                    // Move a peça para o topo da pilha (renderiza por último)
+                    setState(() {
+                      _pieces.remove(piece);
+                      _pieces.add(piece);
+                    });
+                  }
+                },
               onPanUpdate: (details) {
                 if (piece.isLocked || _isGameWon) return;
                 setState(() {
@@ -342,6 +347,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
                 _checkSnap(piece);
               },
               child: _buildPieceWidget(piece),
+              ),
             ),
           );
         }),
@@ -361,10 +367,10 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
                 children: [
                   const Text("🧩", style: TextStyle(fontSize: 50)),
                   const SizedBox(height: 10),
-                  const Text("COMPLETO!", style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold)),
+                  Text(AppLocalizations.of(context)!.complete, style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
                   Text(
-                    'Concluído em $_moves movimentos',
+                    AppLocalizations.of(context)!.completedInMoves(_moves),
                     style: const TextStyle(color: Colors.white70, fontSize: 16),
                   ),
                   const SizedBox(height: 20),
@@ -379,7 +385,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
                         _moves = 0;
                       });
                     },
-                    child: const Text("Nova Partida"),
+                    child: Text(AppLocalizations.of(context)!.newGame),
                   )
                 ],
               ),
@@ -502,6 +508,13 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
       _pieces = newPieces;
       _pieces.shuffle(); 
     });
+  }
+
+  // Retorna peças ordenadas: locked primeiro (por baixo), soltas por cima
+  List<JigsawPiece> _getSortedPieces() {
+    final locked = _pieces.where((p) => p.isLocked).toList();
+    final unlocked = _pieces.where((p) => !p.isLocked).toList();
+    return [...locked, ...unlocked];
   }
 
   void _checkSnap(JigsawPiece piece) {

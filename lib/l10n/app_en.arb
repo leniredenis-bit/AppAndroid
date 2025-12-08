@@ -15,9 +15,16 @@
   "score": "Score",
   "time": "Time",
   "moves": "Moves",
+  "pieces": "Pieces",
+  "level": "Level",
+  "difficulty": "Difficulty",
+  "easy": "Easy",
+  "medium": "Medium",
+  "hard": "Hard",
   "attempts": "Attempts",
   "victory": "Victory!",
   "defeat": "Defeat",
+  "complete": "COMPLETE!",
   "tryAgain": "Try Again",
   
   "homeWelcome": "Welcome to",
@@ -62,18 +69,24 @@
   "quizDifficultyHard": "HARD",
   
   "minigamesTitle": "🎮 Bible Minigames",
+  "minigamesMemory": "🧠 Memory Game",
+  "minigamesMemoryDesc": "Find biblical pairs!",
   "minigamesPuzzle": "🧩 Jigsaw Puzzle",
   "minigamesPuzzleDesc": "Complete the puzzle",
+  "minigamesJigsaw": "🖼️ Photo Puzzle",
+  "minigamesJigsawDesc": "Assemble real images!",
   "minigamesHangman": "🎯 Bible Hangman",
-  "minigamesHangmanDesc": "Guess the word",
+  "minigamesHangmanDesc": "Guess the biblical word!",
   "minigamesWordSearch": "🔍 Word Search",
-  "minigamesWordSearchDesc": "Find the words",
-  "minigamesMaze": "🗺️ Maze",
-  "minigamesMazeDesc": "Find the exit",
-  "minigamesSequence": "🎵 Sequence",
-  "minigamesSequenceDesc": "Repeat the sequence",
+  "minigamesWordSearchDesc": "Find hidden words!",
+  "minigamesMaze": "🌀 Maze",
+  "minigamesMazeDesc": "Find the exit!",
+  "minigamesSequence": "� Quick Sequence",
+  "minigamesSequenceDesc": "Memorize the color pattern!",
+  "minigamesSequenceCrystal": "💠 Crystal Sequence",
+  "minigamesSequenceCrystalDesc": "Crystal version with sparkles!",
   "minigamesTicTacToe": "⭕ Tic-Tac-Toe",
-  "minigamesTicTacToeDesc": "Against AI",
+  "minigamesTicTacToeDesc": "2 players or vs AI!",
   
   "achievementsTitle": "🏆 Achievements",
   "achievementsUnlocked": "{count} Unlocked",
@@ -234,7 +247,7 @@
     }
   },
   
-  "hangmanTitle": "🔤 Hangman",
+  "hangmanTitle": "Hangman",
   "hangmanCategory": "Category",
   "hangmanAttempts": "Attempts remaining: {attempts}",
   "@hangmanAttempts": {
@@ -255,6 +268,28 @@
     }
   },
   "hangmanNewGame": "New Game",
+  "hangmanPlayAgain": "Play Again",
+  "hangmanErrors": "Errors: {errors} / {max}",
+  "@hangmanErrors": {
+    "placeholders": {
+      "errors": {"type": "int"},
+      "max": {"type": "int"}
+    }
+  },
+  "hangmanCongrats": "🎉 Congratulations! You got it!",
+  "hangmanYouLost": "😢 You lost!",
+  "hangmanWordWas": "The word was: {word}",
+  "@hangmanWordWas": {
+    "placeholders": {
+      "word": {"type": "String"}
+    }
+  },
+  "hangmanWrongLetters": "Wrong letters: {letters}",
+  "@hangmanWrongLetters": {
+    "placeholders": {
+      "letters": {"type": "String"}
+    }
+  },
   
   "wordSearchTitle": "🔍 Word Search",
   "wordSearchWordsFound": "Words found: {found}/{total}",
@@ -288,6 +323,12 @@
       }
     }
   },
+  "mazeMovesCount": "Moves: {count}",
+  "@mazeMovesCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "mazeTime": "Time: {time}",
   "@mazeTime": {
     "placeholders": {
@@ -303,6 +344,42 @@
   "mazeEasy": "Easy",
   "mazeMedium": "Medium",
   "mazeHard": "Hard",
+  "mazeCavern": "🏔️ Maze Cavern",
+  "mazeCampaignMode": "Campaign Mode (Level {level})",
+  "@mazeCampaignMode": {
+    "placeholders": {
+      "level": {"type": "int"}
+    }
+  },
+  "mazeQuickPlayCustom": "Custom Quick Play",
+  "mazeRows": "Rows: {count}",
+  "@mazeRows": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "mazeColumns": "Columns: {count}",
+  "@mazeColumns": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "mazePlayQuick": "Play Quick Game",
+  "mazeEscaped": "✨ ESCAPED! ✨",
+  "mazeCompletedIn": "You completed the maze in {moves} moves.",
+  "@mazeCompletedIn": {
+    "placeholders": {
+      "moves": {"type": "int"}
+    }
+  },
+  "mazeBackToMenu": "Back to Menu",
+  "mazeLevelComplete": "Level {level} Complete!",
+  "@mazeLevelComplete": {
+    "placeholders": {
+      "level": {"type": "int"}
+    }
+  },
+  "mazeLoadingNextCavern": "Loading next cavern...",
   
   "sequenceTitle": "🎯 Sequence",
   "sequenceLevel": "Level: {level}",
@@ -334,6 +411,79 @@
     }
   },
   "sequenceNewRecord": "New record!",
+  "sequenceActiveColors": "ACTIVE COLORS: {active} / {max}",
+  "@sequenceActiveColors": {
+    "placeholders": {
+      "active": {"type": "int"},
+      "max": {"type": "int"}
+    }
+  },
+  "sequenceStreak": "STREAK: {current} / {target}",
+  "@sequenceStreak": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "target": {"type": "int"}
+    }
+  },
+  "sequenceCorrect": "✨ Correct! Next Level! ✨",
+  "sequenceObserve": "👀 Watch the sequence...",
+  "sequenceRepeat": "👆 Your turn! Repeat the sequence",
+  "sequenceGameOverLevel": "❌ Game Over! You reached level {level}",
+  "@sequenceGameOverLevel": {
+    "placeholders": {
+      "level": {"type": "int"}
+    }
+  },
+  "sequenceRestartGame": "Restart Game",
+  "sequenceStartDifficulty": "Start/Difficulty",
+  "sequenceChooseDifficulty": "Choose Difficulty",
+  "sequenceEasyColors": "Easy ({count} Colors)",
+  "@sequenceEasyColors": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sequenceMediumColors": "Medium ({count} Colors)",
+  "@sequenceMediumColors": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sequenceHardColors": "Hard ({count} Colors)",
+  "@sequenceHardColors": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sequenceProgressive": "PROGRESSIVE ({start} -> {end} Colors)",
+  "@sequenceProgressive": {
+    "placeholders": {
+      "start": {"type": "int"},
+      "end": {"type": "int"}
+    }
+  },
+  "sequenceProgressiveDesc": "Adds one color every {count} consecutive correct answers.",
+  "@sequenceProgressiveDesc": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sequenceHighScoreLabel": "High Score: {score}",
+  "@sequenceHighScoreLabel": {
+    "placeholders": {
+      "score": {"type": "int"}
+    }
+  },
+  "colorRed": "Red",
+  "colorBlue": "Blue",
+  "colorGreen": "Green",
+  "colorYellow": "Yellow",
+  "colorPurple": "Purple",
+  "colorOrange": "Orange",
+  "colorCyan": "Cyan",
+  "colorLime": "Lime",
+  "colorPink": "Pink",
+  "colorLocked": "Locked",
   
   "puzzleTitle": "🧩 Puzzle",
   "puzzleMoves": "Moves: {moves}",
@@ -354,5 +504,7 @@
   },
   "puzzleDragPieces": "Drag the pieces to solve the puzzle",
   "puzzleComplete": "Puzzle completed!",
-  "puzzleNewPuzzle": "New Puzzle"
+  "puzzleNewPuzzle": "New Puzzle",
+  "completedInMoves": "Completed in {moves} moves",
+  "newGame": "New Game"
 }

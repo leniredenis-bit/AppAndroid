@@ -15,9 +15,16 @@
   "score": "Puntuación",
   "time": "Tiempo",
   "moves": "Movimientos",
+  "pieces": "Piezas",
+  "level": "Nivel",
+  "difficulty": "Dificultad",
+  "easy": "Fácil",
+  "medium": "Medio",
+  "hard": "Difícil",
   "attempts": "Intentos",
   "victory": "¡Victoria!",
   "defeat": "Derrota",
+  "complete": "¡COMPLETO!",
   "tryAgain": "Intentar de Nuevo",
   
   "homeWelcome": "Bienvenido a",
@@ -62,18 +69,24 @@
   "quizDifficultyHard": "DIFÍCIL",
   
   "minigamesTitle": "🎮 Minijuegos Bíblicos",
+  "minigamesMemory": "🧠 Juego de Memoria",
+  "minigamesMemoryDesc": "¡Encuentra parejas bíblicas!",
   "minigamesPuzzle": "🧩 Rompecabezas",
   "minigamesPuzzleDesc": "Completa el rompecabezas",
+  "minigamesJigsaw": "🖼️ Rompecabezas Foto",
+  "minigamesJigsawDesc": "¡Arma imágenes reales!",
   "minigamesHangman": "🎯 Ahorcado Bíblico",
-  "minigamesHangmanDesc": "Adivina la palabra",
+  "minigamesHangmanDesc": "¡Adivina la palabra bíblica!",
   "minigamesWordSearch": "🔍 Sopa de Letras",
-  "minigamesWordSearchDesc": "Encuentra las palabras",
-  "minigamesMaze": "🗺️ Laberinto",
-  "minigamesMazeDesc": "Encuentra la salida",
-  "minigamesSequence": "🎵 Secuencia",
-  "minigamesSequenceDesc": "Repite la secuencia",
+  "minigamesWordSearchDesc": "¡Encuentra palabras ocultas!",
+  "minigamesMaze": "🌀 Laberinto",
+  "minigamesMazeDesc": "¡Encuentra la salida!",
+  "minigamesSequence": "� Secuencia Rápida",
+  "minigamesSequenceDesc": "¡Memoriza el patrón de colores!",
+  "minigamesSequenceCrystal": "💠 Secuencia Cristal",
+  "minigamesSequenceCrystalDesc": "¡Versión cristal con brillos!",
   "minigamesTicTacToe": "⭕ Tres en Raya",
-  "minigamesTicTacToeDesc": "Contra la IA",
+  "minigamesTicTacToeDesc": "¡2 jugadores o vs IA!",
   
   "achievementsTitle": "🏆 Logros",
   "achievementsUnlocked": "{count} Desbloqueados",
@@ -234,7 +247,7 @@
     }
   },
   
-  "hangmanTitle": "🔤 Ahorcado",
+  "hangmanTitle": "Ahorcado",
   "hangmanCategory": "Categoría",
   "hangmanAttempts": "Intentos restantes: {attempts}",
   "@hangmanAttempts": {
@@ -255,6 +268,28 @@
     }
   },
   "hangmanNewGame": "Nuevo Juego",
+  "hangmanPlayAgain": "Jugar de Nuevo",
+  "hangmanErrors": "Errores: {errors} / {max}",
+  "@hangmanErrors": {
+    "placeholders": {
+      "errors": {"type": "int"},
+      "max": {"type": "int"}
+    }
+  },
+  "hangmanCongrats": "🎉 ¡Felicidades! ¡Acertaste!",
+  "hangmanYouLost": "😢 ¡Perdiste!",
+  "hangmanWordWas": "La palabra era: {word}",
+  "@hangmanWordWas": {
+    "placeholders": {
+      "word": {"type": "String"}
+    }
+  },
+  "hangmanWrongLetters": "Letras incorrectas: {letters}",
+  "@hangmanWrongLetters": {
+    "placeholders": {
+      "letters": {"type": "String"}
+    }
+  },
   
   "wordSearchTitle": "🔍 Sopa de Letras",
   "wordSearchWordsFound": "Palabras encontradas: {found}/{total}",
@@ -288,6 +323,12 @@
       }
     }
   },
+  "mazeMovesCount": "Movimientos: {count}",
+  "@mazeMovesCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "mazeTime": "Tiempo: {time}",
   "@mazeTime": {
     "placeholders": {
@@ -303,6 +344,42 @@
   "mazeEasy": "Fácil",
   "mazeMedium": "Medio",
   "mazeHard": "Difícil",
+  "mazeCavern": "🏔️ Caverna del Laberinto",
+  "mazeCampaignMode": "Modo Campaña (Nivel {level})",
+  "@mazeCampaignMode": {
+    "placeholders": {
+      "level": {"type": "int"}
+    }
+  },
+  "mazeQuickPlayCustom": "Partida Rápida Personalizada",
+  "mazeRows": "Filas: {count}",
+  "@mazeRows": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "mazeColumns": "Columnas: {count}",
+  "@mazeColumns": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "mazePlayQuick": "Jugar Partida Rápida",
+  "mazeEscaped": "✨ ¡ESCAPASTE! ✨",
+  "mazeCompletedIn": "Completaste el laberinto en {moves} movimientos.",
+  "@mazeCompletedIn": {
+    "placeholders": {
+      "moves": {"type": "int"}
+    }
+  },
+  "mazeBackToMenu": "Volver al Menú",
+  "mazeLevelComplete": "¡Nivel {level} Completado!",
+  "@mazeLevelComplete": {
+    "placeholders": {
+      "level": {"type": "int"}
+    }
+  },
+  "mazeLoadingNextCavern": "Cargando próxima caverna...",
   
   "sequenceTitle": "🎯 Secuencia",
   "sequenceLevel": "Nivel: {level}",
@@ -334,6 +411,79 @@
     }
   },
   "sequenceNewRecord": "¡Nuevo récord!",
+  "sequenceActiveColors": "COLORES ACTIVOS: {active} / {max}",
+  "@sequenceActiveColors": {
+    "placeholders": {
+      "active": {"type": "int"},
+      "max": {"type": "int"}
+    }
+  },
+  "sequenceStreak": "RACHA: {current} / {target}",
+  "@sequenceStreak": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "target": {"type": "int"}
+    }
+  },
+  "sequenceCorrect": "✨ ¡Correcto! ¡Siguiente Nivel! ✨",
+  "sequenceObserve": "👀 Observa la secuencia...",
+  "sequenceRepeat": "👆 ¡Tu turno! Repite la secuencia",
+  "sequenceGameOverLevel": "❌ ¡Fin del Juego! Llegaste al nivel {level}",
+  "@sequenceGameOverLevel": {
+    "placeholders": {
+      "level": {"type": "int"}
+    }
+  },
+  "sequenceRestartGame": "Reiniciar Juego",
+  "sequenceStartDifficulty": "Iniciar/Dificultad",
+  "sequenceChooseDifficulty": "Elige la Dificultad",
+  "sequenceEasyColors": "Fácil ({count} Colores)",
+  "@sequenceEasyColors": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sequenceMediumColors": "Medio ({count} Colores)",
+  "@sequenceMediumColors": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sequenceHardColors": "Difícil ({count} Colores)",
+  "@sequenceHardColors": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sequenceProgressive": "PROGRESIVO ({start} -> {end} Colores)",
+  "@sequenceProgressive": {
+    "placeholders": {
+      "start": {"type": "int"},
+      "end": {"type": "int"}
+    }
+  },
+  "sequenceProgressiveDesc": "Añade un color cada {count} aciertos seguidos.",
+  "@sequenceProgressiveDesc": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sequenceHighScoreLabel": "Récord: {score}",
+  "@sequenceHighScoreLabel": {
+    "placeholders": {
+      "score": {"type": "int"}
+    }
+  },
+  "colorRed": "Rojo",
+  "colorBlue": "Azul",
+  "colorGreen": "Verde",
+  "colorYellow": "Amarillo",
+  "colorPurple": "Morado",
+  "colorOrange": "Naranja",
+  "colorCyan": "Cian",
+  "colorLime": "Lima",
+  "colorPink": "Rosa",
+  "colorLocked": "Bloqueado",
   
   "puzzleTitle": "🧩 Rompecabezas",
   "puzzleMoves": "Movimientos: {moves}",
@@ -354,5 +504,7 @@
   },
   "puzzleDragPieces": "Arrastra las piezas para resolver el rompecabezas",
   "puzzleComplete": "¡Rompecabezas completado!",
-  "puzzleNewPuzzle": "Nuevo Rompecabezas"
+  "puzzleNewPuzzle": "Nuevo Rompecabezas",
+  "completedInMoves": "Completado en {moves} movimientos",
+  "newGame": "Nueva Partida"
 }

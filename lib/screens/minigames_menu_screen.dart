@@ -1,113 +1,80 @@
 import 'package:flutter/material.dart';
 import '../services/audio_service.dart';
 import '../l10n/app_localizations.dart';
-import 'minigames/tic_tac_toe_game.dart';
 import 'minigames/tic_tac_toe_neon.dart' as neon;
 import 'minigames/hangman_game.dart';
-import 'minigames/word_search_game.dart';
 import 'minigames/word_search_enhanced.dart' as enhanced;
 import 'minigames/maze_game.dart';
 import 'minigames/sequence_game.dart';
 import 'minigames/sequence_game_crystal.dart' as crystal;
-import 'minigames/puzzle_game.dart';
 import 'minigames/jigsaw_puzzle_game.dart';
 import 'memory_game_screen.dart';
 
 class MinigamesMenuScreen extends StatelessWidget {
   const MinigamesMenuScreen({super.key});
 
-  final List<Map<String, dynamic>> minigames = const [
-    {
-      'emoji': '🧠',
-      'title': 'Jogo da Memória',
-      'desc': 'Encontre pares bíblicos!',
-      'color': Color(0xFFFF6B6B),
-      'screen': 'MemoryGame',
-    },
-    {
-      'emoji': '⭕',
-      'title': 'Jogo da Velha',
-      'desc': 'Duelo 2 jogadores ou vs IA!',
-      'color': Color(0xFF4A90E2),
-      'screen': 'TicTacToeGame',
-    },
-    {
-      'emoji': '🌟',
-      'title': 'Jogo da Velha Neon',
-      'desc': 'Versão neon com animações!',
-      'color': Color(0xFF00F0FF),
-      'screen': 'TicTacToeNeon',
-    },
-    {
-      'emoji': '🎯',
-      'title': 'Forca',
-      'desc': 'Adivinhe a palavra bíblica!',
-      'color': Color(0xFFE24A4A),
-      'screen': 'HangmanGame',
-    },
-    {
-      'emoji': '🔍',
-      'title': 'Caça-Palavras',
-      'desc': 'Encontre palavras escondidas!',
-      'color': Color(0xFF50C878),
-      'screen': 'WordSearchGame',
-    },
-    {
-      'emoji': '🎨',
-      'title': 'Caça-Palavras Enhanced',
-      'desc': 'Versão com linhas coloridas!',
-      'color': Color(0xFFFF00AA),
-      'screen': 'WordSearchEnhanced',
-    },
-    {
-      'emoji': '🌀',
-      'title': 'Labirinto',
-      'desc': 'Encontre a saída!',
-      'color': Color(0xFFFF9500),
-      'screen': 'MazeGame',
-    },
-    {
-      'emoji': '🎨',
-      'title': 'Sequência Rápida',
-      'desc': 'Memorize o padrão de cores!',
-      'color': Color(0xFF9B59B6),
-      'screen': 'SequenceGame',
-    },
-    {
-      'emoji': '💠',
-      'title': 'Sequência Cristal',
-      'desc': 'Versão cristal com brilhos!',
-      'color': Color(0xFF1C1C1C),
-      'screen': 'SequenceCrystal',
-    },
-    {
-      'emoji': '🧩',
-      'title': 'Quebra-Cabeça Jigsaw',
-      'desc': 'Arraste e monte!',
-      'color': Color(0xFF3498DB),
-      'screen': 'PuzzleGame',
-    },
-    {
-      'emoji': '🖼️',
-      'title': 'Quebra-Cabeça Foto',
-      'desc': 'Monte imagens reais!',
-      'color': Color(0xFF16A085),
-      'screen': 'JigsawPuzzleGame',
-    },
-  ];
+  // Retorna lista de jogos com strings traduzidas
+  List<Map<String, dynamic>> _getMinigames(AppLocalizations l10n) {
+    return [
+      {
+        'title': l10n.minigamesMemory,
+        'desc': l10n.minigamesMemoryDesc,
+        'color': const Color(0xFFFF6B6B),
+        'screen': 'MemoryGame',
+      },
+      {
+        'title': l10n.minigamesTicTacToe,
+        'desc': l10n.minigamesTicTacToeDesc,
+        'color': const Color(0xFF4A90E2),
+        'screen': 'TicTacToeNeon',
+      },
+      {
+        'title': l10n.minigamesHangman,
+        'desc': l10n.minigamesHangmanDesc,
+        'color': const Color(0xFFE24A4A),
+        'screen': 'HangmanGame',
+      },
+      {
+        'title': l10n.minigamesWordSearch,
+        'desc': l10n.minigamesWordSearchDesc,
+        'color': const Color(0xFF50C878),
+        'screen': 'WordSearchEnhanced',
+      },
+      {
+        'title': l10n.minigamesMaze,
+        'desc': l10n.minigamesMazeDesc,
+        'color': const Color(0xFFFF9500),
+        'screen': 'MazeGame',
+      },
+      {
+        'title': l10n.minigamesSequence,
+        'desc': l10n.minigamesSequenceDesc,
+        'color': const Color(0xFF9B59B6),
+        'screen': 'SequenceGame',
+      },
+      {
+        'title': l10n.minigamesSequenceCrystal,
+        'desc': l10n.minigamesSequenceCrystalDesc,
+        'color': const Color(0xFF1C1C1C),
+        'screen': 'SequenceCrystal',
+      },
+      {
+        'title': l10n.minigamesJigsaw,
+        'desc': l10n.minigamesJigsawDesc,
+        'color': const Color(0xFF16A085),
+        'screen': 'JigsawPuzzleGame',
+      },
+    ];
+  }
 
   Widget _getGameScreen(String screenName) {
     switch (screenName) {
       case 'MemoryGame':
         return const MemoryGameScreen();
-      case 'TicTacToeGame':
-        return const TicTacToeGame();
       case 'TicTacToeNeon':
         return const neon.TicTacToeGame();
       case 'HangmanGame':
         return const HangmanGame();
-      case 'WordSearchGame':
-        return const WordSearchGame();
       case 'WordSearchEnhanced':
         return const enhanced.WordSearchGame();
       case 'MazeGame':
@@ -116,12 +83,10 @@ class MinigamesMenuScreen extends StatelessWidget {
         return const SequenceGame();
       case 'SequenceCrystal':
         return const crystal.SequenceGame();
-      case 'PuzzleGame':
-        return const PuzzleGame();
       case 'JigsawPuzzleGame':
         return const JigsawPuzzleGame();
       default:
-        return const TicTacToeGame();
+        return const neon.TicTacToeGame();
     }
   }
 
@@ -146,7 +111,10 @@ class MinigamesMenuScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
+        child: Builder(
+          builder: (context) {
+            final minigames = _getMinigames(l10n);
+            return GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 16,
@@ -220,6 +188,8 @@ class MinigamesMenuScreen extends StatelessWidget {
                 ),
               ),
             );
+          },
+        );
           },
         ),
         ),

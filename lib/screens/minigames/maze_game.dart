@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
+import 'dart:async'; // Timer para movimento contínuo
 import 'dart:ui' as ui; // Necessário para efeitos visuais avançados
 import '../../services/audio_service.dart';
 import '../../services/storage_service.dart';
 import '../../services/achievement_service.dart';
 import '../../widgets/achievement_unlock_dialog.dart';
+import '../../l10n/app_localizations.dart';
 
 // --- Constantes do Jogo ---
 const int TILE_SIZE = 32; // Tamanho visual de cada quadrado do labirinto
@@ -141,8 +143,10 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
   Offset? _joystickStartLocalPosition;
   Offset _joystickCurrentLocalPosition = Offset.zero;
   bool _isJoystickActive = false;
-  DateTime? _lastMoveTime; // Controle de cooldown entre movimentos
-  static const int _moveCooldownMs = 200; // Tempo mínimo entre movimentos (ms)
+  Timer? _moveTimer; // Timer para movimento contínuo
+  int _currentDeltaRow = 0; // Direção atual do movimento
+  int _currentDeltaCol = 0;
+  static const int _moveIntervalMs = 150; // Intervalo entre movimentos contínuos (ms)
 
   // Animação do Jogador
   late AnimationController _playerAnimController;
@@ -167,6 +171,7 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
 
   @override
   void dispose() {
+    _stopMovement(); // Para o timer de movimento
     _audioService.stopBackgroundMusic();
     _playerAnimController.dispose();
     super.dispose();
@@ -208,36 +213,56 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
   }
 
   void _returnToMenu() {
+    _stopMovement(); // Para o timer ao sair
     setState(() {
       _isPlaying = false;
       _isGameWon = false;
     });
   }
 
-  // Lógica central de movimento - agora move apenas 1 quadrado por vez
-  void _tryMove(int deltaRow, int deltaCol, int directionCode) {
-    if (_isGameWon || _maze.isEmpty) return;
-
-    // Cooldown entre movimentos para não andar vários quadrados de uma vez
-    final now = DateTime.now();
-    if (_lastMoveTime != null && 
-        now.difference(_lastMoveTime!).inMilliseconds < _moveCooldownMs) {
-      return; // Ainda em cooldown, ignora o movimento
+  // Inicia o timer de movimento contínuo
+  void _startContinuousMovement(int deltaRow, int deltaCol, int directionCode) {
+    // Atualiza a direção atual
+    _currentDeltaRow = deltaRow;
+    _currentDeltaCol = deltaCol;
+    
+    // Executa o primeiro movimento imediatamente
+    _executeMove();
+    
+    // Se não houver timer ativo, cria um
+    if (_moveTimer == null || !_moveTimer!.isActive) {
+      _moveTimer = Timer.periodic(
+        Duration(milliseconds: _moveIntervalMs),
+        (_) => _executeMove(),
+      );
     }
+  }
+  
+  // Para o movimento contínuo
+  void _stopMovement() {
+    _moveTimer?.cancel();
+    _moveTimer = null;
+    _playerAnimController.stop();
+  }
 
-    int newRow = _playerRow + deltaRow;
-    int newCol = _playerCol + deltaCol;
+  // Executa um movimento na direção atual
+  void _executeMove() {
+    if (_isGameWon || _maze.isEmpty || !_isJoystickActive) {
+      _stopMovement();
+      return;
+    }
+    
+    int newRow = _playerRow + _currentDeltaRow;
+    int newCol = _playerCol + _currentDeltaCol;
 
     // Verifica limites do mapa
     if (newRow < 0 || newRow >= _mazeRows || newCol < 0 || newCol >= _mazeCols) {
-      _audioService.playWrongAnswer(); // Som de "bump" na borda
-      return;
+      return; // Não para, apenas não move
     }
 
     // Verifica colisão com parede
     if (_maze[newRow][newCol] == WALL) {
-      _audioService.playWrongAnswer(); // Som de "bump" na parede
-      return;
+      return; // Não para, apenas não move
     }
 
     // Movimento Válido!
@@ -245,19 +270,28 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
       _playerRow = newRow;
       _playerCol = newCol;
       _moves++;
-      _lastMoveTime = now; // Atualiza o tempo do último movimento
     });
     
     // Toca som de passo e inicia animação
     if (!_playerAnimController.isAnimating) {
-        _audioService.playClick(); // Use um som de passo se tiver (ex: 'step.mp3')
-        _playerAnimController.forward(from: 0.0);
+      _audioService.playClick();
+      _playerAnimController.forward(from: 0.0);
     }
-
 
     // Verifica Vitória
     if (_maze[newRow][newCol] == END) {
+      _stopMovement();
       _handleVictory();
+    }
+  }
+
+  // Lógica central de movimento - chamada quando direção muda
+  void _tryMove(int deltaRow, int deltaCol, int directionCode) {
+    if (_isGameWon || _maze.isEmpty) return;
+    
+    // Se a direção mudou, atualiza e continua movimento
+    if (deltaRow != _currentDeltaRow || deltaCol != _currentDeltaCol) {
+      _startContinuousMovement(deltaRow, deltaCol, directionCode);
     }
   }
 
@@ -340,6 +374,8 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
 
   // --- Telas ---
   Widget _buildMenuScreen() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Center(
       child: Card(
         margin: const EdgeInsets.all(20),
@@ -349,13 +385,13 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('🏔️ Caverna do Labirinto', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.orangeAccent)),
+              Text(l10n.mazeCavern, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.orangeAccent)),
               const SizedBox(height: 30),
               
               // Botão Modo Campanha
               ElevatedButton.icon(
                 icon: const Icon(Icons.flag),
-                label: Text('Modo Campanha (Nível $_campaignLevel)'),
+                label: Text(l10n.mazeCampaignMode(_campaignLevel)),
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     foregroundColor: Colors.brown.shade900,
@@ -372,12 +408,12 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
               const SizedBox(height: 20),
 
               // Configurações Jogo Rápido
-              const Text('Jogo Rápido Personalizado', style: TextStyle(color: Colors.white70, fontSize: 16)),
+              Text(l10n.mazeQuickPlayCustom, style: const TextStyle(color: Colors.white70, fontSize: 16)),
               const SizedBox(height: 10),
               Row(
                  mainAxisAlignment: MainAxisAlignment.center,
                  children: [
-                   Text('Linhas: $_mazeRows ', style: const TextStyle(color: Colors.orangeAccent)),
+                   Text(l10n.mazeRows(_mazeRows), style: const TextStyle(color: Colors.orangeAccent)),
                    Slider(
                      value: _mazeRows.toDouble(),
                      min: 10,
@@ -391,7 +427,7 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Colunas: $_mazeCols ', style: const TextStyle(color: Colors.orangeAccent)),
+                  Text(l10n.mazeColumns(_mazeCols), style: const TextStyle(color: Colors.orangeAccent)),
                   Slider(
                     value: _mazeCols.toDouble(),
                     min: 10,
@@ -405,7 +441,7 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
               const SizedBox(height: 10),
               ElevatedButton.icon(
                 icon: const Icon(Icons.play_arrow),
-                label: const Text('Jogar Partida Rápida'),
+                label: Text(l10n.mazePlayQuick),
                  style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey.shade700,
                     foregroundColor: Colors.white,
@@ -426,6 +462,8 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
   }
 
   Widget _buildGameScreen() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Stack(
       children: [
         // 1. O Jogo Renderizado (CustomPaint) dentro de uma câmera interativa
@@ -479,11 +517,13 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
               _handleJoystickUpdate(details.localPosition);
             },
             onPanEnd: (_) {
+              _stopMovement(); // Para o movimento contínuo
               setState(() {
                 _isJoystickActive = false;
                 _joystickStartLocalPosition = null;
+                _currentDeltaRow = 0;
+                _currentDeltaCol = 0;
               });
-              _playerAnimController.stop(); // Para a animação de caminhada
             },
             // Desenha o joystick visualmente apenas se estiver ativo
             child: _isJoystickActive && _joystickStartLocalPosition != null
@@ -520,7 +560,7 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
                   border: Border.all(color: Colors.orangeAccent.withValues(alpha: 0.5))
                 ),
                 child: Text(
-                  'Movimentos: $_moves',
+                  l10n.mazeMovesCount(_moves),
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orangeAccent),
                 ),
               ),
@@ -541,14 +581,14 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                   const Text('✨ ESCAPOU! ✨', style: TextStyle(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold)),
+                   Text(l10n.mazeEscaped, style: const TextStyle(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold)),
                    const SizedBox(height: 20),
-                   Text('Você completou o labirinto em $_moves movimentos.', style: const TextStyle(fontSize: 18, color: Colors.white70)),
+                   Text(l10n.mazeCompletedIn(_moves), style: const TextStyle(fontSize: 18, color: Colors.white70)),
                    const SizedBox(height: 30),
                    ElevatedButton(
                      onPressed: _returnToMenu,
                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.green.shade900),
-                     child: const Text('Voltar ao Menu'),
+                     child: Text(l10n.mazeBackToMenu),
                    )
                 ],
               ),
@@ -561,11 +601,11 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
               padding: const EdgeInsets.all(30),
               decoration: BoxDecoration(color: Colors.orange.shade800.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(20)),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                 Text('Nível $_campaignLevel Concluído!', style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)),
+                 Text(l10n.mazeLevelComplete(_campaignLevel), style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)),
                  const SizedBox(height: 10),
                  const CircularProgressIndicator(color: Colors.white),
                  const SizedBox(height: 10),
-                 const Text('Carregando próxima caverna...', style: TextStyle(color: Colors.white70)),
+                 Text(l10n.mazeLoadingNextCavern, style: const TextStyle(color: Colors.white70)),
               ]),
             ),
           ),
@@ -575,12 +615,14 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     // Usa KeyboardListener apenas como fallback ou para testes em emulador
     return Scaffold(
       backgroundColor: Colors.brown.shade900, // Fundo escuro da caverna
       appBar: _isPlaying ? null : AppBar(
-        title: const Text('Labirinto', style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF162447),
+        title: Text(l10n.mazeTitle, style: const TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF162447),
         iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
