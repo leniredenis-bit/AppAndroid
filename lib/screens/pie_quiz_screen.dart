@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/question.dart';
 import '../services/audio_service.dart';
 import '../widgets/bible_reference_button.dart';
+import '../l10n/app_localizations.dart';
 
 class PieQuizScreen extends StatefulWidget {
   final List<Question> questions;
@@ -87,31 +88,32 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
   }
 
   void _showResults() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF162447),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          '🎉 Fim do Jogo!',
-          style: TextStyle(color: Colors.white, fontSize: 24),
+        title: Text(
+          '🎉 ${l10n.pieEndGame}',
+          style: const TextStyle(color: Colors.white, fontSize: 24),
           textAlign: TextAlign.center,
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 20),
-            _buildFinalScoreCard(1, _player1Score),
+            _buildFinalScoreCard(1, _player1Score, l10n.pieQuizPlayer(1)),
             const SizedBox(height: 16),
-            _buildFinalScoreCard(2, _player2Score),
+            _buildFinalScoreCard(2, _player2Score, l10n.pieQuizPlayer(2)),
             const SizedBox(height: 20),
             Text(
               _player1Score > _player2Score
-                  ? '🏆 Jogador 1 Venceu!'
+                  ? '🏆 ${l10n.piePlayerWon(1)}'
                   : _player2Score > _player1Score
-                      ? '🏆 Jogador 2 Venceu!'
-                      : '🤝 Empate!',
+                      ? '🏆 ${l10n.piePlayerWon(2)}'
+                      : '🤝 ${l10n.pieTie}',
               style: const TextStyle(
                 color: Colors.amber,
                 fontSize: 20,
@@ -127,9 +129,9 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: const Text(
-              '🏠 Início',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+            child: Text(
+              '🏠 ${l10n.pieHome}',
+              style: const TextStyle(color: Colors.white, fontSize: 16),
             ),
           ),
         ],
@@ -137,7 +139,7 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
     );
   }
 
-  Widget _buildFinalScoreCard(int player, int score) {
+  Widget _buildFinalScoreCard(int player, int score, String playerLabel) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -157,7 +159,7 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Jogador $player',
+            playerLabel,
             style: const TextStyle(color: Colors.white, fontSize: 18),
           ),
           Text(
@@ -175,6 +177,7 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFF101A2C),
       appBar: AppBar(
@@ -289,7 +292,7 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
                         onPressed: _toggleAnswer,
                         icon: Icon(_showAnswer ? Icons.visibility_off : Icons.visibility),
                         label: Text(
-                          _showAnswer ? 'Ocultar Resposta' : '👁️ Ver Resposta',
+                          _showAnswer ? l10n.pieQuizHideAnswer : l10n.pieQuizShowAnswer,
                           style: const TextStyle(fontSize: 16),
                         ),
                         style: ElevatedButton.styleFrom(
@@ -317,13 +320,13 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Row(
+                            Row(
                               children: [
-                                Icon(Icons.check_circle, color: Colors.lightGreenAccent),
-                                SizedBox(width: 8),
+                                const Icon(Icons.check_circle, color: Colors.lightGreenAccent),
+                                const SizedBox(width: 8),
                                 Text(
-                                  'Resposta Correta:',
-                                  style: TextStyle(
+                                  l10n.pieCorrectAnswer,
+                                  style: const TextStyle(
                                     color: Colors.lightGreenAccent,
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
@@ -358,9 +361,9 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
             const SizedBox(height: 20),
 
             // Botões de pontuação
-            const Text(
-              'Quem acertou?',
-              style: TextStyle(
+            Text(
+              l10n.pieWhoGotIt,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -392,8 +395,8 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
                     ),
                     child: Text(
                       _currentRoundWinner == 1
-                          ? '✓ Jogador 1'
-                          : '👤 Jogador 1',
+                          ? '✓ ${l10n.pieQuizPlayer(1)}'
+                          : '👤 ${l10n.pieQuizPlayer(1)}',
                       style: const TextStyle(fontSize: 16),
                     ),
                   ),
@@ -422,8 +425,8 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
                     ),
                     child: Text(
                       _currentRoundWinner == 2
-                          ? '✓ Jogador 2'
-                          : '👤 Jogador 2',
+                          ? '✓ ${l10n.pieQuizPlayer(2)}'
+                          : '👤 ${l10n.pieQuizPlayer(2)}',
                       style: const TextStyle(fontSize: 16),
                     ),
                   ),
@@ -447,7 +450,7 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
                   ),
                 ),
                 child: Text(
-                  _isLastQuestion ? 'Ver Resultado Final' : 'Próxima Pergunta',
+                  _isLastQuestion ? l10n.pieQuizFinalResult : l10n.pieQuizNextQuestion,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -466,6 +469,7 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
     required int score,
     required bool hasPoint,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -482,7 +486,7 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Jogador $player',
+                l10n.pieQuizPlayer(player),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -527,15 +531,16 @@ class _PieQuizScreenState extends State<PieQuizScreen> {
   }
 
   String _getDifficultyText(int difficulty) {
+    final l10n = AppLocalizations.of(context)!;
     switch (difficulty) {
       case 1:
-        return 'Fácil';
+        return l10n.difficultyEasy;
       case 2:
-        return 'Médio';
+        return l10n.difficultyMedium;
       case 3:
-        return 'Difícil';
+        return l10n.difficultyHard;
       default:
-        return 'Normal';
+        return l10n.difficultyNormal;
     }
   }
 }

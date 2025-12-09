@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import '../../l10n/app_localizations.dart';
 import '../../models/multiplayer/room.dart';
 import '../../services/multiplayer/firebase_multiplayer_service.dart';
 import 'multiplayer_quiz_screen.dart';
@@ -113,11 +114,12 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
   }
 
   Future<void> _nextQuestion() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       await FirebaseMultiplayerService().nextQuestion(widget.roomCode);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: Colors.red),
       );
     }
   }
@@ -128,6 +130,7 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_currentRoom == null) {
       return Scaffold(
         backgroundColor: Color(0xFF101A2C),
@@ -145,7 +148,7 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
       backgroundColor: Color(0xFF101A2C),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('Resultados da Rodada', style: TextStyle(color: Colors.white)),
+        title: Text(l10n.multiplayerRoundResults, style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF162447),
         iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
@@ -168,7 +171,7 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
               child: Column(
                 children: [
                   Text(
-                    currentPlayer.lastAnswerCorrect ? '✅ Acertou!' : '❌ Errou',
+                    currentPlayer.lastAnswerCorrect ? '✅ ${l10n.multiplayerCorrect}' : '❌ ${l10n.multiplayerWrong}',
                     style: TextStyle(
                       color: currentPlayer.lastAnswerCorrect ? Colors.green : Colors.red,
                       fontSize: 32,
@@ -181,12 +184,12 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
                     children: [
                       _buildStatBox(
                         icon: '🏆',
-                        label: 'Posição',
+                        label: l10n.multiplayerPosition,
                         value: '$currentPlayerRank°',
                       ),
                       _buildStatBox(
                         icon: '⭐',
-                        label: 'Pontos',
+                        label: l10n.multiplayerPoints,
                         value: '${currentPlayer.score}',
                       ),
                     ],
@@ -205,7 +208,7 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
                     return Padding(
                       padding: EdgeInsets.only(bottom: 16),
                       child: Text(
-                        '📊 Ranking Atual',
+                        '📊 ${l10n.multiplayerCurrentRanking}',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -292,7 +295,7 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
                                   ),
                                   SizedBox(width: 4),
                                   Text(
-                                    player.lastAnswerCorrect ? 'Acertou' : 'Errou',
+                                    player.lastAnswerCorrect ? l10n.multiplayerCorrect : l10n.multiplayerWrong,
                                     style: TextStyle(
                                       color: player.lastAnswerCorrect ? Colors.green : Colors.red,
                                       fontSize: 12,
@@ -315,7 +318,7 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
                               ),
                             ),
                             Text(
-                              'pontos',
+                              l10n.multiplayerPoints.toLowerCase(),
                               style: TextStyle(
                                 color: Colors.white70,
                                 fontSize: 10,
@@ -362,7 +365,7 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
                             Icon(Icons.arrow_forward, size: 24),
                             SizedBox(width: 8),
                             Text(
-                              'Próxima Pergunta',
+                              l10n.multiplayerNextQuestion,
                               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                           ],
@@ -388,7 +391,7 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
                           ),
                           SizedBox(width: 12),
                           Text(
-                            'Aguardando o anfitrião...',
+                            l10n.multiplayerWaitingHost,
                             style: TextStyle(color: Colors.white, fontSize: 16),
                           ),
                         ],

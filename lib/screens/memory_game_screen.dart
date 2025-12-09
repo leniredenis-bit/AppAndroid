@@ -4,6 +4,7 @@ import '../models/stats_service.dart';
 import '../widgets/emoji_text.dart';
 import '../services/audio_service.dart';
 import '../services/minigame_content_service.dart';
+import '../l10n/app_localizations.dart';
 
 class MemoryGameScreen extends StatefulWidget {
   const MemoryGameScreen({super.key});
@@ -427,14 +428,14 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                 showConfig = true; // Volta para tela de configuração
               });
             },
-            child: Text('Nova Partida', style: TextStyle(color: Colors.white70)),
+            child: Text(AppLocalizations.of(context)!.memoryNewGame, style: TextStyle(color: Colors.white70)),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: Text('Início', style: TextStyle(color: Colors.white70)),
+            child: Text(AppLocalizations.of(context)!.memoryHome, style: TextStyle(color: Colors.white70)),
           ),
         ],
       ),
@@ -535,12 +536,13 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // Tela de configuração
     if (showConfig) {
       return Scaffold(
         backgroundColor: Color(0xFF101A2C),
         appBar: AppBar(
-          title: Text('Configurar Jogo', style: TextStyle(color: Colors.white)),
+          title: Text(l10n.memoryConfigureGame, style: TextStyle(color: Colors.white)),
           backgroundColor: Color(0xFF162447),
           iconTheme: IconThemeData(color: Colors.white),
           elevation: 0,

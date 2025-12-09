@@ -32,21 +32,6 @@ class _SequenceGameState extends State<SequenceGame> {
   
   static const int maxLevel = 20; // Aumentado para 20 níveis
 
-  // Colors
-  final List<Color> _colors = [
-    Colors.red,
-    Colors.blue,
-    Colors.green,
-    Colors.yellow,
-  ];
-
-  final List<String> _colorNames = [
-    'Vermelho',
-    'Azul',
-    'Verde',
-    'Amarelo',
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -214,8 +199,9 @@ class _SequenceGameState extends State<SequenceGame> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('🧠 Sequência Rápida'),
-        backgroundColor: Colors.deepPurple,
+        title: const Text('💎 Caverna dos Cristais'),
+        backgroundColor: Color(0xFF1A0A2E),
+        foregroundColor: Colors.white,
         actions: [
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -233,19 +219,39 @@ class _SequenceGameState extends State<SequenceGame> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.deepPurple.shade300, Colors.deepPurple.shade700],
+            colors: [
+              Color(0xFF1A0A2E), // Roxo escuro caverna
+              Color(0xFF0D0515), // Quase preto
+              Color(0xFF0A0A0A), // Preto profundo
+            ],
           ),
         ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Level indicator
+              // Level indicator - estilo pedra mística
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  gradient: RadialGradient(
+                    colors: [
+                      Color(0xFF2D1F3D),
+                      Color(0xFF1A1025),
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    color: Color(0xFF6B4D8A).withValues(alpha: 0.5),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xFF6B4D8A).withValues(alpha: 0.3),
+                      blurRadius: 15,
+                      spreadRadius: 2,
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
@@ -350,7 +356,7 @@ class _SequenceGameState extends State<SequenceGame> {
 
               const SizedBox(height: 40),
 
-              // Color buttons
+              // Color buttons - Crystal Design
               if (!_gameOver && _sequence.isNotEmpty)
                 Wrap(
                   spacing: 20,
@@ -360,47 +366,11 @@ class _SequenceGameState extends State<SequenceGame> {
                     bool isHighlighted = (_isShowingSequence && 
                         _currentShowIndex >= 0 && 
                         _sequence[_currentShowIndex] == index) ||
-                        (_lastTappedColor == index); // Também acende ao tocar
+                        (_lastTappedColor == index);
                     
                     return GestureDetector(
                       onTap: () => _onColorTap(index),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: isHighlighted 
-                              ? _colors[index] 
-                              : _colors[index].withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: isHighlighted 
-                                  ? _colors[index].withValues(alpha: 0.8)
-                                  : Colors.black.withValues(alpha: 0.3),
-                              blurRadius: isHighlighted ? 20 : 10,
-                              spreadRadius: isHighlighted ? 5 : 2,
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            _colorNames[index],
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black,
-                                  offset: Offset(1, 1),
-                                  blurRadius: 3,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                      child: _buildCrystalButton(index, isHighlighted),
                     );
                   }),
                 ),
@@ -430,5 +400,264 @@ class _SequenceGameState extends State<SequenceGame> {
         ),
       ),
     );
+  }
+
+  // Widget de cristal incrustado na caverna
+  Widget _buildCrystalButton(int index, bool isHighlighted) {
+    // Cores dos cristais com tons de gema
+    final List<List<Color>> crystalGradients = [
+      [Color(0xFFFF1744), Color(0xFFD50000), Color(0xFF7F0000)], // Rubi
+      [Color(0xFF448AFF), Color(0xFF2962FF), Color(0xFF0D47A1)], // Safira
+      [Color(0xFF69F0AE), Color(0xFF00E676), Color(0xFF00695C)], // Esmeralda  
+      [Color(0xFFFFD740), Color(0xFFFFC400), Color(0xFFFF8F00)], // Topázio
+    ];
+
+    final crystalColors = crystalGradients[index];
+    final double glowIntensity = isHighlighted ? 1.0 : 0.3;
+    final double scale = isHighlighted ? 1.1 : 1.0;
+
+    return AnimatedScale(
+      scale: scale,
+      duration: const Duration(milliseconds: 200),
+      child: Container(
+        width: 130,
+        height: 140,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Cavidade da rocha (fundo escuro)
+            Container(
+              width: 120,
+              height: 130,
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  colors: [
+                    Color(0xFF2D2D2D),
+                    Color(0xFF1A1A1A),
+                    Color(0xFF0D0D0D),
+                  ],
+                  stops: [0.0, 0.6, 1.0],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Color(0xFF3D3D3D),
+                  width: 3,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.8),
+                    blurRadius: 15,
+                    spreadRadius: 2,
+                    offset: Offset(0, 5),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Brilho ambiente do cristal quando iluminado
+            if (isHighlighted)
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 140,
+                height: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  boxShadow: [
+                    BoxShadow(
+                      color: crystalColors[0].withValues(alpha: 0.6),
+                      blurRadius: 40,
+                      spreadRadius: 10,
+                    ),
+                    BoxShadow(
+                      color: crystalColors[1].withValues(alpha: 0.4),
+                      blurRadius: 60,
+                      spreadRadius: 20,
+                    ),
+                  ],
+                ),
+              ),
+            
+            // Cristal principal (forma de gema hexagonal)
+            CustomPaint(
+              size: Size(90, 100),
+              painter: CrystalPainter(
+                baseColor: crystalColors[0],
+                midColor: crystalColors[1],
+                darkColor: crystalColors[2],
+                glowIntensity: glowIntensity,
+              ),
+            ),
+            
+            // Reflexo superior (brilho)
+            Positioned(
+              top: 25,
+              left: 35,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: isHighlighted ? 1.0 : 0.4,
+                child: Container(
+                  width: 20,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.9),
+                        Colors.white.withValues(alpha: 0.0),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(5),
+                      bottomLeft: Radius.circular(5),
+                      bottomRight: Radius.circular(15),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            
+            // Pequeno brilho secundário
+            Positioned(
+              top: 35,
+              right: 40,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: isHighlighted ? 0.8 : 0.2,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            
+            // Nome da cor (emoji estilo)
+            Positioned(
+              bottom: 8,
+              child: Text(
+                _getCrystalEmoji(index),
+                style: TextStyle(
+                  fontSize: 20,
+                  shadows: [
+                    Shadow(
+                      color: crystalColors[0],
+                      blurRadius: isHighlighted ? 15 : 5,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getCrystalEmoji(int index) {
+    switch (index) {
+      case 0: return '❤️'; // Rubi
+      case 1: return '💙'; // Safira
+      case 2: return '💚'; // Esmeralda
+      case 3: return '💛'; // Topázio
+      default: return '💎';
+    }
+  }
+}
+
+// Painter customizado para desenhar o cristal
+class CrystalPainter extends CustomPainter {
+  final Color baseColor;
+  final Color midColor;
+  final Color darkColor;
+  final double glowIntensity;
+
+  CrystalPainter({
+    required this.baseColor,
+    required this.midColor,
+    required this.darkColor,
+    required this.glowIntensity,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+    
+    // Facetas do cristal (forma de gema)
+    final path = Path();
+    
+    // Topo do cristal
+    path.moveTo(centerX, 5);
+    path.lineTo(centerX + 35, centerY - 15);
+    path.lineTo(centerX + 30, centerY + 25);
+    path.lineTo(centerX, size.height - 5);
+    path.lineTo(centerX - 30, centerY + 25);
+    path.lineTo(centerX - 35, centerY - 15);
+    path.close();
+    
+    // Gradiente do cristal
+    final paint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          baseColor.withValues(alpha: 0.3 + (glowIntensity * 0.7)),
+          midColor.withValues(alpha: 0.5 + (glowIntensity * 0.5)),
+          darkColor.withValues(alpha: 0.7 + (glowIntensity * 0.3)),
+        ],
+        stops: [0.0, 0.5, 1.0],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+    
+    canvas.drawPath(path, paint);
+    
+    // Borda do cristal
+    final borderPaint = Paint()
+      ..color = baseColor.withValues(alpha: 0.5 + (glowIntensity * 0.5))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    
+    canvas.drawPath(path, borderPaint);
+    
+    // Linha de faceta interna (esquerda)
+    final facetPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.2 + (glowIntensity * 0.3))
+      ..strokeWidth = 1.5;
+    
+    canvas.drawLine(
+      Offset(centerX, 5),
+      Offset(centerX, size.height - 5),
+      facetPaint,
+    );
+    
+    // Faceta diagonal esquerda
+    canvas.drawLine(
+      Offset(centerX, 5),
+      Offset(centerX - 30, centerY + 25),
+      facetPaint,
+    );
+    
+    // Faceta diagonal direita
+    canvas.drawLine(
+      Offset(centerX, 5),
+      Offset(centerX + 30, centerY + 25),
+      facetPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CrystalPainter oldDelegate) {
+    return oldDelegate.glowIntensity != glowIntensity;
   }
 }

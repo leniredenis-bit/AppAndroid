@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import '../../l10n/app_localizations.dart';
 import '../../models/multiplayer/room.dart';
 import '../../models/question.dart';
 import '../../services/multiplayer/firebase_multiplayer_service.dart';
@@ -216,14 +217,15 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
   }
 
   void _showRoomClosedDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         backgroundColor: Color(0xFF162447),
-        title: Text('Sala encerrada', style: TextStyle(color: Colors.white)),
+        title: Text(l10n.multiplayerRoomClosed, style: TextStyle(color: Colors.white)),
         content: Text(
-          'O anfitrião encerrou a partida.',
+          l10n.multiplayerRoomClosedHost,
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
@@ -232,7 +234,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
               Navigator.pop(context);
               Navigator.pop(context);
             },
-            child: Text('OK', style: TextStyle(color: Colors.white)),
+            child: Text(l10n.ok, style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -250,6 +252,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading || _currentRoom == null || _currentQuestion == null) {
       return Scaffold(
         backgroundColor: Color(0xFF101A2C),
@@ -260,7 +263,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
               CircularProgressIndicator(color: Color(0xFF3A5A8C)),
               SizedBox(height: 16),
               Text(
-                'Carregando pergunta...',
+                l10n.loading,
                 style: TextStyle(color: Colors.white70),
               ),
             ],
@@ -279,7 +282,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
         backgroundColor: Color(0xFF101A2C),
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: Text('Pergunta ${_currentRoom!.currentQuestionIndex + 1}/${_currentRoom!.totalQuestions}', style: TextStyle(color: Colors.white)),
+          title: Text('${l10n.multiplayerQuestion} ${_currentRoom!.currentQuestionIndex + 1}/${_currentRoom!.totalQuestions}', style: TextStyle(color: Colors.white)),
           backgroundColor: Color(0xFF162447),
           iconTheme: IconThemeData(color: Colors.white),
           elevation: 0,

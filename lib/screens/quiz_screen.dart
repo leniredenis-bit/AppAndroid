@@ -490,7 +490,7 @@ class _QuizScreenState extends State<QuizScreen> {
                                 nextQuestion();
                               },
                               child: Text(
-                                'Próxima',
+                                l10n.quizNext,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -523,7 +523,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Próxima',
+                        l10n.quizNext,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -541,7 +541,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 padding: const EdgeInsets.only(top: 8),
                 child: Center(
                   child: Text(
-                    'Próxima pergunta em ${autoAdvanceTime}s...',
+                    l10n.quizNextIn(autoAdvanceTime),
                     style: TextStyle(
                       color: Colors.white60,
                       fontSize: 12,
@@ -650,6 +650,7 @@ class _AnimatedResultDialogState extends State<_AnimatedResultDialog>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final percentage = (widget.correctAnswers / widget.totalQuestions * 100).round();
 
     return Dialog(
@@ -699,7 +700,7 @@ class _AnimatedResultDialogState extends State<_AnimatedResultDialog>
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Quiz Finalizado!',
+                    l10n.quizFinished,
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 16,
@@ -717,7 +718,7 @@ class _AnimatedResultDialogState extends State<_AnimatedResultDialog>
                     child: Column(
                       children: [
                         Text(
-                          'Pontuação',
+                          l10n.quizScore,
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 14,
@@ -747,8 +748,8 @@ class _AnimatedResultDialogState extends State<_AnimatedResultDialog>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildStat('Acertos', '${widget.correctAnswers}/${widget.totalQuestions}', Colors.green),
-                      _buildStat('Aproveitamento', '$percentage%', widget.celebrationColor),
+                      _buildStat(l10n.statsCorrectAnswers, '${widget.correctAnswers}/${widget.totalQuestions}', Colors.green),
+                      _buildStat(l10n.quizAccuracy, '$percentage%', widget.celebrationColor),
                     ],
                   ),
                   SizedBox(height: 24),
@@ -769,7 +770,7 @@ class _AnimatedResultDialogState extends State<_AnimatedResultDialog>
                         ),
                       ),
                       child: Text(
-                        'Voltar ao Menu',
+                        l10n.quizBackToMenu,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,

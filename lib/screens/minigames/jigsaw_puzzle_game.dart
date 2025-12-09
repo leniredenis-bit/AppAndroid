@@ -174,7 +174,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
           // Botão Upload
           ElevatedButton.icon(
             icon: const Icon(Icons.add_photo_alternate, size: 30),
-            label: const Text("Carregar da Galeria"),
+            label: Text(AppLocalizations.of(context)!.jigsawLoadFromGallery),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.all(20),
               backgroundColor: Colors.orange,
@@ -184,7 +184,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
           ),
           
           const SizedBox(height: 20),
-          const Text("Ou escolha uma imagem:", style: TextStyle(color: Colors.white70)),
+          Text(AppLocalizations.of(context)!.jigsawOrChooseImage, style: const TextStyle(color: Colors.white70)),
           const SizedBox(height: 10),
           
           // Grid de Imagens do Sistema
@@ -239,7 +239,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
       // Caso não tenha o pacote image_picker ou dê erro
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erro ao abrir galeria. Verifique as permissões.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.jigsawGalleryError)),
         );
       }
     }

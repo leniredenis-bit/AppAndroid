@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/storage_service.dart';
 import '../models/stats_data.dart';
 import 'package:intl/intl.dart';
+import '../l10n/app_localizations.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -132,10 +133,12 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
       appBar: AppBar(
-        title: Text('Estatísticas', style: TextStyle(color: Colors.white)),
+        title: Text(l10n.statsTitle, style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF162447),
         iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
@@ -145,9 +148,9 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
           labelColor: Colors.amber,
           unselectedLabelColor: Colors.white70,
           tabs: [
-            Tab(icon: Icon(Icons.quiz), text: 'Quiz'),
-            Tab(icon: Icon(Icons.games), text: 'Minigames'),
-            Tab(icon: Icon(Icons.history), text: 'Histórico'),
+            Tab(icon: Icon(Icons.quiz), text: l10n.statsTabQuiz),
+            Tab(icon: Icon(Icons.games), text: l10n.statsTabMinigames),
+            Tab(icon: Icon(Icons.history), text: l10n.statsTabHistory),
           ],
         ),
       ),
@@ -165,10 +168,12 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
   }
 
   Widget _buildQuizStatsTab() {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (_globalStats == null) {
       return Center(
         child: Text(
-          'Nenhum dado disponível',
+          l10n.statsNoData,
           style: TextStyle(color: Colors.white70),
         ),
       );
@@ -181,7 +186,7 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
         children: [
           // Estatísticas principais
           Text(
-            '📊 Desempenho Geral',
+            l10n.statsGeneralPerformance,
             style: TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -200,24 +205,24 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
             children: [
               _buildStatCard(
                 emoji: '🧠',
-                title: 'Quizzes\nRealizados',
+                title: l10n.statsQuizzesCompleted,
                 value: '${_globalStats!.totalQuizzes}',
               ),
               _buildStatCard(
                 emoji: '✅',
-                title: 'Taxa de\nAcerto',
+                title: l10n.statsAccuracyRate,
                 value: '${_globalStats!.accuracy.toStringAsFixed(1)}%',
                 valueColor: Colors.green,
               ),
               _buildStatCard(
                 emoji: '🏆',
-                title: 'Melhor\nScore',
+                title: l10n.statsBestScore,
                 value: '${_globalStats!.highScore}',
                 valueColor: Colors.orange,
               ),
               _buildStatCard(
                 emoji: '🔥',
-                title: 'Sequência\nAtual',
+                title: l10n.statsCurrentStreak,
                 value: '${_globalStats!.currentStreak}',
                 valueColor: Colors.red,
               ),
@@ -262,7 +267,7 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
                           ),
                         ),
                         Text(
-                          'Sequência Atual',
+                          l10n.statsCurrentStreak.replaceAll('\n', ' '),
                           style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                       ],
@@ -280,7 +285,7 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
                           ),
                         ),
                         Text(
-                          'Melhor Sequência',
+                          l10n.statsBestStreak,
                           style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                       ],
@@ -289,7 +294,7 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
                 ),
                 SizedBox(height: 12),
                 Text(
-                  'Mantenha 80%+ de acerto para continuar a sequência!',
+                  l10n.statsStreakTip,
                   style: TextStyle(
                     color: Colors.white60,
                     fontSize: 11,
@@ -306,7 +311,7 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
           // Desempenho por categoria
           if (_globalStats!.scoresByCategory.isNotEmpty) ...[
             Text(
-              '📚 Por Categoria',
+              l10n.statsByCategory,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -327,7 +332,7 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
           // Precisão por dificuldade
           if (_globalStats!.accuracyByDifficulty.isNotEmpty) ...[
             Text(
-              '🎯 Precisão por Dificuldade',
+              l10n.statsAccuracyByDifficulty,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -361,6 +366,8 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
   }
 
   Widget _buildMinigamesStatsTab() {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (_minigameRecords == null || _minigameRecords!.records.isEmpty) {
       return Center(
         child: Column(
@@ -369,7 +376,7 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
             Text('🎮', style: TextStyle(fontSize: 64)),
             SizedBox(height: 16),
             Text(
-              'Nenhum minigame jogado ainda',
+              l10n.statsNoMinigames,
               style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
           ],
@@ -378,20 +385,20 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
     }
 
     final gameNames = {
-      'puzzle': '🧩 Quebra-Cabeça',
-      'hangman': '📝 Forca',
-      'word_search': '🔍 Caça-Palavras',
-      'maze': '🌀 Labirinto',
-      'sequence': '🎵 Sequência',
-      'tictactoe': '⭕ Jogo da Velha',
-      'memory': '🧠 Jogo da Memória',
+      'puzzle': l10n.statsGamePuzzle,
+      'hangman': l10n.statsGameHangman,
+      'word_search': l10n.statsGameWordSearch,
+      'maze': l10n.statsGameMaze,
+      'sequence': l10n.statsGameSequence,
+      'tictactoe': l10n.statsGameTicTacToe,
+      'memory': l10n.statsGameMemory,
     };
 
     return ListView(
       padding: EdgeInsets.all(16),
       children: [
         Text(
-          '🕹️ Estatísticas dos Minigames',
+          l10n.statsMinigamesTitle,
           style: TextStyle(
             color: Colors.white,
             fontSize: 20,
@@ -434,17 +441,17 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildMinigameStat('🎮', 'Jogos', '${record.gamesPlayed}'),
-                    _buildMinigameStat('🏆', 'Vitórias', '${record.gamesWon}'),
-                    _buildMinigameStat('📊', 'Taxa', '${record.winRate.toStringAsFixed(1)}%'),
-                    _buildMinigameStat('⭐', 'Recorde', '${record.highScore}'),
+                    _buildMinigameStat('🎮', l10n.statsGames, '${record.gamesPlayed}'),
+                    _buildMinigameStat('🏆', l10n.statsWins, '${record.gamesWon}'),
+                    _buildMinigameStat('📊', l10n.statsRate, '${record.winRate.toStringAsFixed(1)}%'),
+                    _buildMinigameStat('⭐', l10n.statsRecord, '${record.highScore}'),
                   ],
                 ),
                 if (record.bestTime != null && record.bestTime! > 0) ...[
                   SizedBox(height: 8),
                   Center(
                     child: Text(
-                      '⏱️ Melhor tempo: ${_formatTime(record.bestTime!)}',
+                      l10n.statsBestTime(_formatTime(record.bestTime!)),
                       style: TextStyle(color: Colors.amber, fontSize: 12),
                     ),
                   ),
@@ -458,6 +465,8 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
   }
 
   Widget _buildHistoryTab() {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (_recentHistory.isEmpty) {
       return Center(
         child: Column(
@@ -466,7 +475,7 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
             Text('📜', style: TextStyle(fontSize: 64)),
             SizedBox(height: 16),
             Text(
-              'Nenhum histórico disponível',
+              l10n.statsNoHistory,
               style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
           ],

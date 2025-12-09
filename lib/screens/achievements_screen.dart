@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/achievement.dart';
 import '../services/achievement_service.dart';
 import '../services/audio_service.dart';
+import '../l10n/app_localizations.dart';
 
 class AchievementsScreen extends StatefulWidget {
   const AchievementsScreen({super.key});
@@ -44,7 +45,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao carregar conquistas: $e')),
+          SnackBar(content: Text('${AppLocalizations.of(context)!.achievementsLoadError}: $e')),
         );
       }
     }
@@ -57,6 +58,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final stats = _achievementService.getStats();
     final unlockedCount = stats['unlocked'] ?? 0;
     final totalCount = stats['total'] ?? 0;
@@ -65,7 +67,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
       appBar: AppBar(
-        title: Text('Conquistas', style: TextStyle(color: Colors.white)),
+        title: Text(l10n.achievementsTitle2, style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF162447),
         iconTheme: IconThemeData(color: Colors.white),
         centerTitle: true,
@@ -167,6 +169,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
   }
 
   Widget _buildCategoryTabs() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: Color(0xFF1E2A3A),
       child: TabBar(
@@ -191,7 +194,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
               children: [
                 Icon(Icons.grid_view, size: 20),
                 SizedBox(width: 8),
-                Text('Todas'),
+                Text(l10n.achievementsAll),
               ],
             ),
           ),
@@ -200,7 +203,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
               children: [
                 Icon(Icons.quiz, size: 20),
                 SizedBox(width: 8),
-                Text('Quiz'),
+                Text(l10n.achievementsCategoryQuiz),
               ],
             ),
           ),
@@ -209,7 +212,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
               children: [
                 Icon(Icons.games, size: 20),
                 SizedBox(width: 8),
-                Text('Minigames'),
+                Text(l10n.achievementsCategoryMinigames),
               ],
             ),
           ),
@@ -218,7 +221,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
               children: [
                 Icon(Icons.people, size: 20),
                 SizedBox(width: 8),
-                Text('Social'),
+                Text(l10n.achievementsCategorySocial),
               ],
             ),
           ),
@@ -227,7 +230,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
               children: [
                 Icon(Icons.star, size: 20),
                 SizedBox(width: 8),
-                Text('Master'),
+                Text(l10n.achievementsCategoryMaster),
               ],
             ),
           ),
@@ -359,6 +362,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
   }
 
   void _showAchievementDetails(Achievement achievement) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -467,7 +471,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
-                child: Text('Fechar', style: TextStyle(fontSize: 16)),
+                child: Text(l10n.close, style: TextStyle(fontSize: 16)),
               ),
             ],
           ),

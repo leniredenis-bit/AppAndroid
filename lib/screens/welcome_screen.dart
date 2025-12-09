@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
       body: SafeArea(
@@ -59,7 +61,7 @@ class WelcomeScreen extends StatelessWidget {
                       Text('🚀', style: TextStyle(fontSize: 24)),
                       SizedBox(width: 12),
                       Text(
-                        'Começar',
+                        l10n.welcomeStart,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,

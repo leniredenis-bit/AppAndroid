@@ -499,7 +499,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get statsHighScore => 'Recorde de Pontos';
 
   @override
-  String get statsCurrentStreak => 'Sequência Atual';
+  String get statsCurrentStreak => 'Sequência\nAtual';
 
   @override
   String get statsLongestStreak => 'Maior Sequência';
@@ -511,7 +511,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get statsMinigameRecords => 'Recordes de Minigames';
 
   @override
-  String get statsNoData => 'Nenhum dado disponível ainda';
+  String get statsNoData => 'Nenhum dado disponível';
 
   @override
   String get statsPlayToSeeData => 'Jogue para ver suas estatísticas!';
@@ -610,7 +610,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get memoryGamePlayAgain => 'Jogar Novamente';
 
   @override
-  String get ticTacToeTitle => '⭕ Jogo da Velha';
+  String get ticTacToeTitle => 'Jogo da Velha Neon';
 
   @override
   String get ticTacToeMode => 'Modo';
@@ -637,7 +637,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get ticTacToePlayerO => 'Jogador O';
 
   @override
-  String get ticTacToeYourTurn => 'Sua vez!';
+  String get ticTacToeYourTurn => 'Sua vez';
 
   @override
   String get ticTacToeWins => 'Vitórias';
@@ -697,7 +697,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get wordSearchTitle => '🔍 Caça-Palavras';
+  String get wordSearchTitle => 'Caça-Palavras';
 
   @override
   String wordSearchWordsFound(int found, int total) {
@@ -710,7 +710,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get wordSearchComplete => 'Completado! 🎉';
+  String get wordSearchComplete => 'COMPLETO!';
 
   @override
   String get wordSearchNewGame => 'Novo Jogo';
@@ -791,7 +791,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get sequenceTitle => '🎵 Sequência de Cores';
 
   @override
-  String get sequenceLevel => 'Nível';
+  String get sequenceLevel => 'NÍVEL';
 
   @override
   String get sequenceHighScore => 'Recorde';
@@ -800,10 +800,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get sequenceWatchSequence => 'Observe a sequência...';
 
   @override
-  String get sequenceYourTurn => 'Sua vez!';
+  String get sequenceYourTurn => 'Sua vez! Repita a sequência';
 
   @override
-  String get sequenceGameOver => 'Fim de jogo!';
+  String get sequenceGameOver => '❌ Fim de Jogo!';
 
   @override
   String sequenceReached(int level) {
@@ -827,10 +827,10 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get sequenceCorrect => '✨ Correto! Próximo Nível! ✨';
+  String get sequenceCorrect => '✨ Correto! ✨';
 
   @override
-  String get sequenceObserve => '👀 Observe a sequência...';
+  String get sequenceObserve => 'Observe a sequência...';
 
   @override
   String get sequenceRepeat => '👆 Sua vez! Repita a sequência';
@@ -931,4 +931,612 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get newGame => 'Nova Partida';
+
+  @override
+  String get settingsLanguageChanged => 'Idioma alterado com sucesso!';
+
+  @override
+  String get settingsMusicVolume => '🎵 Volume da Música';
+
+  @override
+  String get settingsSfxVolume => '🔊 Volume dos Efeitos';
+
+  @override
+  String get settingsAchievementsSubtitle =>
+      'Veja suas conquistas desbloqueadas';
+
+  @override
+  String get settingsStatisticsSubtitle => 'Veja seu desempenho';
+
+  @override
+  String get settingsTerms => '📜 Termos e Condições';
+
+  @override
+  String get settingsTermsSubtitle => 'Política de privacidade e termos';
+
+  @override
+  String get settingsAboutSubtitle => 'Informações sobre o aplicativo';
+
+  @override
+  String get termsTitle => 'ℹ️ Termos e Condições';
+
+  @override
+  String get termsOfUse => '📋 Termos de Uso';
+
+  @override
+  String get termsWelcome =>
+      'Bem-vindo ao JW SPLASH GAMES! Este aplicativo foi desenvolvido para fins educacionais e de entretenimento, visando promover o conhecimento bíblico de forma interativa.';
+
+  @override
+  String get termsAppUsage => '1. Uso do Aplicativo';
+
+  @override
+  String get termsAppUsageDesc =>
+      'O JW SPLASH GAMES é um aplicativo gratuito para uso pessoal. Você pode:';
+
+  @override
+  String get termsAppUsageItem1 => 'Jogar quizzes individuais ou em grupo';
+
+  @override
+  String get termsAppUsageItem2 => 'Acessar estatísticas pessoais';
+
+  @override
+  String get termsAppUsageItem3 => 'Usar o modo estudo sem limite de tempo';
+
+  @override
+  String get termsAppUsageItem4 => 'Jogar minigames educativos';
+
+  @override
+  String get termsAppUsageItem5 => 'Desbloquear conquistas';
+
+  @override
+  String get termsBiblicalContent => '2. Conteúdo Bíblico';
+
+  @override
+  String get termsBiblicalContentDesc =>
+      'As perguntas e respostas são baseadas na Bíblia Sagrada. Este aplicativo não substitui o estudo pessoal das Escrituras Sagradas nem representa uma organização religiosa oficial.';
+
+  @override
+  String get termsResponsibilities => '3. Responsabilidades';
+
+  @override
+  String get termsResponsibilitiesDesc =>
+      'O usuário é responsável por seu uso adequado do aplicativo. Não nos responsabilizamos por:';
+
+  @override
+  String get termsResponsibilitiesItem1 =>
+      'Uso indevido das informações apresentadas';
+
+  @override
+  String get termsResponsibilitiesItem2 =>
+      'Interpretações pessoais do conteúdo bíblico';
+
+  @override
+  String get termsResponsibilitiesItem3 =>
+      'Problemas técnicos ou perda de dados';
+
+  @override
+  String get privacyPolicy => '🔒 Política de Privacidade';
+
+  @override
+  String get privacyPolicyIntro =>
+      'Respeitamos sua privacidade. Este aplicativo:';
+
+  @override
+  String get privacyDataCollected => '1. Dados Coletados';
+
+  @override
+  String get privacyDataItem1 =>
+      'Dados de uso: Estatísticas de jogo, preferências de tema';
+
+  @override
+  String get privacyDataItem2 =>
+      'Dados técnicos: Tipo de dispositivo, navegador, sistema operacional';
+
+  @override
+  String get privacyDataItem3 =>
+      'Dados de sessão: Tempo de uso, páginas visitadas';
+
+  @override
+  String get privacyStorage => '2. Armazenamento';
+
+  @override
+  String get privacyStorageDesc =>
+      'Todos os dados são armazenados localmente no seu dispositivo. Não enviamos dados para servidores externos.';
+
+  @override
+  String get privacyLocalStorage => '3. LocalStorage';
+
+  @override
+  String get privacyLocalStorageDesc =>
+      'Usamos localStorage do navegador para salvar:';
+
+  @override
+  String get privacyLocalStorageItem1 =>
+      'Preferências do usuário (tema, idioma)';
+
+  @override
+  String get privacyLocalStorageItem2 => 'Estatísticas pessoais de jogo';
+
+  @override
+  String get privacyLocalStorageItem3 => 'Conquistas desbloqueadas';
+
+  @override
+  String get privacySharing => '4. Compartilhamento';
+
+  @override
+  String get privacySharingDesc =>
+      'Não compartilhamos seus dados pessoais com terceiros. Os dados permanecem exclusivamente no seu dispositivo.';
+
+  @override
+  String get copyright => '©️ Direitos Autorais';
+
+  @override
+  String get copyrightAppContent => '1. Conteúdo do Aplicativo';
+
+  @override
+  String get copyrightAppContentDesc =>
+      'O código do aplicativo JW SPLASH GAMES é distribuído sob licença MIT. As perguntas e respostas são de domínio público ou foram criadas especificamente para este projeto educacional.';
+
+  @override
+  String get copyrightBible => '2. Bíblia e Textos Sagrados';
+
+  @override
+  String get copyrightBibleDesc =>
+      'Os textos bíblicos citados seguem a Tradução do Novo Mundo (TNM) das Escrituras Sagradas, usada com permissão para fins educacionais não comerciais.';
+
+  @override
+  String get copyrightImages => '3. Imagens e Ícones';
+
+  @override
+  String get copyrightImagesDesc =>
+      'Os ícones e emojis utilizados são de fontes públicas ou licenciadas para uso gratuito.';
+
+  @override
+  String get copyrightNonCommercial => '4. Uso Não Comercial';
+
+  @override
+  String get copyrightNonCommercialDesc =>
+      'Este aplicativo é desenvolvido para fins educacionais e não comerciais. Qualquer uso comercial requer autorização prévia.';
+
+  @override
+  String get contactSection => '📞 Contato';
+
+  @override
+  String get contactDesc => 'Para dúvidas, sugestões ou relatar problemas:';
+
+  @override
+  String get lastUpdated => '📅 Última Atualização: Novembro 2025';
+
+  @override
+  String get aboutTitle => '📱 Sobre o Jogo';
+
+  @override
+  String get aboutVersion => 'Versão 1.0.0';
+
+  @override
+  String get aboutWhatIs => 'O que é?';
+
+  @override
+  String get aboutWhatIsDesc =>
+      'JW SPLASH GAMES é um aplicativo educativo que torna o aprendizado bíblico divertido e interativo através de quizzes, minigames e desafios.';
+
+  @override
+  String get aboutFeatures => 'Recursos';
+
+  @override
+  String get aboutFeaturesDesc =>
+      '• Quiz Bíblico Interativo\n• Jogo da Memória\n• Caça-Palavras\n• Labirinto\n• Sistema de Conquistas\n• Estatísticas Detalhadas\n• Modo Multiplayer\n• 3 Idiomas (PT, EN, ES)';
+
+  @override
+  String get aboutDevelopedBy => 'Desenvolvido por';
+
+  @override
+  String get aboutDevelopedByDesc =>
+      'Equipe JW SPLASH GAMES\nProjeto open-source disponível no GitHub';
+
+  @override
+  String get aboutObjective => 'Objetivo';
+
+  @override
+  String get aboutObjectiveDesc =>
+      'Proporcionar uma forma divertida e educativa de aprender e memorizar conhecimentos bíblicos, adequado para todas as idades.';
+
+  @override
+  String get aboutUpdateNote =>
+      '📝 Esta página será atualizada em breve com mais informações e link para página online oficial.';
+
+  @override
+  String get aboutVisitGithub => 'Visitar GitHub';
+
+  @override
+  String get statsTabQuiz => 'Quiz';
+
+  @override
+  String get statsTabMinigames => 'Minigames';
+
+  @override
+  String get statsTabHistory => 'Histórico';
+
+  @override
+  String get statsGeneralPerformance => '📊 Desempenho Geral';
+
+  @override
+  String get statsQuizzesCompleted => 'Quizzes\nRealizados';
+
+  @override
+  String get statsAccuracyRate => 'Taxa de\nAcerto';
+
+  @override
+  String get statsBestScore => 'Melhor\nScore';
+
+  @override
+  String get statsBestStreak => 'Melhor Sequência';
+
+  @override
+  String get statsStreakTip =>
+      'Mantenha 80%+ de acerto para continuar a sequência!';
+
+  @override
+  String get statsByCategory => '📚 Por Categoria';
+
+  @override
+  String get statsAccuracyByDifficulty => '🎯 Precisão por Dificuldade';
+
+  @override
+  String get statsNoMinigames => 'Nenhum minigame jogado ainda';
+
+  @override
+  String get statsMinigamesTitle => '🕹️ Estatísticas dos Minigames';
+
+  @override
+  String get statsGames => 'Jogos';
+
+  @override
+  String get statsWins => 'Vitórias';
+
+  @override
+  String get statsRate => 'Taxa';
+
+  @override
+  String get statsRecord => 'Recorde';
+
+  @override
+  String statsBestTime(String time) {
+    return '⏱️ Melhor tempo: $time';
+  }
+
+  @override
+  String get statsNoHistory => 'Nenhum histórico disponível';
+
+  @override
+  String get statsGamePuzzle => '🧩 Quebra-Cabeça';
+
+  @override
+  String get statsGameHangman => '📝 Forca';
+
+  @override
+  String get statsGameWordSearch => '🔍 Caça-Palavras';
+
+  @override
+  String get statsGameMaze => '🌀 Labirinto';
+
+  @override
+  String get statsGameSequence => '🎵 Sequência';
+
+  @override
+  String get statsGameTicTacToe => '⭕ Jogo da Velha';
+
+  @override
+  String get statsGameMemory => '🧠 Jogo da Memória';
+
+  @override
+  String get playAgain => 'JOGAR NOVAMENTE';
+
+  @override
+  String get welcomeStart => 'Começar';
+
+  @override
+  String get quizNext => 'Próxima';
+
+  @override
+  String get quizScore => 'Pontuação';
+
+  @override
+  String get quizPresenter => 'Apresentador';
+
+  @override
+  String pieQuizPlayer(int number) {
+    return 'Jogador $number';
+  }
+
+  @override
+  String get pieQuizShowAnswer => '👁️ Ver Resposta';
+
+  @override
+  String get pieQuizHideAnswer => 'Ocultar Resposta';
+
+  @override
+  String get pieQuizNextQuestion => 'Próxima Pergunta';
+
+  @override
+  String get pieQuizFinalResult => 'Ver Resultado Final';
+
+  @override
+  String get difficultyEasy => 'Fácil';
+
+  @override
+  String get difficultyMedium => 'Médio';
+
+  @override
+  String get difficultyHard => 'Difícil';
+
+  @override
+  String get difficultyNormal => 'Normal';
+
+  @override
+  String get pieEndGame => 'Fim do Jogo!';
+
+  @override
+  String piePlayerWon(int number) {
+    return 'Jogador $number Venceu!';
+  }
+
+  @override
+  String get pieTie => 'Empate!';
+
+  @override
+  String get pieHome => 'Início';
+
+  @override
+  String get pieWhoGotIt => 'Quem acertou?';
+
+  @override
+  String get pieCorrectAnswer => 'Resposta Correta:';
+
+  @override
+  String get sequenceRecord => 'Recorde';
+
+  @override
+  String get sequenceCongrats => '🎉 PARABÉNS! VOCÊ VENCEU! 🎉';
+
+  @override
+  String get sequenceCompletedAll => 'Você completou todos os 20 níveis!';
+
+  @override
+  String sequenceReachedLevel(int level) {
+    return 'Você alcançou o nível $level';
+  }
+
+  @override
+  String get sequencePlayAgain => 'Jogar Novamente';
+
+  @override
+  String get sequenceStartGame => 'Iniciar Jogo';
+
+  @override
+  String wordSearchFoundAll(int seconds) {
+    return 'Você encontrou todas as palavras em $seconds segundos!';
+  }
+
+  @override
+  String get memoryNewGame => 'Nova Partida';
+
+  @override
+  String get memoryHome => 'Início';
+
+  @override
+  String get memoryConfigureGame => 'Configurar Jogo';
+
+  @override
+  String get memoryMoves => 'Jogadas';
+
+  @override
+  String get memoryPairs => 'Pares';
+
+  @override
+  String get memoryTime => 'Tempo';
+
+  @override
+  String get memoryDifficulty => 'Dificuldade';
+
+  @override
+  String get memoryCongrats => '🎉 Parabéns!';
+
+  @override
+  String get memoryFoundAllPairs => 'Você encontrou todos os pares!';
+
+  @override
+  String get ticTacToeOpponentTurn => 'Vez do oponente';
+
+  @override
+  String get ticTacToeYouWin => 'Você venceu!';
+
+  @override
+  String get ticTacToeYouLose => 'Você perdeu!';
+
+  @override
+  String get ticTacToeDraw => 'Empate!';
+
+  @override
+  String get jigsawTitle => 'Quebra-Cabeça';
+
+  @override
+  String get jigsawLoadFromGallery => 'Carregar da Galeria';
+
+  @override
+  String get jigsawOrChooseImage => 'Ou escolha uma imagem:';
+
+  @override
+  String get jigsawGalleryError =>
+      'Erro ao abrir galeria. Verifique as permissões.';
+
+  @override
+  String get jigsawPieces => 'peças';
+
+  @override
+  String get jigsawComplete => 'Quebra-cabeça completo!';
+
+  @override
+  String get achievementsTitle2 => 'Conquistas';
+
+  @override
+  String get achievementsAll => 'Todas';
+
+  @override
+  String get achievementsLoadError => 'Erro ao carregar conquistas';
+
+  @override
+  String get multiplayerOnlineMatch => 'Partida Online';
+
+  @override
+  String get multiplayerPlayRealtime => 'Jogue com seus amigos em tempo real!';
+
+  @override
+  String get multiplayerBeHost => 'Seja o anfitrião e convide amigos';
+
+  @override
+  String get multiplayerEnterCode => 'Digite o código da sala';
+
+  @override
+  String get multiplayerInfo1 => '• Até 8 jogadores por sala';
+
+  @override
+  String get multiplayerInfo2 => '• Perguntas simultâneas';
+
+  @override
+  String get multiplayerInfo3 => '• Pontuação por velocidade';
+
+  @override
+  String get multiplayerInfo4 => '• Ranking em tempo real';
+
+  @override
+  String get multiplayerCreateRoom => 'Criar Sala';
+
+  @override
+  String get multiplayerJoinRoom => 'Entrar em Sala';
+
+  @override
+  String get multiplayerRoom => 'Sala';
+
+  @override
+  String get multiplayerRemovePlayer => 'Remover jogador?';
+
+  @override
+  String get multiplayerRemove => 'Remover';
+
+  @override
+  String get multiplayerLeaveRoom => 'Sair da sala?';
+
+  @override
+  String get multiplayerLeave => 'Sair';
+
+  @override
+  String get multiplayerEndRoom => 'Encerrar Sala?';
+
+  @override
+  String get multiplayerEnd => 'Encerrar';
+
+  @override
+  String get multiplayerAllDisconnected =>
+      'Todos os jogadores serão desconectados.';
+
+  @override
+  String get multiplayerCodeCopied => 'Código copiado';
+
+  @override
+  String multiplayerShareCode(String code) {
+    return 'Compartilhe o código $code com seus amigos!';
+  }
+
+  @override
+  String get multiplayerRoomClosed => 'Sala encerrada';
+
+  @override
+  String get multiplayerRoomClosedHost => 'O anfitrião encerrou a sala.';
+
+  @override
+  String get multiplayerShareCodeBtn => 'Compartilhar Código';
+
+  @override
+  String get multiplayerStartGame => 'Iniciar Jogo';
+
+  @override
+  String get multiplayerWaitingPlayers => 'Aguardando jogadores...';
+
+  @override
+  String get multiplayerHowItWorks => 'Como funciona?';
+
+  @override
+  String get multiplayerUseSuggestion => 'Usar sugestão';
+
+  @override
+  String get multiplayerChooseAnother => 'Escolher outro';
+
+  @override
+  String get multiplayerUnderstood => 'Entendi';
+
+  @override
+  String get multiplayerQuestion => 'Pergunta';
+
+  @override
+  String get multiplayerRoundResults => 'Resultados da Rodada';
+
+  @override
+  String get multiplayerCorrect => 'Acertou!';
+
+  @override
+  String get multiplayerWrong => 'Errou';
+
+  @override
+  String get multiplayerPosition => 'Posição';
+
+  @override
+  String get multiplayerPoints => 'Pontos';
+
+  @override
+  String get multiplayerCurrentRanking => 'Ranking Atual';
+
+  @override
+  String get multiplayerNextQuestion => 'Próxima Pergunta';
+
+  @override
+  String get multiplayerWaitingHost => 'Aguardando o anfitrião...';
+
+  @override
+  String get multiplayerYourNickname => 'Seu apelido';
+
+  @override
+  String get multiplayerRoomCode => 'Código da sala';
+
+  @override
+  String get multiplayerPlayers => 'Jogadores';
+
+  @override
+  String get multiplayerHost => 'Anfitrião';
+
+  @override
+  String get multiplayerGameOver => 'Fim de Jogo!';
+
+  @override
+  String get multiplayerCongrats => 'Parabéns! Você venceu! 🎉';
+
+  @override
+  String get multiplayerMatchEnded => 'Partida finalizada';
+
+  @override
+  String get multiplayerRestarting => 'Reiniciando...';
+
+  @override
+  String get multiplayerPlayAgainBtn => 'Jogar Novamente';
+
+  @override
+  String get multiplayerCloseRoom => 'Encerrar Sala';
+
+  @override
+  String get multiplayerRestartingMatch => 'Reiniciando partida...';
+
+  @override
+  String get multiplayerWaitingHostDecision =>
+      'Aguardando decisão do anfitrião...';
 }

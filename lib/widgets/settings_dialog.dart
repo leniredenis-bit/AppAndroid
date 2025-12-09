@@ -6,6 +6,7 @@ import '../screens/terms_screen.dart';
 import '../screens/about_screen.dart';
 import '../services/audio_service.dart';
 import '../services/language_service.dart';
+import '../l10n/app_localizations.dart';
 
 class SettingsDialog extends StatefulWidget {
   final Function(bool) onThemeChanged;
@@ -52,6 +53,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Dialog(
       backgroundColor: _isDarkTheme ? Color(0xFF162447) : Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -73,7 +75,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ),
                   SizedBox(width: 12),
                   Text(
-                    'Configurações',
+                    l10n.settingsTitle,
                     style: TextStyle(
                       color: _isDarkTheme ? Colors.white : Colors.black87,
                       fontSize: 24,
@@ -111,7 +113,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Tema Escuro',
+                        l10n.settingsThemeDark,
                         style: TextStyle(
                           color: _isDarkTheme ? Colors.white : Colors.black87,
                           fontSize: 16,
@@ -137,7 +139,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
               // Language Selector
               Text(
-                '🌍 Idioma / Language',
+                l10n.settingsLanguage,
                 style: TextStyle(
                   color: _isDarkTheme ? Colors.white70 : Colors.black54,
                   fontSize: 14,
@@ -188,7 +190,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Idioma alterado com sucesso!'),
+                              content: Text(l10n.settingsLanguageChanged),
                               duration: Duration(seconds: 2),
                               backgroundColor: Color(0xFF50C878),
                             ),
@@ -204,7 +206,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
               // Music Volume
               Text(
-                '🎵 Volume da Música',
+                l10n.settingsMusicVolume,
                 style: TextStyle(
                   color: _isDarkTheme ? Colors.white : Colors.black87,
                   fontSize: 16,
@@ -246,7 +248,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
               // SFX Volume
               Text(
-                '🔊 Volume dos Efeitos',
+                l10n.settingsSfxVolume,
                 style: TextStyle(
                   color: _isDarkTheme ? Colors.white : Colors.black87,
                   fontSize: 16,
@@ -293,8 +295,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
               // Achievements Button
               _buildMenuButton(
                 icon: Icons.emoji_events,
-                title: 'Conquistas',
-                subtitle: 'Veja suas conquistas desbloqueadas',
+                title: l10n.settingsAchievements,
+                subtitle: l10n.settingsAchievementsSubtitle,
                 color: Color(0xFFFFD700),
                 onTap: () {
                   Navigator.pop(context);
@@ -310,8 +312,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
               // Statistics Button
               _buildMenuButton(
                 icon: Icons.bar_chart,
-                title: 'Estatísticas',
-                subtitle: 'Veja seu desempenho',
+                title: l10n.settingsStatistics,
+                subtitle: l10n.settingsStatisticsSubtitle,
                 color: Color(0xFF50C878),
                 onTap: () {
                   Navigator.pop(context);
@@ -327,8 +329,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
               // Terms and Conditions Button
               _buildMenuButton(
                 icon: Icons.description,
-                title: 'Termos e Condições',
-                subtitle: 'Política de privacidade e termos',
+                title: l10n.settingsTerms,
+                subtitle: l10n.settingsTermsSubtitle,
                 color: Color(0xFF9B59B6),
                 onTap: () {
                   Navigator.pop(context);
@@ -344,8 +346,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
               // About Button
               _buildMenuButton(
                 icon: Icons.info_outline,
-                title: 'Sobre o Jogo',
-                subtitle: 'Informações sobre o aplicativo',
+                title: l10n.settingsAbout,
+                subtitle: l10n.settingsAboutSubtitle,
                 color: Color(0xFF4A90E2),
                 onTap: () {
                   Navigator.pop(context);

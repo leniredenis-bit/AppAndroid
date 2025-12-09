@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 class TermsScreen extends StatelessWidget {
   const TermsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ℹ️ Termos e Condições'),
+        title: Text(l10n.termsTitle),
         backgroundColor: const Color(0xFF9B59B6),
       ),
       body: Container(
@@ -27,98 +30,72 @@ class TermsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSection(
-                title: '📋 Termos de Uso',
+                title: l10n.termsOfUse,
                 content: [
-                  _buildParagraph(
-                    'Bem-vindo ao JW SPLASH GAMES! Este aplicativo foi desenvolvido para fins educacionais e de entretenimento, visando promover o conhecimento bíblico de forma interativa.',
-                  ),
-                  _buildSubtitle('1. Uso do Aplicativo'),
-                  _buildParagraph(
-                    'O JW SPLASH GAMES é um aplicativo gratuito para uso pessoal. Você pode:',
-                  ),
+                  _buildParagraph(l10n.termsWelcome),
+                  _buildSubtitle(l10n.termsAppUsage),
+                  _buildParagraph(l10n.termsAppUsageDesc),
                   _buildBulletList([
-                    'Jogar quizzes individuais ou em grupo',
-                    'Acessar estatísticas pessoais',
-                    'Usar o modo estudo sem limite de tempo',
-                    'Jogar minigames educativos',
-                    'Desbloquear conquistas',
+                    l10n.termsAppUsageItem1,
+                    l10n.termsAppUsageItem2,
+                    l10n.termsAppUsageItem3,
+                    l10n.termsAppUsageItem4,
+                    l10n.termsAppUsageItem5,
                   ]),
-                  _buildSubtitle('2. Conteúdo Bíblico'),
-                  _buildParagraph(
-                    'As perguntas e respostas são baseadas na Bíblia Sagrada. Este aplicativo não substitui o estudo pessoal das Escrituras Sagradas nem representa uma organização religiosa oficial.',
-                  ),
-                  _buildSubtitle('3. Responsabilidades'),
-                  _buildParagraph(
-                    'O usuário é responsável por seu uso adequado do aplicativo. Não nos responsabilizamos por:',
-                  ),
+                  _buildSubtitle(l10n.termsBiblicalContent),
+                  _buildParagraph(l10n.termsBiblicalContentDesc),
+                  _buildSubtitle(l10n.termsResponsibilities),
+                  _buildParagraph(l10n.termsResponsibilitiesDesc),
                   _buildBulletList([
-                    'Uso indevido das informações apresentadas',
-                    'Interpretações pessoais do conteúdo bíblico',
-                    'Problemas técnicos ou perda de dados',
+                    l10n.termsResponsibilitiesItem1,
+                    l10n.termsResponsibilitiesItem2,
+                    l10n.termsResponsibilitiesItem3,
                   ]),
                 ],
               ),
               const SizedBox(height: 24),
               _buildSection(
-                title: '🔒 Política de Privacidade',
+                title: l10n.privacyPolicy,
                 content: [
-                  _buildParagraph(
-                    'Respeitamos sua privacidade. Este aplicativo:',
-                  ),
-                  _buildSubtitle('1. Dados Coletados'),
+                  _buildParagraph(l10n.privacyPolicyIntro),
+                  _buildSubtitle(l10n.privacyDataCollected),
                   _buildBulletList([
-                    'Dados de uso: Estatísticas de jogo, preferências de tema',
-                    'Dados técnicos: Tipo de dispositivo, navegador, sistema operacional',
-                    'Dados de sessão: Tempo de uso, páginas visitadas',
+                    l10n.privacyDataItem1,
+                    l10n.privacyDataItem2,
+                    l10n.privacyDataItem3,
                   ]),
-                  _buildSubtitle('2. Armazenamento'),
-                  _buildParagraph(
-                    'Todos os dados são armazenados localmente no seu dispositivo. Não enviamos dados para servidores externos.',
-                  ),
-                  _buildSubtitle('3. LocalStorage'),
-                  _buildParagraph(
-                    'Usamos localStorage do navegador para salvar:',
-                  ),
+                  _buildSubtitle(l10n.privacyStorage),
+                  _buildParagraph(l10n.privacyStorageDesc),
+                  _buildSubtitle(l10n.privacyLocalStorage),
+                  _buildParagraph(l10n.privacyLocalStorageDesc),
                   _buildBulletList([
-                    'Preferências do usuário (tema, idioma)',
-                    'Estatísticas pessoais de jogo',
-                    'Conquistas desbloqueadas',
+                    l10n.privacyLocalStorageItem1,
+                    l10n.privacyLocalStorageItem2,
+                    l10n.privacyLocalStorageItem3,
                   ]),
-                  _buildSubtitle('4. Compartilhamento'),
-                  _buildParagraph(
-                    'Não compartilhamos seus dados pessoais com terceiros. Os dados permanecem exclusivamente no seu dispositivo.',
-                  ),
+                  _buildSubtitle(l10n.privacySharing),
+                  _buildParagraph(l10n.privacySharingDesc),
                 ],
               ),
               const SizedBox(height: 24),
               _buildSection(
-                title: '©️ Direitos Autorais',
+                title: l10n.copyright,
                 content: [
-                  _buildSubtitle('1. Conteúdo do Aplicativo'),
-                  _buildParagraph(
-                    'O código do aplicativo JW SPLASH GAMES é distribuído sob licença MIT. As perguntas e respostas são de domínio público ou foram criadas especificamente para este projeto educacional.',
-                  ),
-                  _buildSubtitle('2. Bíblia e Textos Sagrados'),
-                  _buildParagraph(
-                    'Os textos bíblicos citados seguem a Tradução do Novo Mundo (TNM) das Escrituras Sagradas, usada com permissão para fins educacionais não comerciais.',
-                  ),
-                  _buildSubtitle('3. Imagens e Ícones'),
-                  _buildParagraph(
-                    'Os ícones e emojis utilizados são de fontes públicas ou licenciadas para uso gratuito.',
-                  ),
-                  _buildSubtitle('4. Uso Não Comercial'),
-                  _buildParagraph(
-                    'Este aplicativo é desenvolvido para fins educacionais e não comerciais. Qualquer uso comercial requer autorização prévia.',
-                  ),
+                  _buildSubtitle(l10n.copyrightAppContent),
+                  _buildParagraph(l10n.copyrightAppContentDesc),
+                  _buildSubtitle(l10n.copyrightBible),
+                  _buildParagraph(l10n.copyrightBibleDesc),
+                  _buildSubtitle(l10n.copyrightImages),
+                  _buildParagraph(l10n.copyrightImagesDesc),
+                  _buildSubtitle(l10n.copyrightNonCommercial),
+                  _buildParagraph(l10n.copyrightNonCommercialDesc),
                 ],
               ),
               const SizedBox(height: 24),
               _buildSection(
-                title: '📞 Contato',
+                title: l10n.contactSection,
                 content: [
-                  _buildParagraph(
-                    'Para dúvidas, sugestões ou relatar problemas:',
-                  ),
+                  _buildParagraph(l10n.contactDesc),
                   _buildBulletList([
                     'GitHub: leniredenis-bit/JWQuizAndroid',
                   ]),
@@ -127,7 +104,7 @@ class TermsScreen extends StatelessWidget {
               const SizedBox(height: 24),
               Center(
                 child: Text(
-                  '📅 Última Atualização: Novembro 2025',
+                  l10n.lastUpdated,
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],

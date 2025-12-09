@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import 'create_room_screen.dart';
 import 'join_room_screen.dart';
 
@@ -8,10 +9,11 @@ class MultiplayerMenuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
       appBar: AppBar(
-        title: Text('Partida Online', style: TextStyle(color: Colors.white)),
+        title: Text(l10n.multiplayerOnlineMatch, style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF162447),
         iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
@@ -46,7 +48,7 @@ class MultiplayerMenuScreen extends StatelessWidget {
               SizedBox(height: 12),
               
               Text(
-                'Jogue com seus amigos em tempo real!',
+                l10n.multiplayerPlayRealtime,
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: 16,
@@ -60,8 +62,8 @@ class MultiplayerMenuScreen extends StatelessWidget {
               _buildMenuButton(
                 context: context,
                 icon: Icons.add_circle,
-                title: 'Criar Sala',
-                subtitle: 'Seja o anfitrião e convide amigos',
+                title: l10n.multiplayerCreateRoom,
+                subtitle: l10n.multiplayerBeHost,
                 gradient: LinearGradient(
                   colors: [Color(0xFF3A5A8C), Color(0xFF5A7AA8)],
                 ),
@@ -81,8 +83,8 @@ class MultiplayerMenuScreen extends StatelessWidget {
               _buildMenuButton(
                 context: context,
                 icon: Icons.login,
-                title: 'Entrar em Sala',
-                subtitle: 'Digite o código da sala',
+                title: l10n.multiplayerJoinRoom,
+                subtitle: l10n.multiplayerEnterCode,
                 gradient: LinearGradient(
                   colors: [Color(0xFF5A8C3A), Color(0xFF7AA85A)],
                 ),
@@ -113,7 +115,7 @@ class MultiplayerMenuScreen extends StatelessWidget {
                         Icon(Icons.info_outline, color: Colors.amber, size: 20),
                         SizedBox(width: 8),
                         Text(
-                          'Como funciona?',
+                          l10n.multiplayerHowItWorks,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -123,10 +125,10 @@ class MultiplayerMenuScreen extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 12),
-                    _buildInfoRow('• Até 8 jogadores por sala'),
-                    _buildInfoRow('• Perguntas simultâneas'),
-                    _buildInfoRow('• Pontuação por velocidade'),
-                    _buildInfoRow('• Ranking em tempo real'),
+                    _buildInfoRow(l10n.multiplayerInfo1),
+                    _buildInfoRow(l10n.multiplayerInfo2),
+                    _buildInfoRow(l10n.multiplayerInfo3),
+                    _buildInfoRow(l10n.multiplayerInfo4),
                   ],
                 ),
               ),

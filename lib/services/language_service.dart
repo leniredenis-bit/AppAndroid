@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 import '../services/storage_service.dart';
 import '../models/quiz_service.dart'; // Para limpar cache de perguntas
 
@@ -9,7 +10,7 @@ class LanguageService extends ChangeNotifier {
   LanguageService._internal();
 
   final StorageService _storage = StorageService();
-  Locale _currentLocale = const Locale('pt', ''); // Português como padrão
+  Locale _currentLocale = const Locale('pt', ''); // Será sobrescrito na inicialização
 
   /// Idiomas suportados
   static const List<Locale> supportedLocales = [
@@ -37,21 +38,40 @@ class LanguageService extends ChangeNotifier {
   /// Obter bandeira do idioma atual
   String get currentLanguageFlag => languageInfo[currentLanguageCode]?['flag'] ?? '🇧🇷';
 
-  /// Inicializar idioma salvo
+  /// Inicializar idioma salvo ou detectar do dispositivo
   Future<void> initialize() async {
     try {
       final prefs = await _storage.getPreferences();
       final savedLanguage = prefs.language;
       
       if (savedLanguage.isNotEmpty) {
+        // Usuário já escolheu um idioma antes
         final locale = Locale(savedLanguage, '');
         if (supportedLocales.contains(locale)) {
           _currentLocale = locale;
+          debugPrint('🌍 Idioma carregado das preferências: $savedLanguage');
           notifyListeners();
+          return;
         }
       }
+      
+      // Primeira vez: detectar idioma do dispositivo
+      final deviceLocale = ui.PlatformDispatcher.instance.locale;
+      final deviceLanguage = deviceLocale.languageCode;
+      
+      if (languageInfo.containsKey(deviceLanguage)) {
+        // Idioma do dispositivo é suportado
+        _currentLocale = Locale(deviceLanguage, '');
+        debugPrint('🌍 Idioma detectado do dispositivo: $deviceLanguage');
+      } else {
+        // Idioma não suportado, usar inglês como fallback global
+        _currentLocale = const Locale('en', '');
+        debugPrint('🌍 Idioma do dispositivo ($deviceLanguage) não suportado, usando inglês');
+      }
+      
+      notifyListeners();
     } catch (e) {
-      debugPrint('Erro ao carregar idioma salvo: $e');
+      debugPrint('Erro ao carregar idioma: $e');
       // Manter idioma padrão (pt)
     }
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/multiplayer/firebase_multiplayer_service.dart';
 import '../../services/multiplayer/profanity_filter.dart';
+import '../../l10n/app_localizations.dart';
 import 'lobby_screen.dart';
 
 /// Tela para o anfitrião criar uma nova sala multiplayer
@@ -130,11 +131,11 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
               Navigator.pop(context);
               _nicknameController.text = suggestion;
             },
-            child: Text('Usar sugestão', style: TextStyle(color: Colors.green)),
+            child: Text(AppLocalizations.of(context)!.multiplayerUseSuggestion, style: TextStyle(color: Colors.green)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Escolher outro', style: TextStyle(color: Colors.white70)),
+            child: Text(AppLocalizations.of(context)!.multiplayerChooseAnother, style: TextStyle(color: Colors.white70)),
           ),
         ],
       ),
@@ -143,10 +144,11 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
       appBar: AppBar(
-        title: Text('Criar Sala', style: TextStyle(color: Colors.white)),
+        title: Text(l10n.multiplayerCreateRoom, style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF162447),
         iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,

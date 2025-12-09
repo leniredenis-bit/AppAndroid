@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/multiplayer/firebase_multiplayer_service.dart';
 import '../../services/multiplayer/profanity_filter.dart';
+import '../../l10n/app_localizations.dart';
 import 'lobby_screen.dart';
 
 /// Tela para jogador entrar em uma sala existente
@@ -127,11 +128,11 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
               Navigator.pop(context);
               _nicknameController.text = suggestion;
             },
-            child: Text('Usar sugestão', style: TextStyle(color: Colors.green)),
+            child: Text(AppLocalizations.of(context)!.multiplayerUseSuggestion, style: TextStyle(color: Colors.green)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Escolher outro', style: TextStyle(color: Colors.white70)),
+            child: Text(AppLocalizations.of(context)!.multiplayerChooseAnother, style: TextStyle(color: Colors.white70)),
           ),
         ],
       ),
@@ -139,6 +140,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
   }
 
   void _showHelpDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -147,7 +149,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
           children: [
             Icon(Icons.help_outline, color: Color(0xFF3A5A8C)),
             SizedBox(width: 8),
-            Text('Como funciona?', style: TextStyle(color: Colors.white)),
+            Text(l10n.multiplayerHowItWorks, style: TextStyle(color: Colors.white)),
           ],
         ),
         content: Column(
@@ -178,7 +180,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Entendi', style: TextStyle(color: Colors.white)),
+            child: Text(l10n.multiplayerUnderstood, style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -187,10 +189,11 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
       appBar: AppBar(
-        title: Text('Entrar em Sala', style: TextStyle(color: Colors.white)),
+        title: Text(l10n.multiplayerJoinRoom, style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF162447),
         iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,

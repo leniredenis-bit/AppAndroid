@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math' as math;
+import '../../l10n/app_localizations.dart';
 import '../../models/multiplayer/room.dart';
 import '../../models/multiplayer/player.dart';
 import '../../services/multiplayer/firebase_multiplayer_service.dart';
@@ -131,6 +132,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
   }
 
   void _showRoomClosedDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -140,11 +142,11 @@ class _FinalResultScreenState extends State<FinalResultScreen>
           children: [
             Icon(Icons.info, color: Colors.amber),
             SizedBox(width: 8),
-            Text('Sala Encerrada', style: TextStyle(color: Colors.white)),
+            Text(l10n.multiplayerRoomClosed, style: TextStyle(color: Colors.white)),
           ],
         ),
         content: Text(
-          'O anfitrião encerrou a sala.',
+          l10n.multiplayerRoomClosedHost,
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
@@ -153,7 +155,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
               Navigator.of(context).pop();
               Navigator.of(context).popUntil((route) => route.isFirst);
             },
-            child: Text('OK', style: TextStyle(color: Color(0xFF3A5A8C))),
+            child: Text(l10n.ok, style: TextStyle(color: Color(0xFF3A5A8C))),
           ),
         ],
       ),
@@ -161,6 +163,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
   }
 
   Future<void> _restartGame() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isRestarting = true;
     });
@@ -169,7 +172,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
       await FirebaseMultiplayerService().restartGame(widget.roomCode);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: Colors.red),
       );
       setState(() {
         _isRestarting = false;
@@ -178,6 +181,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
   }
 
   Future<void> _closeRoom() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -186,21 +190,21 @@ class _FinalResultScreenState extends State<FinalResultScreen>
           children: [
             Icon(Icons.warning, color: Colors.red),
             SizedBox(width: 8),
-            Text('Encerrar Sala?', style: TextStyle(color: Colors.white)),
+            Text(l10n.multiplayerEndRoom, style: TextStyle(color: Colors.white)),
           ],
         ),
         content: Text(
-          'Todos os jogadores serão desconectados.',
+          l10n.multiplayerAllDisconnected,
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancelar', style: TextStyle(color: Colors.white70)),
+            child: Text(l10n.cancel, style: TextStyle(color: Colors.white70)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Encerrar', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.multiplayerEnd, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -212,7 +216,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
         Navigator.of(context).popUntil((route) => route.isFirst);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -224,6 +228,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_currentRoom == null) {
       return Scaffold(
         backgroundColor: Color(0xFF101A2C),
@@ -268,7 +273,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
                     child: Column(
                       children: [
                         Text(
-                          '🏆 Fim de Jogo!',
+                          '🏆 ${l10n.multiplayerGameOver}',
                           style: TextStyle(
                             color: Colors.amber,
                             fontSize: 32,
@@ -277,7 +282,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
                         ),
                         SizedBox(height: 8),
                         Text(
-                          isWinner ? 'Parabéns! Você venceu! 🎉' : 'Partida finalizada',
+                          isWinner ? l10n.multiplayerCongrats : l10n.multiplayerMatchEnded,
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 16,
@@ -393,7 +398,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
                                       )
                                     : Icon(Icons.replay),
                                 label: Text(
-                                  _isRestarting ? 'Reiniciando...' : 'Jogar Novamente',
+                                  _isRestarting ? l10n.multiplayerRestarting : l10n.multiplayerPlayAgainBtn,
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -413,7 +418,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
                                 onPressed: _closeRoom,
                                 icon: Icon(Icons.close),
                                 label: Text(
-                                  'Encerrar Sala',
+                                  l10n.multiplayerCloseRoom,
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -442,8 +447,8 @@ class _FinalResultScreenState extends State<FinalResultScreen>
                               ],
                               Text(
                                 _isRestarting
-                                    ? 'Reiniciando partida...'
-                                    : 'Aguardando decisão do anfitrião...',
+                                    ? l10n.multiplayerRestartingMatch
+                                    : l10n.multiplayerWaitingHostDecision,
                                 style: TextStyle(color: Colors.white, fontSize: 16),
                               ),
                             ],

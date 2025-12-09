@@ -4,6 +4,7 @@ import '../../services/audio_service.dart';
 import '../../services/storage_service.dart';
 import '../../services/achievement_service.dart';
 import '../../widgets/achievement_unlock_dialog.dart';
+import '../../l10n/app_localizations.dart';
 
 // --- Constantes de Design ---
 const Color kNeonBlue = Color(0xFF00F0FF);
@@ -363,10 +364,11 @@ class _TicTacToeGameState extends State<TicTacToeGame> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: kBackground,
       appBar: AppBar(
-        title: const Text("Jogo da Velha Neon", style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
+        title: Text(l10n.ticTacToeTitle, style: const TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
         backgroundColor: const Color(0xFF162447),
         elevation: 0,
         centerTitle: true,

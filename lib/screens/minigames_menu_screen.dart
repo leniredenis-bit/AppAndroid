@@ -56,7 +56,7 @@ class MinigamesMenuScreen extends StatelessWidget {
         'desc': l10n.minigamesSequenceDesc,
         'color': const Color(0xFF9B59B6),
         'screen': 'SequenceGame',
-        'emoji': '🔢',
+        'emoji': '�',
       },
       {
         'title': l10n.minigamesSequenceCrystal,

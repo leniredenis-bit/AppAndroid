@@ -8,6 +8,7 @@ import 'stats_screen.dart';
 import 'multiplayer/multiplayer_menu_screen.dart';
 import '../widgets/emoji_text.dart';
 import '../services/audio_service.dart';
+import '../services/language_service.dart';
 import 'minigames_menu_screen.dart';
 
 import '../widgets/settings_dialog.dart';
@@ -50,15 +51,24 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     loadTags();
+    // Escuta mudanças de idioma para recarregar tags
+    LanguageService().addListener(_onLanguageChanged);
     // Inicia música de fundo da home
     AudioService().playBackgroundMusic('home');
   }
 
   @override
   void dispose() {
+    // Remove listener de idioma
+    LanguageService().removeListener(_onLanguageChanged);
     // Para música ao sair da tela
     AudioService().stopBackgroundMusic();
     super.dispose();
+  }
+  
+  void _onLanguageChanged() {
+    // Recarrega tags quando idioma muda
+    loadTags();
   }
 
   Future<void> loadTags() async {

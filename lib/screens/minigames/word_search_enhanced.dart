@@ -4,6 +4,7 @@ import 'package:flutter/services.dart'; // Para HapticFeedback
 import '../../services/audio_service.dart';
 import '../../services/storage_service.dart';
 import '../../services/minigame_content_service.dart';
+import '../../l10n/app_localizations.dart';
 
 // --- Paleta de Cores para as Palavras Encontradas ---
 const List<Color> kWordColors = [
@@ -292,20 +293,21 @@ class _WordSearchGameState extends State<WordSearchGame> with TickerProviderStat
     
     // Mostra Dialog
     if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         showDialog(
             context: context,
             barrierDismissible: false,
             builder: (ctx) => AlertDialog(
                 backgroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                title: const Column(
+                title: Column(
                     children: [
-                        Icon(Icons.emoji_events, color: Colors.amber, size: 50),
-                        SizedBox(height: 10),
-                        Text("COMPLETO!", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+                        const Icon(Icons.emoji_events, color: Colors.amber, size: 50),
+                        const SizedBox(height: 10),
+                        Text(l10n.wordSearchComplete, style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
                     ],
                 ),
-                content: Text("Você encontrou todas as palavras em $timeSpent segundos!"),
+                content: Text(l10n.wordSearchFoundAll(timeSpent)),
                 actions: [
                     TextButton(
                         onPressed: () {
@@ -314,7 +316,7 @@ class _WordSearchGameState extends State<WordSearchGame> with TickerProviderStat
                                 _startNewGame();
                             });
                         },
-                        child: const Text("JOGAR NOVAMENTE", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        child: Text(AppLocalizations.of(ctx)!.playAgain, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     )
                 ],
             )
@@ -324,10 +326,11 @@ class _WordSearchGameState extends State<WordSearchGame> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: const Text("Caça-Palavras", style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.white)),
+        title: Text(l10n.wordSearchTitle, style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.white)),
         backgroundColor: const Color(0xFF162447),
         elevation: 0,
         centerTitle: true,

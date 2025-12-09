@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import '../../models/multiplayer/room.dart';
 import '../../services/multiplayer/firebase_multiplayer_service.dart';
+import '../../l10n/app_localizations.dart';
 import 'multiplayer_quiz_screen.dart';
 
 /// Tela do Lobby - Sala de espera antes de iniciar o jogo
@@ -99,11 +100,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   Future<void> _removePlayer(String playerId) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Color(0xFF162447),
-        title: Text('Remover jogador?', style: TextStyle(color: Colors.white)),
+        title: Text(l10n.multiplayerRemovePlayer, style: TextStyle(color: Colors.white)),
         content: Text(
           'Tem certeza que deseja remover este jogador da sala?',
           style: TextStyle(color: Colors.white70),
@@ -111,11 +113,11 @@ class _LobbyScreenState extends State<LobbyScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancelar', style: TextStyle(color: Colors.white70)),
+            child: Text(l10n.cancel, style: TextStyle(color: Colors.white70)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Remover', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.multiplayerRemove, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -128,17 +130,18 @@ class _LobbyScreenState extends State<LobbyScreen> {
           playerId: playerId,
         );
       } catch (e) {
-        _showErrorDialog('Erro ao remover jogador: $e');
+        _showErrorDialog('${l10n.error}: $e');
       }
     }
   }
 
   Future<void> _leaveRoom() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Color(0xFF162447),
-        title: Text('Sair da sala?', style: TextStyle(color: Colors.white)),
+        title: Text(l10n.multiplayerLeaveRoom, style: TextStyle(color: Colors.white)),
         content: Text(
           _isHost
               ? 'Você é o anfitrião. Outro jogador será promovido automaticamente.'
@@ -148,11 +151,11 @@ class _LobbyScreenState extends State<LobbyScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancelar', style: TextStyle(color: Colors.white70)),
+            child: Text(l10n.cancel, style: TextStyle(color: Colors.white70)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Sair', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.multiplayerLeave, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -166,17 +169,18 @@ class _LobbyScreenState extends State<LobbyScreen> {
         );
         if (mounted) Navigator.pop(context);
       } catch (e) {
-        _showErrorDialog('Erro ao sair: $e');
+        _showErrorDialog('${l10n.error}: $e');
       }
     }
   }
 
   Future<void> _closeRoom() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Color(0xFF162447),
-        title: Text('📢 Encerrar sala?', style: TextStyle(color: Colors.white)),
+        title: Text('📢 ${l10n.multiplayerEndRoom}', style: TextStyle(color: Colors.white)),
         content: Text(
           'Isso irá expulsar todos os jogadores e fechar a sala permanentemente.',
           style: TextStyle(color: Colors.white70),
@@ -184,11 +188,11 @@ class _LobbyScreenState extends State<LobbyScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancelar', style: TextStyle(color: Colors.white70)),
+            child: Text(l10n.cancel, style: TextStyle(color: Colors.white70)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Encerrar', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.multiplayerEnd, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -199,16 +203,18 @@ class _LobbyScreenState extends State<LobbyScreen> {
         await FirebaseMultiplayerService().closeRoom(widget.roomCode);
         if (mounted) Navigator.pop(context);
       } catch (e) {
-        _showErrorDialog('Erro ao encerrar: $e');
+        final l10n = AppLocalizations.of(context)!;
+        _showErrorDialog('${l10n.error}: $e');
       }
     }
   }
 
   void _copyRoomCode() {
+    final l10n = AppLocalizations.of(context)!;
     Clipboard.setData(ClipboardData(text: widget.roomCode));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Código copiado: ${widget.roomCode}'),
+        content: Text('${l10n.multiplayerCodeCopied}: ${widget.roomCode}'),
         backgroundColor: Colors.green,
         duration: Duration(seconds: 2),
       ),
@@ -216,25 +222,27 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   void _shareRoomCode() {
+    final l10n = AppLocalizations.of(context)!;
     // TODO: Implementar share nativo (usar package share_plus)
     _copyRoomCode();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Compartilhe o código ${widget.roomCode} com seus amigos!'),
+        content: Text(l10n.multiplayerShareCode(widget.roomCode)),
         duration: Duration(seconds: 3),
       ),
     );
   }
 
   void _showRoomClosedDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         backgroundColor: Color(0xFF162447),
-        title: Text('Sala encerrada', style: TextStyle(color: Colors.white)),
+        title: Text(l10n.multiplayerRoomClosed, style: TextStyle(color: Colors.white)),
         content: Text(
-          'O anfitrião encerrou a sala.',
+          l10n.multiplayerRoomClosedHost,
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
@@ -243,7 +251,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
               Navigator.pop(context);
               Navigator.pop(context);
             },
-            child: Text('OK', style: TextStyle(color: Colors.white)),
+            child: Text(l10n.ok, style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -251,6 +259,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   void _showErrorDialog(String message) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -259,14 +268,14 @@ class _LobbyScreenState extends State<LobbyScreen> {
           children: [
             Icon(Icons.error_outline, color: Colors.red),
             SizedBox(width: 8),
-            Text('Erro', style: TextStyle(color: Colors.white)),
+            Text(l10n.error, style: TextStyle(color: Colors.white)),
           ],
         ),
         content: Text(message, style: TextStyle(color: Colors.white70)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('OK', style: TextStyle(color: Colors.white)),
+            child: Text(l10n.ok, style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -279,6 +288,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_currentRoom == null) {
       return Scaffold(
         backgroundColor: Color(0xFF101A2C),
@@ -301,7 +311,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
       child: Scaffold(
         backgroundColor: Color(0xFF101A2C),
         appBar: AppBar(
-          title: Text('Sala ${widget.roomCode}', style: TextStyle(color: Colors.white)),
+          title: Text('${l10n.multiplayerRoom} ${widget.roomCode}', style: TextStyle(color: Colors.white)),
           backgroundColor: Color(0xFF162447),
           iconTheme: IconThemeData(color: Colors.white),
           elevation: 0,
@@ -314,7 +324,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
               IconButton(
                 icon: Icon(Icons.close),
                 onPressed: _closeRoom,
-                tooltip: 'Encerrar sala',
+                tooltip: l10n.multiplayerEnd,
               ),
           ],
         ),
@@ -334,7 +344,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
               child: Column(
                 children: [
                   Text(
-                    'Código da Sala',
+                    l10n.multiplayerRoomCode,
                     style: TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                   SizedBox(height: 8),
@@ -361,14 +371,14 @@ class _LobbyScreenState extends State<LobbyScreen> {
                       IconButton(
                         icon: Icon(Icons.copy, color: Colors.white),
                         onPressed: _copyRoomCode,
-                        tooltip: 'Copiar código',
+                        tooltip: l10n.multiplayerCodeCopied,
                       ),
                     ],
                   ),
                   SizedBox(height: 12),
                   ElevatedButton.icon(
                     icon: Icon(Icons.share, size: 18),
-                    label: Text('Compartilhar Código'),
+                    label: Text(l10n.multiplayerShareCodeBtn),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF3A5A8C),
                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),

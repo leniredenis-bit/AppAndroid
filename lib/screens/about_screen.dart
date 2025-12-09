@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 /// Tela "Sobre o Jogo"
 /// 
@@ -10,9 +11,11 @@ class AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('📱 Sobre o Jogo'),
+        title: Text(l10n.aboutTitle),
         backgroundColor: const Color(0xFF4A90E2),
       ),
       body: Container(
@@ -68,7 +71,7 @@ class AboutScreen extends StatelessWidget {
               
               // Version
               Text(
-                'Versão 1.0.0',
+                l10n.aboutVersion,
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey[600],
@@ -79,36 +82,29 @@ class AboutScreen extends StatelessWidget {
               // Description Card
               _buildCard(
                 icon: '🎮',
-                title: 'O que é?',
-                content: 'JW SPLASH GAMES é um aplicativo educativo que torna o aprendizado bíblico divertido e interativo através de quizzes, minigames e desafios.',
+                title: l10n.aboutWhatIs,
+                content: l10n.aboutWhatIsDesc,
               ),
               const SizedBox(height: 16),
               
               _buildCard(
                 icon: '🎯',
-                title: 'Recursos',
-                content: '''• Quiz Bíblico Interativo
-• Jogo da Memória
-• Caça-Palavras
-• Labirinto
-• Sistema de Conquistas
-• Estatísticas Detalhadas
-• Modo Multiplayer
-• 3 Idiomas (PT, EN, ES)''',
+                title: l10n.aboutFeatures,
+                content: l10n.aboutFeaturesDesc,
               ),
               const SizedBox(height: 16),
               
               _buildCard(
                 icon: '👥',
-                title: 'Desenvolvido por',
-                content: 'Equipe JW SPLASH GAMES\nProjeto open-source disponível no GitHub',
+                title: l10n.aboutDevelopedBy,
+                content: l10n.aboutDevelopedByDesc,
               ),
               const SizedBox(height: 16),
               
               _buildCard(
                 icon: '💡',
-                title: 'Objetivo',
-                content: 'Proporcionar uma forma divertida e educativa de aprender e memorizar conhecimentos bíblicos, adequado para todas as idades.',
+                title: l10n.aboutObjective,
+                content: l10n.aboutObjectiveDesc,
               ),
               const SizedBox(height: 32),
               
@@ -126,7 +122,7 @@ class AboutScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        '📝 Esta página será atualizada em breve com mais informações e link para página online oficial.',
+                        l10n.aboutUpdateNote,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.amber.shade900,
@@ -151,7 +147,7 @@ class AboutScreen extends StatelessWidget {
                   );
                 },
                 icon: const Icon(Icons.code),
-                label: const Text('Ver no GitHub'),
+                label: Text(l10n.aboutVisitGithub),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4A90E2),
                   foregroundColor: Colors.white,

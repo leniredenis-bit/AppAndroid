@@ -1045,7 +1045,7 @@ abstract class AppLocalizations {
   /// No description provided for @statsCurrentStreak.
   ///
   /// In pt, this message translates to:
-  /// **'Sequência Atual'**
+  /// **'Sequência\nAtual'**
   String get statsCurrentStreak;
 
   /// No description provided for @statsLongestStreak.
@@ -1069,7 +1069,7 @@ abstract class AppLocalizations {
   /// No description provided for @statsNoData.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhum dado disponível ainda'**
+  /// **'Nenhum dado disponível'**
   String get statsNoData;
 
   /// No description provided for @statsPlayToSeeData.
@@ -1255,7 +1255,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticTacToeTitle.
   ///
   /// In pt, this message translates to:
-  /// **'⭕ Jogo da Velha'**
+  /// **'Jogo da Velha Neon'**
   String get ticTacToeTitle;
 
   /// No description provided for @ticTacToeMode.
@@ -1309,7 +1309,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticTacToeYourTurn.
   ///
   /// In pt, this message translates to:
-  /// **'Sua vez!'**
+  /// **'Sua vez'**
   String get ticTacToeYourTurn;
 
   /// No description provided for @ticTacToeWins.
@@ -1417,7 +1417,7 @@ abstract class AppLocalizations {
   /// No description provided for @wordSearchTitle.
   ///
   /// In pt, this message translates to:
-  /// **'🔍 Caça-Palavras'**
+  /// **'Caça-Palavras'**
   String get wordSearchTitle;
 
   /// No description provided for @wordSearchWordsFound.
@@ -1435,7 +1435,7 @@ abstract class AppLocalizations {
   /// No description provided for @wordSearchComplete.
   ///
   /// In pt, this message translates to:
-  /// **'Completado! 🎉'**
+  /// **'COMPLETO!'**
   String get wordSearchComplete;
 
   /// No description provided for @wordSearchNewGame.
@@ -1573,7 +1573,7 @@ abstract class AppLocalizations {
   /// No description provided for @sequenceLevel.
   ///
   /// In pt, this message translates to:
-  /// **'Nível'**
+  /// **'NÍVEL'**
   String get sequenceLevel;
 
   /// No description provided for @sequenceHighScore.
@@ -1591,13 +1591,13 @@ abstract class AppLocalizations {
   /// No description provided for @sequenceYourTurn.
   ///
   /// In pt, this message translates to:
-  /// **'Sua vez!'**
+  /// **'Sua vez! Repita a sequência'**
   String get sequenceYourTurn;
 
   /// No description provided for @sequenceGameOver.
   ///
   /// In pt, this message translates to:
-  /// **'Fim de jogo!'**
+  /// **'❌ Fim de Jogo!'**
   String get sequenceGameOver;
 
   /// No description provided for @sequenceReached.
@@ -1633,13 +1633,13 @@ abstract class AppLocalizations {
   /// No description provided for @sequenceCorrect.
   ///
   /// In pt, this message translates to:
-  /// **'✨ Correto! Próximo Nível! ✨'**
+  /// **'✨ Correto! ✨'**
   String get sequenceCorrect;
 
   /// No description provided for @sequenceObserve.
   ///
   /// In pt, this message translates to:
-  /// **'👀 Observe a sequência...'**
+  /// **'Observe a sequência...'**
   String get sequenceObserve;
 
   /// No description provided for @sequenceRepeat.
@@ -1809,6 +1809,1140 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Nova Partida'**
   String get newGame;
+
+  /// No description provided for @settingsLanguageChanged.
+  ///
+  /// In pt, this message translates to:
+  /// **'Idioma alterado com sucesso!'**
+  String get settingsLanguageChanged;
+
+  /// No description provided for @settingsMusicVolume.
+  ///
+  /// In pt, this message translates to:
+  /// **'🎵 Volume da Música'**
+  String get settingsMusicVolume;
+
+  /// No description provided for @settingsSfxVolume.
+  ///
+  /// In pt, this message translates to:
+  /// **'🔊 Volume dos Efeitos'**
+  String get settingsSfxVolume;
+
+  /// No description provided for @settingsAchievementsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Veja suas conquistas desbloqueadas'**
+  String get settingsAchievementsSubtitle;
+
+  /// No description provided for @settingsStatisticsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Veja seu desempenho'**
+  String get settingsStatisticsSubtitle;
+
+  /// No description provided for @settingsTerms.
+  ///
+  /// In pt, this message translates to:
+  /// **'📜 Termos e Condições'**
+  String get settingsTerms;
+
+  /// No description provided for @settingsTermsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Política de privacidade e termos'**
+  String get settingsTermsSubtitle;
+
+  /// No description provided for @settingsAboutSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informações sobre o aplicativo'**
+  String get settingsAboutSubtitle;
+
+  /// No description provided for @termsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'ℹ️ Termos e Condições'**
+  String get termsTitle;
+
+  /// No description provided for @termsOfUse.
+  ///
+  /// In pt, this message translates to:
+  /// **'📋 Termos de Uso'**
+  String get termsOfUse;
+
+  /// No description provided for @termsWelcome.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bem-vindo ao JW SPLASH GAMES! Este aplicativo foi desenvolvido para fins educacionais e de entretenimento, visando promover o conhecimento bíblico de forma interativa.'**
+  String get termsWelcome;
+
+  /// No description provided for @termsAppUsage.
+  ///
+  /// In pt, this message translates to:
+  /// **'1. Uso do Aplicativo'**
+  String get termsAppUsage;
+
+  /// No description provided for @termsAppUsageDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'O JW SPLASH GAMES é um aplicativo gratuito para uso pessoal. Você pode:'**
+  String get termsAppUsageDesc;
+
+  /// No description provided for @termsAppUsageItem1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogar quizzes individuais ou em grupo'**
+  String get termsAppUsageItem1;
+
+  /// No description provided for @termsAppUsageItem2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acessar estatísticas pessoais'**
+  String get termsAppUsageItem2;
+
+  /// No description provided for @termsAppUsageItem3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar o modo estudo sem limite de tempo'**
+  String get termsAppUsageItem3;
+
+  /// No description provided for @termsAppUsageItem4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogar minigames educativos'**
+  String get termsAppUsageItem4;
+
+  /// No description provided for @termsAppUsageItem5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desbloquear conquistas'**
+  String get termsAppUsageItem5;
+
+  /// No description provided for @termsBiblicalContent.
+  ///
+  /// In pt, this message translates to:
+  /// **'2. Conteúdo Bíblico'**
+  String get termsBiblicalContent;
+
+  /// No description provided for @termsBiblicalContentDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'As perguntas e respostas são baseadas na Bíblia Sagrada. Este aplicativo não substitui o estudo pessoal das Escrituras Sagradas nem representa uma organização religiosa oficial.'**
+  String get termsBiblicalContentDesc;
+
+  /// No description provided for @termsResponsibilities.
+  ///
+  /// In pt, this message translates to:
+  /// **'3. Responsabilidades'**
+  String get termsResponsibilities;
+
+  /// No description provided for @termsResponsibilitiesDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'O usuário é responsável por seu uso adequado do aplicativo. Não nos responsabilizamos por:'**
+  String get termsResponsibilitiesDesc;
+
+  /// No description provided for @termsResponsibilitiesItem1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Uso indevido das informações apresentadas'**
+  String get termsResponsibilitiesItem1;
+
+  /// No description provided for @termsResponsibilitiesItem2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Interpretações pessoais do conteúdo bíblico'**
+  String get termsResponsibilitiesItem2;
+
+  /// No description provided for @termsResponsibilitiesItem3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Problemas técnicos ou perda de dados'**
+  String get termsResponsibilitiesItem3;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In pt, this message translates to:
+  /// **'🔒 Política de Privacidade'**
+  String get privacyPolicy;
+
+  /// No description provided for @privacyPolicyIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'Respeitamos sua privacidade. Este aplicativo:'**
+  String get privacyPolicyIntro;
+
+  /// No description provided for @privacyDataCollected.
+  ///
+  /// In pt, this message translates to:
+  /// **'1. Dados Coletados'**
+  String get privacyDataCollected;
+
+  /// No description provided for @privacyDataItem1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados de uso: Estatísticas de jogo, preferências de tema'**
+  String get privacyDataItem1;
+
+  /// No description provided for @privacyDataItem2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados técnicos: Tipo de dispositivo, navegador, sistema operacional'**
+  String get privacyDataItem2;
+
+  /// No description provided for @privacyDataItem3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados de sessão: Tempo de uso, páginas visitadas'**
+  String get privacyDataItem3;
+
+  /// No description provided for @privacyStorage.
+  ///
+  /// In pt, this message translates to:
+  /// **'2. Armazenamento'**
+  String get privacyStorage;
+
+  /// No description provided for @privacyStorageDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos os dados são armazenados localmente no seu dispositivo. Não enviamos dados para servidores externos.'**
+  String get privacyStorageDesc;
+
+  /// No description provided for @privacyLocalStorage.
+  ///
+  /// In pt, this message translates to:
+  /// **'3. LocalStorage'**
+  String get privacyLocalStorage;
+
+  /// No description provided for @privacyLocalStorageDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usamos localStorage do navegador para salvar:'**
+  String get privacyLocalStorageDesc;
+
+  /// No description provided for @privacyLocalStorageItem1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preferências do usuário (tema, idioma)'**
+  String get privacyLocalStorageItem1;
+
+  /// No description provided for @privacyLocalStorageItem2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estatísticas pessoais de jogo'**
+  String get privacyLocalStorageItem2;
+
+  /// No description provided for @privacyLocalStorageItem3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conquistas desbloqueadas'**
+  String get privacyLocalStorageItem3;
+
+  /// No description provided for @privacySharing.
+  ///
+  /// In pt, this message translates to:
+  /// **'4. Compartilhamento'**
+  String get privacySharing;
+
+  /// No description provided for @privacySharingDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não compartilhamos seus dados pessoais com terceiros. Os dados permanecem exclusivamente no seu dispositivo.'**
+  String get privacySharingDesc;
+
+  /// No description provided for @copyright.
+  ///
+  /// In pt, this message translates to:
+  /// **'©️ Direitos Autorais'**
+  String get copyright;
+
+  /// No description provided for @copyrightAppContent.
+  ///
+  /// In pt, this message translates to:
+  /// **'1. Conteúdo do Aplicativo'**
+  String get copyrightAppContent;
+
+  /// No description provided for @copyrightAppContentDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'O código do aplicativo JW SPLASH GAMES é distribuído sob licença MIT. As perguntas e respostas são de domínio público ou foram criadas especificamente para este projeto educacional.'**
+  String get copyrightAppContentDesc;
+
+  /// No description provided for @copyrightBible.
+  ///
+  /// In pt, this message translates to:
+  /// **'2. Bíblia e Textos Sagrados'**
+  String get copyrightBible;
+
+  /// No description provided for @copyrightBibleDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Os textos bíblicos citados seguem a Tradução do Novo Mundo (TNM) das Escrituras Sagradas, usada com permissão para fins educacionais não comerciais.'**
+  String get copyrightBibleDesc;
+
+  /// No description provided for @copyrightImages.
+  ///
+  /// In pt, this message translates to:
+  /// **'3. Imagens e Ícones'**
+  String get copyrightImages;
+
+  /// No description provided for @copyrightImagesDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Os ícones e emojis utilizados são de fontes públicas ou licenciadas para uso gratuito.'**
+  String get copyrightImagesDesc;
+
+  /// No description provided for @copyrightNonCommercial.
+  ///
+  /// In pt, this message translates to:
+  /// **'4. Uso Não Comercial'**
+  String get copyrightNonCommercial;
+
+  /// No description provided for @copyrightNonCommercialDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este aplicativo é desenvolvido para fins educacionais e não comerciais. Qualquer uso comercial requer autorização prévia.'**
+  String get copyrightNonCommercialDesc;
+
+  /// No description provided for @contactSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'📞 Contato'**
+  String get contactSection;
+
+  /// No description provided for @contactDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para dúvidas, sugestões ou relatar problemas:'**
+  String get contactDesc;
+
+  /// No description provided for @lastUpdated.
+  ///
+  /// In pt, this message translates to:
+  /// **'📅 Última Atualização: Novembro 2025'**
+  String get lastUpdated;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'📱 Sobre o Jogo'**
+  String get aboutTitle;
+
+  /// No description provided for @aboutVersion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Versão 1.0.0'**
+  String get aboutVersion;
+
+  /// No description provided for @aboutWhatIs.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que é?'**
+  String get aboutWhatIs;
+
+  /// No description provided for @aboutWhatIsDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'JW SPLASH GAMES é um aplicativo educativo que torna o aprendizado bíblico divertido e interativo através de quizzes, minigames e desafios.'**
+  String get aboutWhatIsDesc;
+
+  /// No description provided for @aboutFeatures.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recursos'**
+  String get aboutFeatures;
+
+  /// No description provided for @aboutFeaturesDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'• Quiz Bíblico Interativo\n• Jogo da Memória\n• Caça-Palavras\n• Labirinto\n• Sistema de Conquistas\n• Estatísticas Detalhadas\n• Modo Multiplayer\n• 3 Idiomas (PT, EN, ES)'**
+  String get aboutFeaturesDesc;
+
+  /// No description provided for @aboutDevelopedBy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desenvolvido por'**
+  String get aboutDevelopedBy;
+
+  /// No description provided for @aboutDevelopedByDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Equipe JW SPLASH GAMES\nProjeto open-source disponível no GitHub'**
+  String get aboutDevelopedByDesc;
+
+  /// No description provided for @aboutObjective.
+  ///
+  /// In pt, this message translates to:
+  /// **'Objetivo'**
+  String get aboutObjective;
+
+  /// No description provided for @aboutObjectiveDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Proporcionar uma forma divertida e educativa de aprender e memorizar conhecimentos bíblicos, adequado para todas as idades.'**
+  String get aboutObjectiveDesc;
+
+  /// No description provided for @aboutUpdateNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'📝 Esta página será atualizada em breve com mais informações e link para página online oficial.'**
+  String get aboutUpdateNote;
+
+  /// No description provided for @aboutVisitGithub.
+  ///
+  /// In pt, this message translates to:
+  /// **'Visitar GitHub'**
+  String get aboutVisitGithub;
+
+  /// No description provided for @statsTabQuiz.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quiz'**
+  String get statsTabQuiz;
+
+  /// No description provided for @statsTabMinigames.
+  ///
+  /// In pt, this message translates to:
+  /// **'Minigames'**
+  String get statsTabMinigames;
+
+  /// No description provided for @statsTabHistory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico'**
+  String get statsTabHistory;
+
+  /// No description provided for @statsGeneralPerformance.
+  ///
+  /// In pt, this message translates to:
+  /// **'📊 Desempenho Geral'**
+  String get statsGeneralPerformance;
+
+  /// No description provided for @statsQuizzesCompleted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quizzes\nRealizados'**
+  String get statsQuizzesCompleted;
+
+  /// No description provided for @statsAccuracyRate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Taxa de\nAcerto'**
+  String get statsAccuracyRate;
+
+  /// No description provided for @statsBestScore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Melhor\nScore'**
+  String get statsBestScore;
+
+  /// No description provided for @statsBestStreak.
+  ///
+  /// In pt, this message translates to:
+  /// **'Melhor Sequência'**
+  String get statsBestStreak;
+
+  /// No description provided for @statsStreakTip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mantenha 80%+ de acerto para continuar a sequência!'**
+  String get statsStreakTip;
+
+  /// No description provided for @statsByCategory.
+  ///
+  /// In pt, this message translates to:
+  /// **'📚 Por Categoria'**
+  String get statsByCategory;
+
+  /// No description provided for @statsAccuracyByDifficulty.
+  ///
+  /// In pt, this message translates to:
+  /// **'🎯 Precisão por Dificuldade'**
+  String get statsAccuracyByDifficulty;
+
+  /// No description provided for @statsNoMinigames.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum minigame jogado ainda'**
+  String get statsNoMinigames;
+
+  /// No description provided for @statsMinigamesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'🕹️ Estatísticas dos Minigames'**
+  String get statsMinigamesTitle;
+
+  /// No description provided for @statsGames.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogos'**
+  String get statsGames;
+
+  /// No description provided for @statsWins.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vitórias'**
+  String get statsWins;
+
+  /// No description provided for @statsRate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Taxa'**
+  String get statsRate;
+
+  /// No description provided for @statsRecord.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recorde'**
+  String get statsRecord;
+
+  /// No description provided for @statsBestTime.
+  ///
+  /// In pt, this message translates to:
+  /// **'⏱️ Melhor tempo: {time}'**
+  String statsBestTime(String time);
+
+  /// No description provided for @statsNoHistory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum histórico disponível'**
+  String get statsNoHistory;
+
+  /// No description provided for @statsGamePuzzle.
+  ///
+  /// In pt, this message translates to:
+  /// **'🧩 Quebra-Cabeça'**
+  String get statsGamePuzzle;
+
+  /// No description provided for @statsGameHangman.
+  ///
+  /// In pt, this message translates to:
+  /// **'📝 Forca'**
+  String get statsGameHangman;
+
+  /// No description provided for @statsGameWordSearch.
+  ///
+  /// In pt, this message translates to:
+  /// **'🔍 Caça-Palavras'**
+  String get statsGameWordSearch;
+
+  /// No description provided for @statsGameMaze.
+  ///
+  /// In pt, this message translates to:
+  /// **'🌀 Labirinto'**
+  String get statsGameMaze;
+
+  /// No description provided for @statsGameSequence.
+  ///
+  /// In pt, this message translates to:
+  /// **'🎵 Sequência'**
+  String get statsGameSequence;
+
+  /// No description provided for @statsGameTicTacToe.
+  ///
+  /// In pt, this message translates to:
+  /// **'⭕ Jogo da Velha'**
+  String get statsGameTicTacToe;
+
+  /// No description provided for @statsGameMemory.
+  ///
+  /// In pt, this message translates to:
+  /// **'🧠 Jogo da Memória'**
+  String get statsGameMemory;
+
+  /// No description provided for @playAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'JOGAR NOVAMENTE'**
+  String get playAgain;
+
+  /// No description provided for @welcomeStart.
+  ///
+  /// In pt, this message translates to:
+  /// **'Começar'**
+  String get welcomeStart;
+
+  /// No description provided for @quizNext.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próxima'**
+  String get quizNext;
+
+  /// No description provided for @quizScore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pontuação'**
+  String get quizScore;
+
+  /// No description provided for @quizPresenter.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apresentador'**
+  String get quizPresenter;
+
+  /// No description provided for @pieQuizPlayer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogador {number}'**
+  String pieQuizPlayer(int number);
+
+  /// No description provided for @pieQuizShowAnswer.
+  ///
+  /// In pt, this message translates to:
+  /// **'👁️ Ver Resposta'**
+  String get pieQuizShowAnswer;
+
+  /// No description provided for @pieQuizHideAnswer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ocultar Resposta'**
+  String get pieQuizHideAnswer;
+
+  /// No description provided for @pieQuizNextQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próxima Pergunta'**
+  String get pieQuizNextQuestion;
+
+  /// No description provided for @pieQuizFinalResult.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver Resultado Final'**
+  String get pieQuizFinalResult;
+
+  /// No description provided for @difficultyEasy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fácil'**
+  String get difficultyEasy;
+
+  /// No description provided for @difficultyMedium.
+  ///
+  /// In pt, this message translates to:
+  /// **'Médio'**
+  String get difficultyMedium;
+
+  /// No description provided for @difficultyHard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Difícil'**
+  String get difficultyHard;
+
+  /// No description provided for @difficultyNormal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Normal'**
+  String get difficultyNormal;
+
+  /// No description provided for @pieEndGame.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fim do Jogo!'**
+  String get pieEndGame;
+
+  /// No description provided for @piePlayerWon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogador {number} Venceu!'**
+  String piePlayerWon(int number);
+
+  /// No description provided for @pieTie.
+  ///
+  /// In pt, this message translates to:
+  /// **'Empate!'**
+  String get pieTie;
+
+  /// No description provided for @pieHome.
+  ///
+  /// In pt, this message translates to:
+  /// **'Início'**
+  String get pieHome;
+
+  /// No description provided for @pieWhoGotIt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quem acertou?'**
+  String get pieWhoGotIt;
+
+  /// No description provided for @pieCorrectAnswer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resposta Correta:'**
+  String get pieCorrectAnswer;
+
+  /// No description provided for @sequenceRecord.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recorde'**
+  String get sequenceRecord;
+
+  /// No description provided for @sequenceCongrats.
+  ///
+  /// In pt, this message translates to:
+  /// **'🎉 PARABÉNS! VOCÊ VENCEU! 🎉'**
+  String get sequenceCongrats;
+
+  /// No description provided for @sequenceCompletedAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você completou todos os 20 níveis!'**
+  String get sequenceCompletedAll;
+
+  /// No description provided for @sequenceReachedLevel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você alcançou o nível {level}'**
+  String sequenceReachedLevel(int level);
+
+  /// No description provided for @sequencePlayAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogar Novamente'**
+  String get sequencePlayAgain;
+
+  /// No description provided for @sequenceStartGame.
+  ///
+  /// In pt, this message translates to:
+  /// **'Iniciar Jogo'**
+  String get sequenceStartGame;
+
+  /// No description provided for @wordSearchFoundAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você encontrou todas as palavras em {seconds} segundos!'**
+  String wordSearchFoundAll(int seconds);
+
+  /// No description provided for @memoryNewGame.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova Partida'**
+  String get memoryNewGame;
+
+  /// No description provided for @memoryHome.
+  ///
+  /// In pt, this message translates to:
+  /// **'Início'**
+  String get memoryHome;
+
+  /// No description provided for @memoryConfigureGame.
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurar Jogo'**
+  String get memoryConfigureGame;
+
+  /// No description provided for @memoryMoves.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogadas'**
+  String get memoryMoves;
+
+  /// No description provided for @memoryPairs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pares'**
+  String get memoryPairs;
+
+  /// No description provided for @memoryTime.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tempo'**
+  String get memoryTime;
+
+  /// No description provided for @memoryDifficulty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dificuldade'**
+  String get memoryDifficulty;
+
+  /// No description provided for @memoryCongrats.
+  ///
+  /// In pt, this message translates to:
+  /// **'🎉 Parabéns!'**
+  String get memoryCongrats;
+
+  /// No description provided for @memoryFoundAllPairs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você encontrou todos os pares!'**
+  String get memoryFoundAllPairs;
+
+  /// No description provided for @ticTacToeOpponentTurn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vez do oponente'**
+  String get ticTacToeOpponentTurn;
+
+  /// No description provided for @ticTacToeYouWin.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você venceu!'**
+  String get ticTacToeYouWin;
+
+  /// No description provided for @ticTacToeYouLose.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você perdeu!'**
+  String get ticTacToeYouLose;
+
+  /// No description provided for @ticTacToeDraw.
+  ///
+  /// In pt, this message translates to:
+  /// **'Empate!'**
+  String get ticTacToeDraw;
+
+  /// No description provided for @jigsawTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quebra-Cabeça'**
+  String get jigsawTitle;
+
+  /// No description provided for @jigsawLoadFromGallery.
+  ///
+  /// In pt, this message translates to:
+  /// **'Carregar da Galeria'**
+  String get jigsawLoadFromGallery;
+
+  /// No description provided for @jigsawOrChooseImage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ou escolha uma imagem:'**
+  String get jigsawOrChooseImage;
+
+  /// No description provided for @jigsawGalleryError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao abrir galeria. Verifique as permissões.'**
+  String get jigsawGalleryError;
+
+  /// No description provided for @jigsawPieces.
+  ///
+  /// In pt, this message translates to:
+  /// **'peças'**
+  String get jigsawPieces;
+
+  /// No description provided for @jigsawComplete.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quebra-cabeça completo!'**
+  String get jigsawComplete;
+
+  /// No description provided for @achievementsTitle2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conquistas'**
+  String get achievementsTitle2;
+
+  /// No description provided for @achievementsAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todas'**
+  String get achievementsAll;
+
+  /// No description provided for @achievementsLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao carregar conquistas'**
+  String get achievementsLoadError;
+
+  /// No description provided for @multiplayerOnlineMatch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Partida Online'**
+  String get multiplayerOnlineMatch;
+
+  /// No description provided for @multiplayerPlayRealtime.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogue com seus amigos em tempo real!'**
+  String get multiplayerPlayRealtime;
+
+  /// No description provided for @multiplayerBeHost.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seja o anfitrião e convide amigos'**
+  String get multiplayerBeHost;
+
+  /// No description provided for @multiplayerEnterCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o código da sala'**
+  String get multiplayerEnterCode;
+
+  /// No description provided for @multiplayerInfo1.
+  ///
+  /// In pt, this message translates to:
+  /// **'• Até 8 jogadores por sala'**
+  String get multiplayerInfo1;
+
+  /// No description provided for @multiplayerInfo2.
+  ///
+  /// In pt, this message translates to:
+  /// **'• Perguntas simultâneas'**
+  String get multiplayerInfo2;
+
+  /// No description provided for @multiplayerInfo3.
+  ///
+  /// In pt, this message translates to:
+  /// **'• Pontuação por velocidade'**
+  String get multiplayerInfo3;
+
+  /// No description provided for @multiplayerInfo4.
+  ///
+  /// In pt, this message translates to:
+  /// **'• Ranking em tempo real'**
+  String get multiplayerInfo4;
+
+  /// No description provided for @multiplayerCreateRoom.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar Sala'**
+  String get multiplayerCreateRoom;
+
+  /// No description provided for @multiplayerJoinRoom.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar em Sala'**
+  String get multiplayerJoinRoom;
+
+  /// No description provided for @multiplayerRoom.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sala'**
+  String get multiplayerRoom;
+
+  /// No description provided for @multiplayerRemovePlayer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover jogador?'**
+  String get multiplayerRemovePlayer;
+
+  /// No description provided for @multiplayerRemove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover'**
+  String get multiplayerRemove;
+
+  /// No description provided for @multiplayerLeaveRoom.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sair da sala?'**
+  String get multiplayerLeaveRoom;
+
+  /// No description provided for @multiplayerLeave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sair'**
+  String get multiplayerLeave;
+
+  /// No description provided for @multiplayerEndRoom.
+  ///
+  /// In pt, this message translates to:
+  /// **'Encerrar Sala?'**
+  String get multiplayerEndRoom;
+
+  /// No description provided for @multiplayerEnd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Encerrar'**
+  String get multiplayerEnd;
+
+  /// No description provided for @multiplayerAllDisconnected.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos os jogadores serão desconectados.'**
+  String get multiplayerAllDisconnected;
+
+  /// No description provided for @multiplayerCodeCopied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código copiado'**
+  String get multiplayerCodeCopied;
+
+  /// No description provided for @multiplayerShareCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhe o código {code} com seus amigos!'**
+  String multiplayerShareCode(String code);
+
+  /// No description provided for @multiplayerRoomClosed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sala encerrada'**
+  String get multiplayerRoomClosed;
+
+  /// No description provided for @multiplayerRoomClosedHost.
+  ///
+  /// In pt, this message translates to:
+  /// **'O anfitrião encerrou a sala.'**
+  String get multiplayerRoomClosedHost;
+
+  /// No description provided for @multiplayerShareCodeBtn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhar Código'**
+  String get multiplayerShareCodeBtn;
+
+  /// No description provided for @multiplayerStartGame.
+  ///
+  /// In pt, this message translates to:
+  /// **'Iniciar Jogo'**
+  String get multiplayerStartGame;
+
+  /// No description provided for @multiplayerWaitingPlayers.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aguardando jogadores...'**
+  String get multiplayerWaitingPlayers;
+
+  /// No description provided for @multiplayerHowItWorks.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como funciona?'**
+  String get multiplayerHowItWorks;
+
+  /// No description provided for @multiplayerUseSuggestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar sugestão'**
+  String get multiplayerUseSuggestion;
+
+  /// No description provided for @multiplayerChooseAnother.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher outro'**
+  String get multiplayerChooseAnother;
+
+  /// No description provided for @multiplayerUnderstood.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi'**
+  String get multiplayerUnderstood;
+
+  /// No description provided for @multiplayerQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pergunta'**
+  String get multiplayerQuestion;
+
+  /// No description provided for @multiplayerRoundResults.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resultados da Rodada'**
+  String get multiplayerRoundResults;
+
+  /// No description provided for @multiplayerCorrect.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acertou!'**
+  String get multiplayerCorrect;
+
+  /// No description provided for @multiplayerWrong.
+  ///
+  /// In pt, this message translates to:
+  /// **'Errou'**
+  String get multiplayerWrong;
+
+  /// No description provided for @multiplayerPosition.
+  ///
+  /// In pt, this message translates to:
+  /// **'Posição'**
+  String get multiplayerPosition;
+
+  /// No description provided for @multiplayerPoints.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pontos'**
+  String get multiplayerPoints;
+
+  /// No description provided for @multiplayerCurrentRanking.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ranking Atual'**
+  String get multiplayerCurrentRanking;
+
+  /// No description provided for @multiplayerNextQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próxima Pergunta'**
+  String get multiplayerNextQuestion;
+
+  /// No description provided for @multiplayerWaitingHost.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aguardando o anfitrião...'**
+  String get multiplayerWaitingHost;
+
+  /// No description provided for @multiplayerYourNickname.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu apelido'**
+  String get multiplayerYourNickname;
+
+  /// No description provided for @multiplayerRoomCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código da sala'**
+  String get multiplayerRoomCode;
+
+  /// No description provided for @multiplayerPlayers.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogadores'**
+  String get multiplayerPlayers;
+
+  /// No description provided for @multiplayerHost.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anfitrião'**
+  String get multiplayerHost;
+
+  /// No description provided for @multiplayerGameOver.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fim de Jogo!'**
+  String get multiplayerGameOver;
+
+  /// No description provided for @multiplayerCongrats.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parabéns! Você venceu! 🎉'**
+  String get multiplayerCongrats;
+
+  /// No description provided for @multiplayerMatchEnded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Partida finalizada'**
+  String get multiplayerMatchEnded;
+
+  /// No description provided for @multiplayerRestarting.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reiniciando...'**
+  String get multiplayerRestarting;
+
+  /// No description provided for @multiplayerPlayAgainBtn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogar Novamente'**
+  String get multiplayerPlayAgainBtn;
+
+  /// No description provided for @multiplayerCloseRoom.
+  ///
+  /// In pt, this message translates to:
+  /// **'Encerrar Sala'**
+  String get multiplayerCloseRoom;
+
+  /// No description provided for @multiplayerRestartingMatch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reiniciando partida...'**
+  String get multiplayerRestartingMatch;
+
+  /// No description provided for @multiplayerWaitingHostDecision.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aguardando decisão do anfitrião...'**
+  String get multiplayerWaitingHostDecision;
 }
 
 class _AppLocalizationsDelegate
