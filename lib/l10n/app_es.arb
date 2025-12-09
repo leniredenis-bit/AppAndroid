@@ -227,6 +227,16 @@
       }
     }
   },
+  "memoryGameStartGame": "Iniciar Juego",
+  "memoryGameTime": "Tiempo",
+  "memoryGamePlayerTurn": "Turno del Jugador {player}",
+  "@memoryGamePlayerTurn": {
+    "placeholders": {
+      "player": {"type": "int"}
+    }
+  },
+  "memoryGameCongrats": "¡Felicidades! 🎉",
+  "memoryGamePlayAgain": "Jugar de Nuevo",
   
   "ticTacToeTitle": "⭕❌ Tres en Raya",
   "ticTacToeMode": "Modo",
@@ -256,6 +266,10 @@
       }
     }
   },
+  "ticTacToeImpossible": "Imposible",
+  "ticTacToeYourTurn": "¡Tu turno!",
+  "ticTacToeResetScores": "Resetear Marcador",
+  "ticTacToeNewGame": "Nuevo Juego",
   
   "hangmanTitle": "Ahorcado",
   "hangmanCategory": "Categoría",
@@ -279,6 +293,7 @@
   },
   "hangmanNewGame": "Nuevo Juego",
   "hangmanPlayAgain": "Jugar de Nuevo",
+  "hangmanTheWordWas": "La palabra era:",
   "hangmanErrors": "Errores: {errors} / {max}",
   "@hangmanErrors": {
     "placeholders": {
@@ -323,6 +338,8 @@
   },
   "wordSearchCongratulations": "¡Felicitaciones! ¡Encontraste todas las palabras!",
   "wordSearchWordList": "Lista de Palabras",
+  "wordSearchComplete": "¡Completado! 🎉",
+  "wordSearchNewGame": "Nuevo Juego",
   
   "mazeTitle": "🌀 Laberinto",
   "mazeMoves": "Movimientos: {moves}",
@@ -348,7 +365,10 @@
     }
   },
   "mazeControls": "Usa las flechas para moverte",
+  "mazeUseButtons": "Usa los botones o las teclas de flecha",
+  "mazeGoal": "¡Encuentra la salida!",
   "mazeVictory": "¡Encontraste la salida!",
+  "mazePlayAgain": "Jugar de Nuevo",
   "mazeNewMaze": "Nuevo Laberinto",
   "mazeDifficulty": "Dificultad",
   "mazeEasy": "Fácil",
@@ -409,8 +429,16 @@
     }
   },
   "sequenceWatch": "Observa la secuencia",
+  "sequenceWatchSequence": "Observa la secuencia...",
   "sequenceYourTurn": "¡Tu turno!",
   "sequenceGameOver": "¡Juego Terminado!",
+  "sequenceReached": "¡Llegaste al nivel {level}!",
+  "@sequenceReached": {
+    "placeholders": {
+      "level": {"type": "int"}
+    }
+  },
+  "sequenceTryAgain": "Intentar de Nuevo",
   "sequenceNewGame": "Nuevo Juego",
   "sequenceYourScore": "Tu puntuación: {score}",
   "@sequenceYourScore": {
@@ -514,6 +542,7 @@
   },
   "puzzleDragPieces": "Arrastra las piezas para resolver el rompecabezas",
   "puzzleComplete": "¡Rompecabezas completado!",
+  "puzzleNewGame": "Nuevo Juego",
   "puzzleNewPuzzle": "Nuevo Rompecabezas",
   "completedInMoves": "Completado en {moves} movimientos",
   "newGame": "Nueva Partida"

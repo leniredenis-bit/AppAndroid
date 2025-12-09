@@ -582,7 +582,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get memoryGamePlayers => 'Jugadores';
 
   @override
-  String get memoryGameStartGame => 'Iniciar Jogo';
+  String get memoryGameStartGame => 'Iniciar Juego';
 
   @override
   String get memoryGameAttempts => 'Intentos';
@@ -591,11 +591,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get memoryGameMatches => 'Aciertos';
 
   @override
-  String get memoryGameTime => 'Tempo';
+  String get memoryGameTime => 'Tiempo';
 
   @override
   String memoryGamePlayerTurn(int player) {
-    return 'Vez do Jogador $player';
+    return 'Turno del Jugador $player';
   }
 
   @override
@@ -604,10 +604,10 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get memoryGameCongrats => 'Parabéns! 🎉';
+  String get memoryGameCongrats => '¡Felicidades! 🎉';
 
   @override
-  String get memoryGamePlayAgain => 'Jogar Novamente';
+  String get memoryGamePlayAgain => 'Jugar de Nuevo';
 
   @override
   String get ticTacToeTitle => '⭕❌ Tres en Raya';
@@ -628,7 +628,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get ticTacToeEasy => 'Fácil';
 
   @override
-  String get ticTacToeImpossible => 'Impossível';
+  String get ticTacToeImpossible => 'Imposible';
 
   @override
   String get ticTacToePlayerX => 'Jugador X';
@@ -637,7 +637,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get ticTacToePlayerO => 'Jugador O';
 
   @override
-  String get ticTacToeYourTurn => 'Sua vez!';
+  String get ticTacToeYourTurn => '¡Tu turno!';
 
   @override
   String get ticTacToeWins => 'Victorias';
@@ -646,10 +646,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get ticTacToeDraws => 'Empates';
 
   @override
-  String get ticTacToeResetScores => 'Resetar Placar';
+  String get ticTacToeResetScores => 'Resetear Marcador';
 
   @override
-  String get ticTacToeNewGame => 'Novo Jogo';
+  String get ticTacToeNewGame => 'Nuevo Juego';
 
   @override
   String get hangmanTitle => 'Ahorcado';
@@ -670,7 +670,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get hangmanLose => '¡Juego terminado! La palabra era: null';
 
   @override
-  String get hangmanTheWordWas => 'A palavra era:';
+  String get hangmanTheWordWas => 'La palabra era:';
 
   @override
   String get hangmanPlayAgain => 'Jugar de Nuevo';
@@ -710,10 +710,10 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get wordSearchComplete => 'Completado! 🎉';
+  String get wordSearchComplete => '¡Completado! 🎉';
 
   @override
-  String get wordSearchNewGame => 'Novo Jogo';
+  String get wordSearchNewGame => 'Nuevo Juego';
 
   @override
   String get mazeTitle => '🌀 Laberinto';
@@ -733,16 +733,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get mazeControls => 'Usa las flechas para moverte';
 
   @override
-  String get mazeUseButtons => 'Use os botões ou teclas de seta';
+  String get mazeUseButtons => 'Usa los botones o las teclas de flecha';
 
   @override
-  String get mazeGoal => 'Encontre a saída!';
+  String get mazeGoal => '¡Encuentra la salida!';
 
   @override
   String get mazeVictory => '¡Encontraste la salida!';
 
   @override
-  String get mazePlayAgain => 'Jogar Novamente';
+  String get mazePlayAgain => 'Jugar de Nuevo';
 
   @override
   String get mazeCavern => '🏔️ Caverna del Laberinto';
@@ -797,7 +797,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sequenceHighScore => 'Puntuación Máxima: null';
 
   @override
-  String get sequenceWatchSequence => 'Observe a sequência...';
+  String get sequenceWatchSequence => 'Observa la secuencia...';
 
   @override
   String get sequenceYourTurn => '¡Tu turno!';
@@ -807,14 +807,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String sequenceReached(int level) {
-    return 'Você chegou ao nível $level!';
+    return '¡Llegaste al nivel $level!';
   }
 
   @override
   String get sequenceNewRecord => '¡Nuevo récord!';
 
   @override
-  String get sequenceTryAgain => 'Tentar Novamente';
+  String get sequenceTryAgain => 'Intentar de Nuevo';
 
   @override
   String sequenceActiveColors(int active, int max) {
@@ -923,7 +923,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get puzzleComplete => '¡Rompecabezas completado!';
 
   @override
-  String get puzzleNewGame => 'Novo Jogo';
+  String get puzzleNewGame => 'Nuevo Juego';
 
   @override
   String completedInMoves(Object moves) {

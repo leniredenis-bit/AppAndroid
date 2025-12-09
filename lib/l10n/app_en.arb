@@ -227,6 +227,16 @@
       }
     }
   },
+  "memoryGameStartGame": "Start Game",
+  "memoryGameTime": "Time",
+  "memoryGamePlayerTurn": "Player {player}'s Turn",
+  "@memoryGamePlayerTurn": {
+    "placeholders": {
+      "player": {"type": "int"}
+    }
+  },
+  "memoryGameCongrats": "Congratulations! 🎉",
+  "memoryGamePlayAgain": "Play Again",
   
   "ticTacToeTitle": "⭕❌ Tic-Tac-Toe",
   "ticTacToeMode": "Mode",
@@ -256,6 +266,10 @@
       }
     }
   },
+  "ticTacToeImpossible": "Impossible",
+  "ticTacToeYourTurn": "Your turn!",
+  "ticTacToeResetScores": "Reset Scores",
+  "ticTacToeNewGame": "New Game",
   
   "hangmanTitle": "Hangman",
   "hangmanCategory": "Category",
@@ -279,6 +293,7 @@
   },
   "hangmanNewGame": "New Game",
   "hangmanPlayAgain": "Play Again",
+  "hangmanTheWordWas": "The word was:",
   "hangmanErrors": "Errors: {errors} / {max}",
   "@hangmanErrors": {
     "placeholders": {
@@ -323,6 +338,8 @@
   },
   "wordSearchCongratulations": "Congratulations! You found all the words!",
   "wordSearchWordList": "Word List",
+  "wordSearchComplete": "Completed! 🎉",
+  "wordSearchNewGame": "New Game",
   
   "mazeTitle": "🌀 Maze",
   "mazeMoves": "Moves: {moves}",
@@ -348,7 +365,10 @@
     }
   },
   "mazeControls": "Use arrows to move",
+  "mazeUseButtons": "Use the buttons or arrow keys",
+  "mazeGoal": "Find the exit!",
   "mazeVictory": "You found the exit!",
+  "mazePlayAgain": "Play Again",
   "mazeNewMaze": "New Maze",
   "mazeDifficulty": "Difficulty",
   "mazeEasy": "Easy",
@@ -409,8 +429,16 @@
     }
   },
   "sequenceWatch": "Watch the sequence",
+  "sequenceWatchSequence": "Watch the sequence...",
   "sequenceYourTurn": "Your turn!",
   "sequenceGameOver": "Game Over!",
+  "sequenceReached": "You reached level {level}!",
+  "@sequenceReached": {
+    "placeholders": {
+      "level": {"type": "int"}
+    }
+  },
+  "sequenceTryAgain": "Try Again",
   "sequenceNewGame": "New Game",
   "sequenceYourScore": "Your score: {score}",
   "@sequenceYourScore": {
@@ -514,6 +542,7 @@
   },
   "puzzleDragPieces": "Drag the pieces to solve the puzzle",
   "puzzleComplete": "Puzzle completed!",
+  "puzzleNewGame": "New Game",
   "puzzleNewPuzzle": "New Puzzle",
   "completedInMoves": "Completed in {moves} moves",
   "newGame": "New Game"
