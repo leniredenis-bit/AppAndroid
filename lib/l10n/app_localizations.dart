@@ -322,6 +322,66 @@ abstract class AppLocalizations {
   /// **'claro'**
   String get homeThemeLight;
 
+  /// No description provided for @homeQuizClassic.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quiz Clássico'**
+  String get homeQuizClassic;
+
+  /// No description provided for @homeQuizClassicDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Responda perguntas e marque pontos!'**
+  String get homeQuizClassicDesc;
+
+  /// No description provided for @homeQuizPie.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quiz Torta na Cara'**
+  String get homeQuizPie;
+
+  /// No description provided for @homeQuizPieDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Duelo 1v1 local - quem errar perde!'**
+  String get homeQuizPieDesc;
+
+  /// No description provided for @homeOnlineMatch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Partida Online'**
+  String get homeOnlineMatch;
+
+  /// No description provided for @homeOnlineMatchDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogue com amigos em tempo real!'**
+  String get homeOnlineMatchDesc;
+
+  /// No description provided for @homeMinigames.
+  ///
+  /// In pt, this message translates to:
+  /// **'Minigames'**
+  String get homeMinigames;
+
+  /// No description provided for @homeMinigamesDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jogos divertidos te aguardam!'**
+  String get homeMinigamesDesc;
+
+  /// No description provided for @homeStats.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estatísticas'**
+  String get homeStats;
+
+  /// No description provided for @homeStatsDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Veja seu desempenho e conquistas!'**
+  String get homeStatsDesc;
+
   /// No description provided for @playQuiz.
   ///
   /// In pt, this message translates to:

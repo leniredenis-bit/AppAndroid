@@ -129,6 +129,36 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeThemeLight => 'claro';
 
   @override
+  String get homeQuizClassic => 'Quiz Clássico';
+
+  @override
+  String get homeQuizClassicDesc => 'Responda perguntas e marque pontos!';
+
+  @override
+  String get homeQuizPie => 'Quiz Torta na Cara';
+
+  @override
+  String get homeQuizPieDesc => 'Duelo 1v1 local - quem errar perde!';
+
+  @override
+  String get homeOnlineMatch => 'Partida Online';
+
+  @override
+  String get homeOnlineMatchDesc => 'Jogue com amigos em tempo real!';
+
+  @override
+  String get homeMinigames => 'Minigames';
+
+  @override
+  String get homeMinigamesDesc => 'Jogos divertidos te aguardam!';
+
+  @override
+  String get homeStats => 'Estatísticas';
+
+  @override
+  String get homeStatsDesc => 'Veja seu desempenho e conquistas!';
+
+  @override
   String get playQuiz => '🎯 Jogar Quiz';
 
   @override

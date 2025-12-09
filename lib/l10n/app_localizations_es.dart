@@ -129,6 +129,36 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeThemeLight => 'claro';
 
   @override
+  String get homeQuizClassic => 'Quiz Clásico';
+
+  @override
+  String get homeQuizClassicDesc => '¡Responde preguntas y suma puntos!';
+
+  @override
+  String get homeQuizPie => 'Quiz Pastelazo';
+
+  @override
+  String get homeQuizPieDesc => '¡Duelo 1v1 local - quien falla pierde!';
+
+  @override
+  String get homeOnlineMatch => 'Partida en Línea';
+
+  @override
+  String get homeOnlineMatchDesc => '¡Juega con amigos en tiempo real!';
+
+  @override
+  String get homeMinigames => 'Minijuegos';
+
+  @override
+  String get homeMinigamesDesc => '¡Juegos divertidos te esperan!';
+
+  @override
+  String get homeStats => 'Estadísticas';
+
+  @override
+  String get homeStatsDesc => '¡Mira tu rendimiento y logros!';
+
+  @override
   String get playQuiz => '🎯 Jugar Quiz';
 
   @override

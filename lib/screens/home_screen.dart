@@ -21,22 +21,30 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<String> difficulties = ['Fácil', 'Médio', 'Difícil'];
   List<String> allTags = [];
   List<String> displayedTags = [];
   bool isLoadingTags = true;
   bool showAllTags = false;
   final int initialTagsCount = 7;
-  final List<Map<String, String>> modes = [
-    {'emoji': '🧠', 'title': 'Quiz Clássico', 'desc': 'Responda perguntas e marque pontos!'},
-    {'emoji': '🥧', 'title': 'Quiz Torta na Cara', 'desc': 'Duelo 1v1 local - quem errar perde!'},
-    {'emoji': '🌐', 'title': 'Partida Online', 'desc': 'Jogue com amigos em tempo real!'},
-    {'emoji': '🎮', 'title': 'Minigames', 'desc': 'Jogos divertidos te aguardam!'},
-    {'emoji': '📊', 'title': 'Estatísticas', 'desc': 'Veja seu desempenho e conquistas!'},
-  ];
 
-  String? selectedDifficulty;
+  int? selectedDifficultyIndex; // Usa índice ao invés de string
   String? selectedTag;
+  
+  // Retorna as dificuldades traduzidas
+  List<String> _getDifficulties(AppLocalizations l10n) {
+    return [l10n.easy, l10n.medium, l10n.hard];
+  }
+  
+  // Retorna os modos de jogo traduzidos
+  List<Map<String, String>> _getModes(AppLocalizations l10n) {
+    return [
+      {'emoji': '🧠', 'title': l10n.homeQuizClassic, 'desc': l10n.homeQuizClassicDesc},
+      {'emoji': '🥧', 'title': l10n.homeQuizPie, 'desc': l10n.homeQuizPieDesc},
+      {'emoji': '🌐', 'title': l10n.homeOnlineMatch, 'desc': l10n.homeOnlineMatchDesc},
+      {'emoji': '🎮', 'title': l10n.homeMinigames, 'desc': l10n.homeMinigamesDesc},
+      {'emoji': '📊', 'title': l10n.homeStats, 'desc': l10n.homeStatsDesc},
+    ];
+  }
 
   @override
   void initState() {
@@ -86,9 +94,9 @@ class _HomeScreenState extends State<HomeScreen> {
       List<Question> questions = await QuizService.loadQuestions();
       
       // Aplicar filtros
-      if (selectedDifficulty != null) {
-        // Converter dificuldade de String para int (1=Fácil, 2=Médio, 3=Difícil)
-        int difficultyLevel = difficulties.indexOf(selectedDifficulty!) + 1;
+      if (selectedDifficultyIndex != null) {
+        // Converter índice para nível de dificuldade (1=Fácil, 2=Médio, 3=Difícil)
+        int difficultyLevel = selectedDifficultyIndex! + 1;
         questions = QuizService.filterByDifficulty(questions, difficultyLevel);
       }
       
@@ -128,6 +136,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final difficulties = _getDifficulties(l10n);
+    final modes = _getModes(l10n);
     
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
@@ -161,8 +171,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     List<Question> questions = await QuizService.loadQuestions();
                     
                     // Aplicar filtros se houver
-                    if (selectedDifficulty != null) {
-                      int difficultyLevel = difficulties.indexOf(selectedDifficulty!) + 1;
+                    if (selectedDifficultyIndex != null) {
+                      int difficultyLevel = selectedDifficultyIndex! + 1;
                       questions = QuizService.filterByDifficulty(questions, difficultyLevel);
                     }
                     
@@ -280,21 +290,25 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(l10n.homeDifficulty, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
             SizedBox(height: 8),
             Row(
-              children: difficulties.map((dif) => Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: FilterChip(
-                  label: Text(dif),
-                  selected: selectedDifficulty == dif,
-                  backgroundColor: Color(0xFF23395D),
-                  selectedColor: Color(0xFF3A5A8C),
-                  labelStyle: TextStyle(color: Colors.white),
-                  onSelected: (selected) {
-                    setState(() {
-                      selectedDifficulty = selected ? dif : null;
-                    });
-                  },
-                ),
-              )).toList(),
+              children: difficulties.asMap().entries.map((entry) {
+                final index = entry.key;
+                final dif = entry.value;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    label: Text(dif),
+                    selected: selectedDifficultyIndex == index,
+                    backgroundColor: Color(0xFF23395D),
+                    selectedColor: Color(0xFF3A5A8C),
+                    labelStyle: TextStyle(color: Colors.white),
+                    onSelected: (selected) {
+                      setState(() {
+                        selectedDifficultyIndex = selected ? index : null;
+                      });
+                    },
+                  ),
+                );
+              }).toList(),
             ),
             SizedBox(height: 16),
             // Tags de categorias
