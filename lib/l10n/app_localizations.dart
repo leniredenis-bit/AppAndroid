@@ -1858,6 +1858,18 @@ abstract class AppLocalizations {
   /// **'Informações sobre o aplicativo'**
   String get settingsAboutSubtitle;
 
+  /// No description provided for @settingsSupport.
+  ///
+  /// In pt, this message translates to:
+  /// **'💬 Ajuda e Suporte'**
+  String get settingsSupport;
+
+  /// No description provided for @settingsSupportSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fale conosco, envie feedback ou dúvidas'**
+  String get settingsSupportSubtitle;
+
   /// No description provided for @termsTitle.
   ///
   /// In pt, this message translates to:

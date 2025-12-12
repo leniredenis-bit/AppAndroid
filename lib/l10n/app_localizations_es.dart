@@ -958,6 +958,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsAboutSubtitle => 'Información sobre la aplicación';
 
   @override
+  String get settingsSupport => '💬 Ayuda y Soporte';
+
+  @override
+  String get settingsSupportSubtitle =>
+      'Contáctanos, envía comentarios o preguntas';
+
+  @override
   String get termsTitle => 'ℹ️ Términos y Condiciones';
 
   @override

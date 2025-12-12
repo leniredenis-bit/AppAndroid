@@ -6,6 +6,7 @@ import '../screens/terms_screen.dart';
 import '../screens/about_screen.dart';
 import '../services/audio_service.dart';
 import '../services/language_service.dart';
+import '../services/chat_service.dart';
 import '../l10n/app_localizations.dart';
 
 class SettingsDialog extends StatefulWidget {
@@ -355,6 +356,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     context,
                     MaterialPageRoute(builder: (context) => const AboutScreen()),
                   );
+                },
+              ),
+
+              SizedBox(height: 12),
+
+              // Support Button
+              _buildMenuButton(
+                icon: Icons.chat_bubble_outline,
+                title: l10n.settingsSupport,
+                subtitle: l10n.settingsSupportSubtitle,
+                color: Color(0xFF00BCD4),
+                onTap: () {
+                  Navigator.pop(context);
+                  ChatService().openSupportChat(currentScreen: 'Settings');
                 },
               ),
 
