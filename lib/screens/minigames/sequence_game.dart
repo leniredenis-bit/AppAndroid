@@ -419,7 +419,7 @@ class _SequenceGameState extends State<SequenceGame> {
     return AnimatedScale(
       scale: scale,
       duration: const Duration(milliseconds: 200),
-      child: Container(
+      child: SizedBox(
         width: 130,
         height: 140,
         child: Stack(

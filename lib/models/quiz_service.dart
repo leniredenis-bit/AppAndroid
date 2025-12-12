@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'question.dart';
 import '../services/language_service.dart';
@@ -32,7 +33,7 @@ class QuizService {
         _questions = jsonList.map((json) => Question.fromJson(json)).toList();
       } catch (e) {
         // Fallback para português se arquivo do idioma não existir
-        print('⚠️ Arquivo $fileName não encontrado, usando perguntas_pt.json');
+        debugPrint('⚠️ Arquivo $fileName não encontrado, usando perguntas_pt.json');
         final ByteData data = await rootBundle.load('assets/data/perguntas_pt.json');
         final String jsonString = utf8.decode(data.buffer.asUint8List());
         final List<dynamic> jsonList = json.decode(jsonString);

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/audio_service.dart';
 import '../../services/storage_service.dart';
@@ -10,8 +9,8 @@ import '../../widgets/achievement_unlock_dialog.dart';
 import '../../l10n/app_localizations.dart';
 
 // --- Configurações do Quebra-Cabeça ---
-const int DEFAULT_GRID_SIZE = 3; // 3x3 (fácil: 3, médio: 4, difícil: 5)
-const double SNAP_THRESHOLD_PERCENT = 0.95; // 95% de proximidade para encaixar
+const int defaultGridSize = 3; // 3x3 (fácil: 3, médio: 4, difícil: 5)
+const double snapThresholdPercent = 0.95; // 95% de proximidade para encaixar
 
 // --- Estrutura da Peça ---
 class JigsawPiece {
@@ -65,7 +64,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
   bool _isGameStarted = false;
   bool _isGameWon = false;
   bool _showPreview = true;
-  int _gridSize = DEFAULT_GRID_SIZE;
+  int _gridSize = defaultGridSize;
   int _moves = 0;
   DateTime? _gameStartTime;
   final Random _random = Random();
@@ -358,7 +357,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
             child: Container(
               padding: const EdgeInsets.all(30),
               decoration: BoxDecoration(
-                color: Colors.green.shade900.withOpacity(0.95),
+                color: Colors.green.shade900.withValues(alpha: 0.95),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: const [BoxShadow(blurRadius: 20, color: Colors.black)],
               ),
@@ -401,7 +400,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
       decoration: BoxDecoration(
         color: Colors.black45,
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.orangeAccent.withOpacity(0.5)),
+        border: Border.all(color: Colors.orangeAccent.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -520,7 +519,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
   void _checkSnap(JigsawPiece piece) {
     // Calcula a distância máxima aceitável baseada no tamanho da peça
     double pieceSize = _boardSize!.width / _gridSize;
-    double maxSnapDistance = pieceSize * (1 - SNAP_THRESHOLD_PERCENT) * 2; // ~5% do tamanho da peça
+    double maxSnapDistance = pieceSize * (1 - snapThresholdPercent) * 2; // ~5% do tamanho da peça
     
     double dist = (piece.currentPos - piece.correctPos).distance;
 
@@ -600,7 +599,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
                 painter: JigsawPathPainter(
                   piece: piece,
                   baseSize: baseSize,
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   isShadow: true,
                 ),
               ),
@@ -608,7 +607,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
           // A Peça com Imagem
           ClipPath(
             clipper: JigsawClipper(piece: piece, baseSize: baseSize),
-            child: Container(
+            child: SizedBox(
               width: drawSize,
               height: drawSize,
               child: OverflowBox(
@@ -639,7 +638,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
             painter: JigsawPathPainter(
               piece: piece,
               baseSize: baseSize,
-              color: piece.isLocked ? Colors.green.withOpacity(0.6) : Colors.white.withOpacity(0.3),
+              color: piece.isLocked ? Colors.green.withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.3),
               isShadow: false,
             ),
           ),
@@ -662,7 +661,7 @@ class GridPainter extends CustomPainter {
     if (!showGrid) return;
 
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.1)
+      ..color = Colors.white.withValues(alpha: 0.1)
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
 

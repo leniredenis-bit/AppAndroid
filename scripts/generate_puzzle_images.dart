@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 /// Execute com: dart run scripts/generate_puzzle_images.dart
 
 void main() async {
-  print('🎨 Gerando imagens de teste para o quebra-cabeça...');
+  debugPrint('🎨 Gerando imagens de teste para o quebra-cabeça...');
   
   const int size = 500;
   final outputDir = Directory('assets/images');
@@ -47,8 +47,8 @@ void main() async {
     'Aurora',
   );
 
-  print('✅ Todas as imagens foram geradas com sucesso!');
-  print('📁 Localização: assets/images/');
+  debugPrint('✅ Todas as imagens foram geradas com sucesso!');
+  debugPrint('📁 Localização: assets/images/');
 }
 
 Future<void> generateGradientImage(
@@ -57,7 +57,7 @@ Future<void> generateGradientImage(
   String outputPath,
   String name,
 ) async {
-  print('  Criando: $name ($outputPath)...');
+  debugPrint('  Criando: $name ($outputPath)...');
   
   // Infelizmente, dart puro não tem acesso a ui.Image sem o framework Flutter rodando
   // Vou criar um approach diferente usando dados raw
@@ -71,15 +71,15 @@ Future<void> generateGradientImage(
     
     for (int x = 0; x < size; x++) {
       final index = (y * size + x) * 4;
-      pixels[index] = color.red;
-      pixels[index + 1] = color.green;
-      pixels[index + 2] = color.blue;
-      pixels[index + 3] = color.alpha;
+      pixels[index] = (color.r * 255.0).round() & 0xff;
+      pixels[index + 1] = (color.g * 255.0).round() & 0xff;
+      pixels[index + 2] = (color.b * 255.0).round() & 0xff;
+      pixels[index + 3] = (color.a * 255.0).round() & 0xff;
     }
   }
   
   // Não podemos escrever PNG direto sem package, então vamos usar uma abordagem mais simples
-  print('  ⚠️ Nota: Script direto não funciona sem package image. Usando alternativa...');
+  debugPrint('  ⚠️ Nota: Script direto não funciona sem package image. Usando alternativa...');
 }
 
 Color _interpolateColors(List<Color> colors, double t) {

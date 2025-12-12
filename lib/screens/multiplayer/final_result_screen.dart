@@ -171,6 +171,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
     try {
       await FirebaseMultiplayerService().restartGame(widget.roomCode);
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: Colors.red),
       );
@@ -210,11 +211,13 @@ class _FinalResultScreenState extends State<FinalResultScreen>
       ),
     );
 
-    if (confirm == true) {
+    if (confirm == true && mounted) {
       try {
         await FirebaseMultiplayerService().closeRoom(widget.roomCode);
+        if (!mounted) return;
         Navigator.of(context).popUntil((route) => route.isFirst);
       } catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: Colors.red),
         );

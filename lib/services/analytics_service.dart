@@ -23,6 +23,9 @@ class AnalyticsService {
   /// Observer para navegação automática (usar no MaterialApp)
   FirebaseAnalyticsObserver? get observer => _observer;
   
+  /// ID do usuário atual (se definido)
+  String? get currentUserId => _currentUserId;
+  
   /// Verifica se o analytics está habilitado
   bool get isEnabled => _isEnabled && FirebaseService().isInitialized;
 

@@ -181,6 +181,7 @@ class _TicTacToeGameState extends State<TicTacToeGame> with TickerProviderStateM
             won: true,
             timeInSeconds: timeSpent
         );
+        if (!mounted) return;
         for (var a in achievements) {
              showDialog(context: context, builder: (_) => AchievementUnlockDialog(achievement: a));
         }

@@ -201,8 +201,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
     if (confirmed == true) {
       try {
         await FirebaseMultiplayerService().closeRoom(widget.roomCode);
-        if (mounted) Navigator.pop(context);
+        if (!mounted) return;
+        Navigator.pop(context);
       } catch (e) {
+        if (!mounted) return;
         final l10n = AppLocalizations.of(context)!;
         _showErrorDialog('${l10n.error}: $e');
       }
@@ -259,6 +261,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   void _showErrorDialog(String message) {
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,

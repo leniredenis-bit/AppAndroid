@@ -194,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     questions = QuizService.getRandomQuestions(questions, 10);
                     
                     if (questions.isEmpty) {
-                      if (!mounted) return;
+                      if (!context.mounted) return;
                       final l10n = AppLocalizations.of(context)!;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(l10n.homeNoQuestionsFound)),
@@ -202,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return;
                     }
                     
-                    if (!mounted) return;
+                    if (!context.mounted) return;
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -213,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   } catch (e) {
-                    if (!mounted) return;
+                    if (!context.mounted) return;
                     final l10n = AppLocalizations.of(context)!;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(l10n.homeLoadingError(e.toString()))),

@@ -324,7 +324,7 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
                 padding: EdgeInsets.only(bottom: 12),
                 child: _buildCategoryBar(entry.key, entry.value),
               );
-            }).toList(),
+            }),
           ],
           
           SizedBox(height: 24),
@@ -459,7 +459,7 @@ class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStat
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }

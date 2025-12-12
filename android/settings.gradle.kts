@@ -21,8 +21,8 @@ plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
     id("com.android.application") version "8.9.1" apply false
     id("org.jetbrains.kotlin.android") version "2.1.0" apply false
-    id("com.google.gms.google-services") version "4.4.0" apply false  // Firebase
-    id("com.google.firebase.crashlytics") version "3.0.6" apply false  // Crashlytics
+    id("com.google.gms.google-services") version "4.4.2" apply false  // Firebase (4.4.1+ required for Crashlytics 3)
+    id("com.google.firebase.crashlytics") version "3.0.2" apply false  // Crashlytics
 }
 
 include(":app")

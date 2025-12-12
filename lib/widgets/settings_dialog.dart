@@ -188,7 +188,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         setState(() {}); // Força rebuild para atualizar UI
                         
                         // Mostrar mensagem de confirmação
-                        if (mounted) {
+                        if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(l10n.settingsLanguageChanged),

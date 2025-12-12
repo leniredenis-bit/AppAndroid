@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:math';
 import 'dart:async'; // Timer para movimento contínuo
 import 'dart:ui' as ui; // Necessário para efeitos visuais avançados
@@ -10,11 +9,11 @@ import '../../widgets/achievement_unlock_dialog.dart';
 import '../../l10n/app_localizations.dart';
 
 // --- Constantes do Jogo ---
-const int TILE_SIZE = 32; // Tamanho visual de cada quadrado do labirinto
-const int WALL = 1;
-const int PATH = 0;
-const int START = 2;
-const int END = 3;
+const int tileSize = 32; // Tamanho visual de cada quadrado do labirinto
+const int wallTile = 1;
+const int pathTile = 0;
+const int startTile = 2;
+const int endTile = 3;
 
 // --- Enum para os Modos de Jogo ---
 enum GameMode { campaign, quickPlay }
@@ -23,7 +22,7 @@ enum GameMode { campaign, quickPlay }
 class MazeGenerator {
   static List<List<int>> generate(int rows, int cols, {double extraPathsChance = 0.05}) {
     // 1. Começa com tudo preenchido com paredes
-    List<List<int>> maze = List.generate(rows, (_) => List.filled(cols, WALL));
+    List<List<int>> maze = List.generate(rows, (_) => List.filled(cols, wallTile));
     final random = Random();
 
     // 2. Usa Recursive Backtracking para criar labirinto com caminho único garantido
@@ -43,7 +42,7 @@ class MazeGenerator {
     
     // Função recursiva de escavação usando backtracking
     void carve(int row, int col) {
-      maze[row][col] = PATH;
+      maze[row][col] = pathTile;
       
       // Direções: cima, baixo, esquerda, direita (pulando 2 células)
       List<List<int>> directions = [
@@ -63,9 +62,9 @@ class MazeGenerator {
         // Verifica se a nova posição é válida e ainda é parede
         if (newRow > 0 && newRow < effectiveRows - 1 &&
             newCol > 0 && newCol < effectiveCols - 1 &&
-            maze[newRow][newCol] == WALL) {
+            maze[newRow][newCol] == wallTile) {
           // Escava a parede entre a posição atual e a nova
-          maze[row + dir[0] ~/ 2][col + dir[1] ~/ 2] = PATH;
+          maze[row + dir[0] ~/ 2][col + dir[1] ~/ 2] = pathTile;
           // Continua escavando recursivamente
           carve(newRow, newCol);
         }
@@ -76,31 +75,31 @@ class MazeGenerator {
     carve(startRow, startCol);
     
     // Marca início e fim
-    maze[startRow][startCol] = START;
-    maze[endRow][endCol] = END;
+    maze[startRow][startCol] = startTile;
+    maze[endRow][endCol] = endTile;
     
     // Garante que há caminho até o fim (pode não estar conectado se dimensões pares)
     // Cria um caminho forçado se necessário
-    if (maze[endRow][endCol - 1] == WALL && maze[endRow - 1][endCol] == WALL) {
+    if (maze[endRow][endCol - 1] == wallTile && maze[endRow - 1][endCol] == wallTile) {
       // Abre caminho para o fim
-      if (endCol - 1 > 0) maze[endRow][endCol - 1] = PATH;
+      if (endCol - 1 > 0) maze[endRow][endCol - 1] = pathTile;
     }
     
     // 3. Adiciona alguns caminhos falsos extras (becos sem saída)
     // Mas NÃO sobrescreve o caminho principal já criado
     for (int r = 1; r < effectiveRows - 1; r++) {
       for (int c = 1; c < effectiveCols - 1; c++) {
-        if (maze[r][c] == WALL && random.nextDouble() < extraPathsChance) {
+        if (maze[r][c] == wallTile && random.nextDouble() < extraPathsChance) {
           // Verifica se tem pelo menos um caminho adjacente
           int adjacentPaths = 0;
-          if (r > 0 && maze[r-1][c] == PATH) adjacentPaths++;
-          if (r < effectiveRows - 1 && maze[r+1][c] == PATH) adjacentPaths++;
-          if (c > 0 && maze[r][c-1] == PATH) adjacentPaths++;
-          if (c < effectiveCols - 1 && maze[r][c+1] == PATH) adjacentPaths++;
+          if (r > 0 && maze[r-1][c] == pathTile) adjacentPaths++;
+          if (r < effectiveRows - 1 && maze[r+1][c] == pathTile) adjacentPaths++;
+          if (c > 0 && maze[r][c-1] == pathTile) adjacentPaths++;
+          if (c < effectiveCols - 1 && maze[r][c+1] == pathTile) adjacentPaths++;
           
           // Só abre se tiver exatamente 1 caminho adjacente (cria beco sem saída)
           if (adjacentPaths == 1) {
-            maze[r][c] = PATH;
+            maze[r][c] = pathTile;
           }
         }
       }
@@ -201,10 +200,10 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
       // Encontra posição inicial e final
       for(int r=0; r<_mazeRows; r++) {
         for(int c=0; c<_mazeCols; c++) {
-          if (_maze[r][c] == START) {
+          if (_maze[r][c] == startTile) {
             _playerRow = r;
             _playerCol = c;
-          } else if (_maze[r][c] == END) {
+          } else if (_maze[r][c] == endTile) {
             _endPoint = Point(r, c);
           }
         }
@@ -261,7 +260,7 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
     }
 
     // Verifica colisão com parede
-    if (_maze[newRow][newCol] == WALL) {
+    if (_maze[newRow][newCol] == wallTile) {
       return; // Não para, apenas não move
     }
 
@@ -279,7 +278,7 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
     }
 
     // Verifica Vitória
-    if (_maze[newRow][newCol] == END) {
+    if (_maze[newRow][newCol] == endTile) {
       _stopMovement();
       _handleVictory();
     }
@@ -475,16 +474,15 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
           maxScale: 2.0, // Zoom in máximo
           // O ponto crucial: a transformação inicial para centralizar o jogador
           transformationController: TransformationController(
-            Matrix4.identity()
-              // Translada a tela para que a posição do jogador fique no centro
-              ..translate(
-                 - (_playerCol * TILE_SIZE.toDouble()) + (MediaQuery.of(context).size.width / 2) - (TILE_SIZE/2),
-                 - (_playerRow * TILE_SIZE.toDouble()) + (MediaQuery.of(context).size.height / 2) - (TILE_SIZE/2)
-              )
+            Matrix4.translationValues(
+               - (_playerCol * tileSize.toDouble()) + (MediaQuery.of(context).size.width / 2) - (tileSize/2),
+               - (_playerRow * tileSize.toDouble()) + (MediaQuery.of(context).size.height / 2) - (tileSize/2),
+               0
+            )
           ),
           child: CustomPaint(
             // O tamanho total do canvas é o tamanho do labirinto * tamanho do tile
-            size: Size(_mazeCols * TILE_SIZE.toDouble(), _mazeRows * TILE_SIZE.toDouble()),
+            size: Size(_mazeCols * tileSize.toDouble(), _mazeRows * tileSize.toDouble()),
             painter: MazePainter(
               maze: _maze,
               playerRow: _playerRow,
@@ -666,9 +664,9 @@ class MazePainter extends CustomPainter {
     // 1. Desenha o Mapa (Chão e Paredes)
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
-        final rect = Rect.fromLTWH(c * TILE_SIZE.toDouble(), r * TILE_SIZE.toDouble(), TILE_SIZE.toDouble(), TILE_SIZE.toDouble());
+        final rect = Rect.fromLTWH(c * tileSize.toDouble(), r * tileSize.toDouble(), tileSize.toDouble(), tileSize.toDouble());
         
-        if (maze[r][c] == WALL) {
+        if (maze[r][c] == wallTile) {
           // Desenha parede com uma textura simples (um retângulo menor mais claro em cima para dar volume)
           canvas.drawRect(rect, wallPaint);
            canvas.drawRect(rect.deflate(4.0), Paint()..color = Colors.brown.shade700);
@@ -678,31 +676,31 @@ class MazePainter extends CustomPainter {
           // Opcional: adicionar pontinhos ou textura de terra aqui
         }
 
-        if (maze[r][c] == START) {
-           canvas.drawCircle(rect.center, TILE_SIZE / 3, startPaint);
+        if (maze[r][c] == startTile) {
+           canvas.drawCircle(rect.center, tileSize / 3, startPaint);
         }
       }
     }
     
     // 2. Desenha a Saída Iluminada
     if (endPoint != null) {
-       final endRect = Rect.fromLTWH(endPoint!.x * TILE_SIZE.toDouble(), endPoint!.y * TILE_SIZE.toDouble(), TILE_SIZE.toDouble(), TILE_SIZE.toDouble());
+       final endRect = Rect.fromLTWH(endPoint!.x * tileSize.toDouble(), endPoint!.y * tileSize.toDouble(), tileSize.toDouble(), tileSize.toDouble());
        
        // Cria o efeito de brilho (gradiente radial)
        final glowPaint = Paint()
        ..shader = ui.Gradient.radial(
            endRect.center,
-           TILE_SIZE.toDouble() * 1.5, // Raio do brilho
+           tileSize.toDouble() * 1.5, // Raio do brilho
            [Colors.yellowAccent.withValues(alpha: 0.6), Colors.orange.withValues(alpha: 0.0)], // Cores do centro pra fora
            [0.0, 1.0], // Paradas do gradiente
            TileMode.clamp
        );
        // Desenha o brilho maior que a célula
-       canvas.drawCircle(endRect.center, TILE_SIZE.toDouble() * 1.5, glowPaint);
+       canvas.drawCircle(endRect.center, tileSize.toDouble() * 1.5, glowPaint);
        
        // Desenha um ícone de saída no centro (pode ser uma escada, um buraco de luz, etc)
        // Usando um círculo brilhante sólido por enquanto
-       canvas.drawCircle(endRect.center, TILE_SIZE / 3, Paint()..color = Colors.yellow..maskFilter = const MaskFilter.blur(BlurStyle.solid, 5));
+       canvas.drawCircle(endRect.center, tileSize / 3, Paint()..color = Colors.yellow..maskFilter = const MaskFilter.blur(BlurStyle.solid, 5));
     }
 
     // 3. Desenha o Jogador Animado
@@ -710,19 +708,19 @@ class MazePainter extends CustomPainter {
   }
 
   void drawPlayer(Canvas canvas) {
-      final centerX = (playerCol * TILE_SIZE.toDouble()) + (TILE_SIZE / 2);
+      final centerX = (playerCol * tileSize.toDouble()) + (tileSize / 2);
       // Aplica a animação de "bounce" na posição Y
-      final centerY = (playerRow * TILE_SIZE.toDouble()) + (TILE_SIZE / 2) + playerBounceY;
+      final centerY = (playerRow * tileSize.toDouble()) + (tileSize / 2) + playerBounceY;
 
       // --- Bonequinho Simples (Estilo Explorador) ---
       // Corpo
       final bodyPaint = Paint()..color = Colors.blue.shade400;
-      canvas.drawCircle(Offset(centerX, centerY), TILE_SIZE / 3, bodyPaint);
+      canvas.drawCircle(Offset(centerX, centerY), tileSize / 3, bodyPaint);
 
       // Capacete (Um semi-círculo amarelo em cima)
       final helmetPaint = Paint()..color = Colors.amber;
       canvas.drawArc(
-          Rect.fromCenter(center: Offset(centerX, centerY - (TILE_SIZE/6)), width: TILE_SIZE/1.8, height: TILE_SIZE/2),
+          Rect.fromCenter(center: Offset(centerX, centerY - (tileSize/6)), width: tileSize/1.8, height: tileSize/2),
           pi, // Começa em 180 graus
           pi, // Desenha 180 graus (semi-círculo)
           true, // Usa o centro
@@ -730,7 +728,7 @@ class MazePainter extends CustomPainter {
       );
       
       // Luz do capacete (um pequeno círculo branco brilhante)
-      canvas.drawCircle(Offset(centerX, centerY - (TILE_SIZE/3.5)), 3, Paint()..color = Colors.white..maskFilter = const MaskFilter.blur(BlurStyle.solid, 2));
+      canvas.drawCircle(Offset(centerX, centerY - (tileSize/3.5)), 3, Paint()..color = Colors.white..maskFilter = const MaskFilter.blur(BlurStyle.solid, 2));
 
       // Olhos (dois pontinhos pretos)
       final eyePaint = Paint()..color = Colors.black;
@@ -738,7 +736,7 @@ class MazePainter extends CustomPainter {
       canvas.drawCircle(Offset(centerX + 4, centerY - 2), 2, eyePaint);
 
       // Sombra do pé (para dar a impressão que ele está pulando)
-      canvas.drawOval(Rect.fromCenter(center: Offset(centerX, centerY + (TILE_SIZE/2.5) - playerBounceY), width: TILE_SIZE/2, height: TILE_SIZE/5), Paint()..color = Colors.black.withValues(alpha: 0.3));
+      canvas.drawOval(Rect.fromCenter(center: Offset(centerX, centerY + (tileSize/2.5) - playerBounceY), width: tileSize/2, height: tileSize/5), Paint()..color = Colors.black.withValues(alpha: 0.3));
   }
 
   @override

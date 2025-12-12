@@ -118,6 +118,7 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
     try {
       await FirebaseMultiplayerService().nextQuestion(widget.roomCode);
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${l10n.error}: $e'), backgroundColor: Colors.red),
       );
@@ -256,7 +257,7 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
                     child: Row(
                       children: [
                         // Ranking
-                        Container(
+                        SizedBox(
                           width: 40,
                           child: Text(
                             medal ?? '$rank°',
