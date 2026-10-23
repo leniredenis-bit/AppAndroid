@@ -1,0 +1,674 @@
+﻿[
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\ajustesapp.md",
+        "RelativePath":  "ajustesapp.md",
+        "Name":  "ajustesapp.md",
+        "Hash":  "D69C99A6A1F0FED2DF652663A4E3FFFE7F9678E507FD3FAE0ADCF75CC2A75280",
+        "Size":  1581
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\COMO_CRIAR_APK.md",
+        "RelativePath":  "COMO_CRIAR_APK.md",
+        "Name":  "COMO_CRIAR_APK.md",
+        "Hash":  "488F394B72D5A78755324243F4B8E1D66034B277D0474267C4C5F3999A9BBC14",
+        "Size":  7520
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\CONTRIBUTING.md",
+        "RelativePath":  "CONTRIBUTING.md",
+        "Name":  "CONTRIBUTING.md",
+        "Hash":  "4599142A11EA54B7E2450DD46D45AEAF8642D2D4CF8946519F16955B61024413",
+        "Size":  8285
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\EXECUTIVE_SUMMARY.md",
+        "RelativePath":  "EXECUTIVE_SUMMARY.md",
+        "Name":  "EXECUTIVE_SUMMARY.md",
+        "Hash":  "14566EAF185CD27700B46E61ABC75835C87B3E72E4F925B965794E3AB2220527",
+        "Size":  7851
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\MELHORIAS_EM_ANDAMENTO.md",
+        "RelativePath":  "MELHORIAS_EM_ANDAMENTO.md",
+        "Name":  "MELHORIAS_EM_ANDAMENTO.md",
+        "Hash":  "330D1D361A6C0AE2F708D2EC2642C84FDFB96234D308F2C6D293163CE4D3EE0D",
+        "Size":  3984
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\NEXT_STEPS.md",
+        "RelativePath":  "NEXT_STEPS.md",
+        "Name":  "NEXT_STEPS.md",
+        "Hash":  "F79BB1D7D4606068F4C9BA060C1F8BC68604E3311E50792B866A25FEC253EEF1",
+        "Size":  10329
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\PENDENCIAS.md",
+        "RelativePath":  "PENDENCIAS.md",
+        "Name":  "PENDENCIAS.md",
+        "Hash":  "8123308E9629C469BC35B5C022E95FCAFC25B61E632E4AD176AB18CC8C7E1131",
+        "Size":  4174
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\PROJECT_STATUS.md",
+        "RelativePath":  "PROJECT_STATUS.md",
+        "Name":  "PROJECT_STATUS.md",
+        "Hash":  "D7B7B9EC05031D0430462A7432881162617C3B0846BFCD8A522AC20FF4731ADF",
+        "Size":  14939
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\PUBLICATION_CHECKLIST.md",
+        "RelativePath":  "PUBLICATION_CHECKLIST.md",
+        "Name":  "PUBLICATION_CHECKLIST.md",
+        "Hash":  "2058F84E20CEAA85E1BDFDA41EED1BAD72F0DF4588A50039383EB7FA1DB98C79",
+        "Size":  9062
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\README.md",
+        "RelativePath":  "README.md",
+        "Name":  "README.md",
+        "Hash":  "EBA33D0F830C12DAE98D81872F3F4690969C79995909D1C195EB0879ECBDB290",
+        "Size":  17392
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\assets\\audio\\sfx\\README.md",
+        "RelativePath":  "assets\\audio\\sfx\\README.md",
+        "Name":  "README.md",
+        "Hash":  "C761CDDD333AAA266559650F044B7042E71B323043E69BCF32A3273A3D7C64A4",
+        "Size":  953
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\assets\\images\\README.md",
+        "RelativePath":  "assets\\images\\README.md",
+        "Name":  "README.md",
+        "Hash":  "5374BBAC15D2B8349D60B1476AF1DA4AB562114B57DF36451A2C0CE42878ACD5",
+        "Size":  1703
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\FIREBASE_ANALYTICS_CHAT.md",
+        "RelativePath":  "docs\\FIREBASE_ANALYTICS_CHAT.md",
+        "Name":  "FIREBASE_ANALYTICS_CHAT.md",
+        "Hash":  "AF37A386EB4741FAB8D2E5D7D06F15013F9A7BB9E161C9F6FE2DB5EE1F5A7021",
+        "Size":  6189
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\FIREBASE_BACKUP.md",
+        "RelativePath":  "docs\\FIREBASE_BACKUP.md",
+        "Name":  "FIREBASE_BACKUP.md",
+        "Hash":  "A0C9DE58D4A229CAB6BA2C8E5CBC66F4A664D076629A4EE546C52FA44F4EEE42",
+        "Size":  4346
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\archive\\ANALISE_PROBLEMAS.md",
+        "RelativePath":  "docs\\archive\\ANALISE_PROBLEMAS.md",
+        "Name":  "ANALISE_PROBLEMAS.md",
+        "Hash":  "3F11596D6C4938D4379F10CC0526042E9A677F89F94B29959EDCEDAD71F864A1",
+        "Size":  6663
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\archive\\FUNCIONALIDADES_COMPLETAS.md",
+        "RelativePath":  "docs\\archive\\FUNCIONALIDADES_COMPLETAS.md",
+        "Name":  "FUNCIONALIDADES_COMPLETAS.md",
+        "Hash":  "67E1EE74C0148492E177D88C83D3F1C48BC15930D52EC334604F83CE4B0CB5C6",
+        "Size":  9457
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\archive\\MIGRACAO_CONCLUIDA.md",
+        "RelativePath":  "docs\\archive\\MIGRACAO_CONCLUIDA.md",
+        "Name":  "MIGRACAO_CONCLUIDA.md",
+        "Hash":  "0F7397D79521CA15C438C36C5A97290850024D3900C9DC12A6CE24A2FF3AD3FE",
+        "Size":  5432
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\archive\\POR_QUE_INCOMPLETO.md",
+        "RelativePath":  "docs\\archive\\POR_QUE_INCOMPLETO.md",
+        "Name":  "POR_QUE_INCOMPLETO.md",
+        "Hash":  "FB3EDC8664A9778ADC1EE71108D4A6AAE60352F9CC91F93C42C1BAEB162468D8",
+        "Size":  3324
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\archive\\README_OLD.md",
+        "RelativePath":  "docs\\archive\\README_OLD.md",
+        "Name":  "README_OLD.md",
+        "Hash":  "66FB83C952FEDC00B049E016A6E8456B4D78F22BC2C460DFC0F95DA642D01367",
+        "Size":  574
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\checklists\\CHECKLIST_FINAL.md",
+        "RelativePath":  "docs\\checklists\\CHECKLIST_FINAL.md",
+        "Name":  "CHECKLIST_FINAL.md",
+        "Hash":  "E91C063801EEBCFBA5B31E73B7617457DFDEAFE5E5AE14387B050068E20379C8",
+        "Size":  7989
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\checklists\\ICONS_CHECKLIST.md",
+        "RelativePath":  "docs\\checklists\\ICONS_CHECKLIST.md",
+        "Name":  "ICONS_CHECKLIST.md",
+        "Hash":  "8C570AD9D074814A84B9C7462A429B302F9FCEED4AB394A07BF96392DED19101",
+        "Size":  14793
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\dev\\CORRECOES_BUGS.md",
+        "RelativePath":  "docs\\dev\\CORRECOES_BUGS.md",
+        "Name":  "CORRECOES_BUGS.md",
+        "Hash":  "A34B4168ED987F435C044418D46CDEA9C6B811604CC74C32D3A3A23653A77992",
+        "Size":  5370
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\dev\\JIGSAW_PUZZLE_DOCS.md",
+        "RelativePath":  "docs\\dev\\JIGSAW_PUZZLE_DOCS.md",
+        "Name":  "JIGSAW_PUZZLE_DOCS.md",
+        "Hash":  "D4709836DD6DE54C61EA880BE8110138B09C1091FA38F6A9C62960475FA86E04",
+        "Size":  7864
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\dev\\MELHORIAS_APLICADAS.md",
+        "RelativePath":  "docs\\dev\\MELHORIAS_APLICADAS.md",
+        "Name":  "MELHORIAS_APLICADAS.md",
+        "Hash":  "753D1D98ACE02D6B17C67766C57EE6A1DD2DB504D10B031B217C546CFEDABEA6",
+        "Size":  4858
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\dev\\MELHORIAS_AUDIO_PENDENTES.md",
+        "RelativePath":  "docs\\dev\\MELHORIAS_AUDIO_PENDENTES.md",
+        "Name":  "MELHORIAS_AUDIO_PENDENTES.md",
+        "Hash":  "8911387A6DA09160A0BB64D454ECAD749373345D26B013BDA8D1F309FB912F38",
+        "Size":  3196
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\dev\\MULTIPLAYER_README.md",
+        "RelativePath":  "docs\\dev\\MULTIPLAYER_README.md",
+        "Name":  "MULTIPLAYER_README.md",
+        "Hash":  "EBE3E783A95EF8AD08D1B118586339422AC1625CA90CB94D488167D5E39D6547",
+        "Size":  13318
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\dev\\RESUMO_MELHORIAS.md",
+        "RelativePath":  "docs\\dev\\RESUMO_MELHORIAS.md",
+        "Name":  "RESUMO_MELHORIAS.md",
+        "Hash":  "5CE73AD679A89581AE76EFE468466EC60B2643A2B5BF0915B3E2FA88D27F7D05",
+        "Size":  5982
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\dev\\RESUMO_TIMER_IMPLEMENTACAO.md",
+        "RelativePath":  "docs\\dev\\RESUMO_TIMER_IMPLEMENTACAO.md",
+        "Name":  "RESUMO_TIMER_IMPLEMENTACAO.md",
+        "Hash":  "B628C08EA243355E1C68D543015B44FE4A0A164657BC27CD5F28EB0CCE40C7DF",
+        "Size":  8062
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\dev\\REVISAO_BOTOES_COMPLETA.md",
+        "RelativePath":  "docs\\dev\\REVISAO_BOTOES_COMPLETA.md",
+        "Name":  "REVISAO_BOTOES_COMPLETA.md",
+        "Hash":  "0A40D701EDA1C72C0A76AB077E0EBD138ABDC500CC398929470A0613050666CC",
+        "Size":  13600
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\dev\\SISTEMA_AUDIO.md",
+        "RelativePath":  "docs\\dev\\SISTEMA_AUDIO.md",
+        "Name":  "SISTEMA_AUDIO.md",
+        "Hash":  "F71EB3A8BDECD3D3940D578FDA287596ACB234874B86B38BA3685D424590E19E",
+        "Size":  3622
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\dev\\SUGESTOES_MELHORIAS.md",
+        "RelativePath":  "docs\\dev\\SUGESTOES_MELHORIAS.md",
+        "Name":  "SUGESTOES_MELHORIAS.md",
+        "Hash":  "46B59A925C847B640C380EB52CA49C8844F3D6E9D65A6E71CAC326B6B24213B8",
+        "Size":  17151
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\dev\\TIMER_SYSTEM.md",
+        "RelativePath":  "docs\\dev\\TIMER_SYSTEM.md",
+        "Name":  "TIMER_SYSTEM.md",
+        "Hash":  "FBFD06DB9067746721C6A02E3BABE36C6F01F7137A15EB3FE7F8425E58FA46D9",
+        "Size":  8758
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\guides\\COMO_TESTAR.md",
+        "RelativePath":  "docs\\guides\\COMO_TESTAR.md",
+        "Name":  "COMO_TESTAR.md",
+        "Hash":  "0DE50E42E046091993CF3975E183CAC25AA2428D711CE7E9E570D288B3FF0A4D",
+        "Size":  10375
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\guides\\FIREBASE_SETUP.md",
+        "RelativePath":  "docs\\guides\\FIREBASE_SETUP.md",
+        "Name":  "FIREBASE_SETUP.md",
+        "Hash":  "68549B24ABB29B330BE16EA3DAD7C0FB10C537FDD43F4F591747BFC78986F421",
+        "Size":  5774
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\docs\\guides\\MULTIPLAYER_QUICKSTART.md",
+        "RelativePath":  "docs\\guides\\MULTIPLAYER_QUICKSTART.md",
+        "Name":  "MULTIPLAYER_QUICKSTART.md",
+        "Hash":  "DFCA840E5E6D43C2DE8F70E9A9EACB76D05248039A8DD4C5232FC51273D8F833",
+        "Size":  6186
+    },
+    {
+        "Repo":  "AppAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\AppAndroid\\ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\README.md",
+        "RelativePath":  "ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\README.md",
+        "Name":  "README.md",
+        "Hash":  "853AC958E2416FE2540F6F61165283A3618B71A7BA5F85F65AC41C2158DFCD21",
+        "Size":  340
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\CHANGELOG.md",
+        "RelativePath":  "CHANGELOG.md",
+        "Name":  "CHANGELOG.md",
+        "Hash":  "DE805D345E3E34E9181914468EDA8BF6D0347B40B7D661B73BD8D7C251736CA8",
+        "Size":  5595
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\COMANDOS_RAPIDOS.md",
+        "RelativePath":  "COMANDOS_RAPIDOS.md",
+        "Name":  "COMANDOS_RAPIDOS.md",
+        "Hash":  "BEB0875687D59BDD1AFD241E318D9DF10C8777D6B0EB53DD85C19EE73540F640",
+        "Size":  6660
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\GUIA_DESIGN.md",
+        "RelativePath":  "GUIA_DESIGN.md",
+        "Name":  "GUIA_DESIGN.md",
+        "Hash":  "7AC5854DF16F55F750847DB669B8CA1F95FD7E22E99EFF35A493980FCF026EDD",
+        "Size":  11783
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\GUIA_MOBILE_CAPACITOR.md",
+        "RelativePath":  "GUIA_MOBILE_CAPACITOR.md",
+        "Name":  "GUIA_MOBILE_CAPACITOR.md",
+        "Hash":  "E4252463C86ADDE8FC41A1AD92BD42374A0AD836D9A874DBB73A380FD17385D9",
+        "Size":  21111
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\INICIO_RAPIDO_MOBILE.md",
+        "RelativePath":  "INICIO_RAPIDO_MOBILE.md",
+        "Name":  "INICIO_RAPIDO_MOBILE.md",
+        "Hash":  "CF5D40151CD603ABFFECE232AA29F1C117F86903485CB46B1F64F90D301996CC",
+        "Size":  1410
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\INSTRUCOES_PARA_IA.md",
+        "RelativePath":  "INSTRUCOES_PARA_IA.md",
+        "Name":  "INSTRUCOES_PARA_IA.md",
+        "Hash":  "75279E1605188F93095CF68BB7EF6928166075184940ECF14531E1685354B146",
+        "Size":  22232
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\MELHORIAS_FUTURAS.md",
+        "RelativePath":  "MELHORIAS_FUTURAS.md",
+        "Name":  "MELHORIAS_FUTURAS.md",
+        "Hash":  "15ED70A5131971CCF874B60D25AD9C8B5D94B2E0553582EE907841E18B1607E3",
+        "Size":  10482
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\README.md",
+        "RelativePath":  "README.md",
+        "Name":  "README.md",
+        "Hash":  "E9D2710479B303F10D2E90FA23861653282902A8F2D8B98A12D607DF817F833B",
+        "Size":  6953
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\RESUMO_EXECUTIVO.md",
+        "RelativePath":  "RESUMO_EXECUTIVO.md",
+        "Name":  "RESUMO_EXECUTIVO.md",
+        "Hash":  "272748F7F714A575D270FB3DB5E0D48C2614713AB3C9ADE8D489F1D9B18EB2BE",
+        "Size":  8586
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\ROTEIRO_VISUAL.md",
+        "RelativePath":  "ROTEIRO_VISUAL.md",
+        "Name":  "ROTEIRO_VISUAL.md",
+        "Hash":  "1F40CA5AC5EC6663522EED556E2D5C48D66514498705649176361AC0C7532124",
+        "Size":  22983
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\CSS\\README.md",
+        "RelativePath":  "CSS\\README.md",
+        "Name":  "README.md",
+        "Hash":  "910A30C83BD5ACCD02274EB4C3FF5C980614940D398F61CB075AB33A4DCD5235",
+        "Size":  7887
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\docs\\ADMIN_PANEL_README.md",
+        "RelativePath":  "docs\\ADMIN_PANEL_README.md",
+        "Name":  "ADMIN_PANEL_README.md",
+        "Hash":  "C194FC7AE55FC49EE1FECE9A6FAFB61F28094ABB94F5FB3D884210172F87627F",
+        "Size":  8242
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\docs\\CONTRIBUTING.md",
+        "RelativePath":  "docs\\CONTRIBUTING.md",
+        "Name":  "CONTRIBUTING.md",
+        "Hash":  "CB34766EEC2848BD41DA44A74D6FA68EB34BCF38417C5867987FB65E39D2A7EE",
+        "Size":  6986
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\docs\\DESIGN_SUGESTOES.md",
+        "RelativePath":  "docs\\DESIGN_SUGESTOES.md",
+        "Name":  "DESIGN_SUGESTOES.md",
+        "Hash":  "6FF82E13F2D5AB2F5A708A9867D236AFBC3B1455F298B8478DE43C07B3FF4DB1",
+        "Size":  7631
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\docs\\DOCUMENTACAO_JOGO_MEMORIA.md",
+        "RelativePath":  "docs\\DOCUMENTACAO_JOGO_MEMORIA.md",
+        "Name":  "DOCUMENTACAO_JOGO_MEMORIA.md",
+        "Hash":  "2BBA25860C8FF3956A57380C39FFA50B88A308908EE383D5653A8357AC16F186",
+        "Size":  45224
+    },
+    {
+        "Repo":  "JW-Quiz",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JW-Quiz\\docs\\DOCUMENTACAO_QUIZ.md",
+        "RelativePath":  "docs\\DOCUMENTACAO_QUIZ.md",
+        "Name":  "DOCUMENTACAO_QUIZ.md",
+        "Hash":  "F5774D54F50811CE95412AE7C65AF4044F1A006B98FF1979ED8192FC72388518",
+        "Size":  40949
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\COMO_CRIAR_APK.md",
+        "RelativePath":  "COMO_CRIAR_APK.md",
+        "Name":  "COMO_CRIAR_APK.md",
+        "Hash":  "6106F465DC97E0B797D9B4DC59191A33CE8320F36DB65677ABC801B665F26A74",
+        "Size":  7517
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\CONTRIBUTING.md",
+        "RelativePath":  "CONTRIBUTING.md",
+        "Name":  "CONTRIBUTING.md",
+        "Hash":  "4599142A11EA54B7E2450DD46D45AEAF8642D2D4CF8946519F16955B61024413",
+        "Size":  8285
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\EXECUTIVE_SUMMARY.md",
+        "RelativePath":  "EXECUTIVE_SUMMARY.md",
+        "Name":  "EXECUTIVE_SUMMARY.md",
+        "Hash":  "14566EAF185CD27700B46E61ABC75835C87B3E72E4F925B965794E3AB2220527",
+        "Size":  7851
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\NEXT_STEPS.md",
+        "RelativePath":  "NEXT_STEPS.md",
+        "Name":  "NEXT_STEPS.md",
+        "Hash":  "F79BB1D7D4606068F4C9BA060C1F8BC68604E3311E50792B866A25FEC253EEF1",
+        "Size":  10329
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\PROJECT_STATUS.md",
+        "RelativePath":  "PROJECT_STATUS.md",
+        "Name":  "PROJECT_STATUS.md",
+        "Hash":  "D7B7B9EC05031D0430462A7432881162617C3B0846BFCD8A522AC20FF4731ADF",
+        "Size":  14939
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\PUBLICATION_CHECKLIST.md",
+        "RelativePath":  "PUBLICATION_CHECKLIST.md",
+        "Name":  "PUBLICATION_CHECKLIST.md",
+        "Hash":  "2058F84E20CEAA85E1BDFDA41EED1BAD72F0DF4588A50039383EB7FA1DB98C79",
+        "Size":  9062
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\README.md",
+        "RelativePath":  "README.md",
+        "Name":  "README.md",
+        "Hash":  "EBA33D0F830C12DAE98D81872F3F4690969C79995909D1C195EB0879ECBDB290",
+        "Size":  17392
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\assets\\audio\\sfx\\README.md",
+        "RelativePath":  "assets\\audio\\sfx\\README.md",
+        "Name":  "README.md",
+        "Hash":  "C761CDDD333AAA266559650F044B7042E71B323043E69BCF32A3273A3D7C64A4",
+        "Size":  953
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\assets\\images\\README.md",
+        "RelativePath":  "assets\\images\\README.md",
+        "Name":  "README.md",
+        "Hash":  "5374BBAC15D2B8349D60B1476AF1DA4AB562114B57DF36451A2C0CE42878ACD5",
+        "Size":  1703
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\archive\\ANALISE_PROBLEMAS.md",
+        "RelativePath":  "docs\\archive\\ANALISE_PROBLEMAS.md",
+        "Name":  "ANALISE_PROBLEMAS.md",
+        "Hash":  "3F11596D6C4938D4379F10CC0526042E9A677F89F94B29959EDCEDAD71F864A1",
+        "Size":  6663
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\archive\\FUNCIONALIDADES_COMPLETAS.md",
+        "RelativePath":  "docs\\archive\\FUNCIONALIDADES_COMPLETAS.md",
+        "Name":  "FUNCIONALIDADES_COMPLETAS.md",
+        "Hash":  "67E1EE74C0148492E177D88C83D3F1C48BC15930D52EC334604F83CE4B0CB5C6",
+        "Size":  9457
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\archive\\MIGRACAO_CONCLUIDA.md",
+        "RelativePath":  "docs\\archive\\MIGRACAO_CONCLUIDA.md",
+        "Name":  "MIGRACAO_CONCLUIDA.md",
+        "Hash":  "0F7397D79521CA15C438C36C5A97290850024D3900C9DC12A6CE24A2FF3AD3FE",
+        "Size":  5432
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\archive\\POR_QUE_INCOMPLETO.md",
+        "RelativePath":  "docs\\archive\\POR_QUE_INCOMPLETO.md",
+        "Name":  "POR_QUE_INCOMPLETO.md",
+        "Hash":  "FB3EDC8664A9778ADC1EE71108D4A6AAE60352F9CC91F93C42C1BAEB162468D8",
+        "Size":  3324
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\archive\\README_OLD.md",
+        "RelativePath":  "docs\\archive\\README_OLD.md",
+        "Name":  "README_OLD.md",
+        "Hash":  "66FB83C952FEDC00B049E016A6E8456B4D78F22BC2C460DFC0F95DA642D01367",
+        "Size":  574
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\checklists\\CHECKLIST_FINAL.md",
+        "RelativePath":  "docs\\checklists\\CHECKLIST_FINAL.md",
+        "Name":  "CHECKLIST_FINAL.md",
+        "Hash":  "E91C063801EEBCFBA5B31E73B7617457DFDEAFE5E5AE14387B050068E20379C8",
+        "Size":  7989
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\checklists\\ICONS_CHECKLIST.md",
+        "RelativePath":  "docs\\checklists\\ICONS_CHECKLIST.md",
+        "Name":  "ICONS_CHECKLIST.md",
+        "Hash":  "8C570AD9D074814A84B9C7462A429B302F9FCEED4AB394A07BF96392DED19101",
+        "Size":  14793
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\dev\\CORRECOES_BUGS.md",
+        "RelativePath":  "docs\\dev\\CORRECOES_BUGS.md",
+        "Name":  "CORRECOES_BUGS.md",
+        "Hash":  "A34B4168ED987F435C044418D46CDEA9C6B811604CC74C32D3A3A23653A77992",
+        "Size":  5370
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\dev\\JIGSAW_PUZZLE_DOCS.md",
+        "RelativePath":  "docs\\dev\\JIGSAW_PUZZLE_DOCS.md",
+        "Name":  "JIGSAW_PUZZLE_DOCS.md",
+        "Hash":  "D4709836DD6DE54C61EA880BE8110138B09C1091FA38F6A9C62960475FA86E04",
+        "Size":  7864
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\dev\\MELHORIAS_APLICADAS.md",
+        "RelativePath":  "docs\\dev\\MELHORIAS_APLICADAS.md",
+        "Name":  "MELHORIAS_APLICADAS.md",
+        "Hash":  "753D1D98ACE02D6B17C67766C57EE6A1DD2DB504D10B031B217C546CFEDABEA6",
+        "Size":  4858
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\dev\\MELHORIAS_AUDIO_PENDENTES.md",
+        "RelativePath":  "docs\\dev\\MELHORIAS_AUDIO_PENDENTES.md",
+        "Name":  "MELHORIAS_AUDIO_PENDENTES.md",
+        "Hash":  "8911387A6DA09160A0BB64D454ECAD749373345D26B013BDA8D1F309FB912F38",
+        "Size":  3196
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\dev\\MULTIPLAYER_README.md",
+        "RelativePath":  "docs\\dev\\MULTIPLAYER_README.md",
+        "Name":  "MULTIPLAYER_README.md",
+        "Hash":  "EBE3E783A95EF8AD08D1B118586339422AC1625CA90CB94D488167D5E39D6547",
+        "Size":  13318
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\dev\\RESUMO_MELHORIAS.md",
+        "RelativePath":  "docs\\dev\\RESUMO_MELHORIAS.md",
+        "Name":  "RESUMO_MELHORIAS.md",
+        "Hash":  "5CE73AD679A89581AE76EFE468466EC60B2643A2B5BF0915B3E2FA88D27F7D05",
+        "Size":  5982
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\dev\\RESUMO_TIMER_IMPLEMENTACAO.md",
+        "RelativePath":  "docs\\dev\\RESUMO_TIMER_IMPLEMENTACAO.md",
+        "Name":  "RESUMO_TIMER_IMPLEMENTACAO.md",
+        "Hash":  "B628C08EA243355E1C68D543015B44FE4A0A164657BC27CD5F28EB0CCE40C7DF",
+        "Size":  8062
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\dev\\REVISAO_BOTOES_COMPLETA.md",
+        "RelativePath":  "docs\\dev\\REVISAO_BOTOES_COMPLETA.md",
+        "Name":  "REVISAO_BOTOES_COMPLETA.md",
+        "Hash":  "0A40D701EDA1C72C0A76AB077E0EBD138ABDC500CC398929470A0613050666CC",
+        "Size":  13600
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\dev\\SISTEMA_AUDIO.md",
+        "RelativePath":  "docs\\dev\\SISTEMA_AUDIO.md",
+        "Name":  "SISTEMA_AUDIO.md",
+        "Hash":  "F71EB3A8BDECD3D3940D578FDA287596ACB234874B86B38BA3685D424590E19E",
+        "Size":  3622
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\dev\\SUGESTOES_MELHORIAS.md",
+        "RelativePath":  "docs\\dev\\SUGESTOES_MELHORIAS.md",
+        "Name":  "SUGESTOES_MELHORIAS.md",
+        "Hash":  "46B59A925C847B640C380EB52CA49C8844F3D6E9D65A6E71CAC326B6B24213B8",
+        "Size":  17151
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\dev\\TIMER_SYSTEM.md",
+        "RelativePath":  "docs\\dev\\TIMER_SYSTEM.md",
+        "Name":  "TIMER_SYSTEM.md",
+        "Hash":  "FBFD06DB9067746721C6A02E3BABE36C6F01F7137A15EB3FE7F8425E58FA46D9",
+        "Size":  8758
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\guides\\COMO_TESTAR.md",
+        "RelativePath":  "docs\\guides\\COMO_TESTAR.md",
+        "Name":  "COMO_TESTAR.md",
+        "Hash":  "0DE50E42E046091993CF3975E183CAC25AA2428D711CE7E9E570D288B3FF0A4D",
+        "Size":  10375
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\guides\\FIREBASE_SETUP.md",
+        "RelativePath":  "docs\\guides\\FIREBASE_SETUP.md",
+        "Name":  "FIREBASE_SETUP.md",
+        "Hash":  "68549B24ABB29B330BE16EA3DAD7C0FB10C537FDD43F4F591747BFC78986F421",
+        "Size":  5774
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\docs\\guides\\MULTIPLAYER_QUICKSTART.md",
+        "RelativePath":  "docs\\guides\\MULTIPLAYER_QUICKSTART.md",
+        "Name":  "MULTIPLAYER_QUICKSTART.md",
+        "Hash":  "DFCA840E5E6D43C2DE8F70E9A9EACB76D05248039A8DD4C5232FC51273D8F833",
+        "Size":  6186
+    },
+    {
+        "Repo":  "JWQuizFlutter",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizFlutter\\ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\README.md",
+        "RelativePath":  "ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\README.md",
+        "Name":  "README.md",
+        "Hash":  "853AC958E2416FE2540F6F61165283A3618B71A7BA5F85F65AC41C2158DFCD21",
+        "Size":  340
+    },
+    {
+        "Repo":  "JWQuizAndroid",
+        "FullPath":  "C:\\Users\\Denis\\Documents\\GitHub\\JWQuizAndroid\\README.md",
+        "RelativePath":  "README.md",
+        "Name":  "README.md",
+        "Hash":  "8EE552B6BC5141BD7C32DA22442B09F105FA12E42724EE991654505D79C1ECB4",
+        "Size":  15
+    }
+]

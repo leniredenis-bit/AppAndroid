@@ -1,5 +1,5 @@
 # ============================================
-# Script para Build do APK - JW Quiz Flutter
+# Script para Build do APK - JW Splash Games
 # ============================================
 # Execute este script para gerar o APK do app
 # 
@@ -8,6 +8,7 @@
 #   .\build_apk.ps1 debug    -> Build debug (para testes)
 #   .\build_apk.ps1 clean    -> Limpa builds anteriores
 #   .\build_apk.ps1 quick    -> Build rapido sem clean (debug)
+#   .\build_apk.ps1 aab      -> App Bundle assinado para a Play Store
 # ============================================
 
 param(
@@ -118,9 +119,19 @@ Write-Host ""
 
 $startTime = Get-Date
 
+if ($BuildType -ne "debug" -and -not (Test-Path "android\key.properties")) {
+    Write-Host "[AVISO] android\key.properties nao encontrado: o build sera assinado com a chave DEBUG." -ForegroundColor Red
+    Write-Host "        Serve para testar, mas a Play Store recusa. Rode scripts\criar_keystore.ps1" -ForegroundColor Red
+    Write-Host ""
+}
+
 if ($BuildType -eq "debug") {
     flutter build apk --debug
     $apkPath = "build\app\outputs\flutter-apk\app-debug.apk"
+} elseif ($BuildType -eq "aab") {
+    # Pacote para upload na Play Console
+    flutter build appbundle --release
+    $apkPath = "build\app\outputs\bundle\release\app-release.aab"
 } else {
     # Release otimizado
     flutter build apk --release

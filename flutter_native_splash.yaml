@@ -1,0 +1,10 @@
+# Splash nativo (tela exibida enquanto o Flutter carrega)
+# Uso: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#101A2C"                               # fundo escuro do app
+  image: "assets/icon/splash_logo.png"           # logo centralizado, PNG transparente ~1152x1152 (conteúdo em ~768px)
+  android_12:
+    color: "#101A2C"
+    image: "assets/icon/splash_logo.png"
+    icon_background_color: "#101A2C"
+  web: false

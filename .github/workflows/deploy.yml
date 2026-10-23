@@ -1,3 +1,5 @@
+# Publica a versão web + política de privacidade (web/privacidade.html)
+# em https://leniredenis-bit.github.io/AppAndroid/
 name: Deploy to GitHub Pages
 
 on:
@@ -20,14 +22,14 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.1'
+          flutter-version: '3.41.2'
           channel: 'stable'
       
       - name: Get dependencies
         run: flutter pub get
       
       - name: Build web
-        run: flutter build web --release --base-href /JWQuizFlutter/
+        run: flutter build web --release --base-href /AppAndroid/
       
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

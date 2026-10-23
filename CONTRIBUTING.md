@@ -1,6 +1,6 @@
-# 🤝 Guia de Contribuição - JW Quiz Flutter
+# 🤝 Guia de Contribuição - JW Splash Games
 
-Obrigado por considerar contribuir para o **JW Quiz Flutter**! Este documento fornece diretrizes para ajudá-lo a contribuir de forma eficaz.
+Obrigado por considerar contribuir para o **JW Splash Games**! Este documento fornece diretrizes para ajudá-lo a contribuir de forma eficaz.
 
 ---
 
@@ -25,7 +25,7 @@ Este projeto segue o [Código de Conduta do Contributor Covenant](https://www.co
 ## 💡 Como Posso Contribuir?
 
 ### 1. **Reportar Bugs**
-- Use a aba [Issues](https://github.com/leniredenis-bit/JWQuizFlutter/issues)
+- Use a aba [Issues](https://github.com/leniredenis-bit/AppAndroid/issues)
 - Verifique se o bug já foi reportado
 - Use o template de bug report
 - Inclua prints/vídeos se possível
@@ -169,8 +169,8 @@ void dispose() {
 
 ```bash
 # Fork no GitHub, depois:
-git clone https://github.com/SEU-USUARIO/JWQuizFlutter.git
-cd jw_quiz_flutter
+git clone https://github.com/SEU-USUARIO/AppAndroid.git
+cd AppAndroid
 ```
 
 ### **2. Crie uma Branch**

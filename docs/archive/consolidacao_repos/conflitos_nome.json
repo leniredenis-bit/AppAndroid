@@ -1,0 +1,98 @@
+﻿[
+    {
+        "Nome":  "COMO_CRIAR_APK.md",
+        "Repo":  "AppAndroid",
+        "Arquivo":  "COMO_CRIAR_APK.md",
+        "Hash":  "488F394B72D5A78755324243F4B8E1D66034B277D0474267C4C5F3999A9BBC14"
+    },
+    {
+        "Nome":  "COMO_CRIAR_APK.md",
+        "Repo":  "JWQuizFlutter",
+        "Arquivo":  "COMO_CRIAR_APK.md",
+        "Hash":  "6106F465DC97E0B797D9B4DC59191A33CE8320F36DB65677ABC801B665F26A74"
+    },
+    {
+        "Nome":  "CONTRIBUTING.md",
+        "Repo":  "AppAndroid",
+        "Arquivo":  "CONTRIBUTING.md",
+        "Hash":  "4599142A11EA54B7E2450DD46D45AEAF8642D2D4CF8946519F16955B61024413"
+    },
+    {
+        "Nome":  "CONTRIBUTING.md",
+        "Repo":  "JW-Quiz",
+        "Arquivo":  "docs\\CONTRIBUTING.md",
+        "Hash":  "CB34766EEC2848BD41DA44A74D6FA68EB34BCF38417C5867987FB65E39D2A7EE"
+    },
+    {
+        "Nome":  "CONTRIBUTING.md",
+        "Repo":  "JWQuizFlutter",
+        "Arquivo":  "CONTRIBUTING.md",
+        "Hash":  "4599142A11EA54B7E2450DD46D45AEAF8642D2D4CF8946519F16955B61024413"
+    },
+    {
+        "Nome":  "README.md",
+        "Repo":  "AppAndroid",
+        "Arquivo":  "README.md",
+        "Hash":  "EBA33D0F830C12DAE98D81872F3F4690969C79995909D1C195EB0879ECBDB290"
+    },
+    {
+        "Nome":  "README.md",
+        "Repo":  "AppAndroid",
+        "Arquivo":  "assets\\audio\\sfx\\README.md",
+        "Hash":  "C761CDDD333AAA266559650F044B7042E71B323043E69BCF32A3273A3D7C64A4"
+    },
+    {
+        "Nome":  "README.md",
+        "Repo":  "AppAndroid",
+        "Arquivo":  "assets\\images\\README.md",
+        "Hash":  "5374BBAC15D2B8349D60B1476AF1DA4AB562114B57DF36451A2C0CE42878ACD5"
+    },
+    {
+        "Nome":  "README.md",
+        "Repo":  "AppAndroid",
+        "Arquivo":  "ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\README.md",
+        "Hash":  "853AC958E2416FE2540F6F61165283A3618B71A7BA5F85F65AC41C2158DFCD21"
+    },
+    {
+        "Nome":  "README.md",
+        "Repo":  "JW-Quiz",
+        "Arquivo":  "README.md",
+        "Hash":  "E9D2710479B303F10D2E90FA23861653282902A8F2D8B98A12D607DF817F833B"
+    },
+    {
+        "Nome":  "README.md",
+        "Repo":  "JW-Quiz",
+        "Arquivo":  "CSS\\README.md",
+        "Hash":  "910A30C83BD5ACCD02274EB4C3FF5C980614940D398F61CB075AB33A4DCD5235"
+    },
+    {
+        "Nome":  "README.md",
+        "Repo":  "JWQuizFlutter",
+        "Arquivo":  "README.md",
+        "Hash":  "EBA33D0F830C12DAE98D81872F3F4690969C79995909D1C195EB0879ECBDB290"
+    },
+    {
+        "Nome":  "README.md",
+        "Repo":  "JWQuizFlutter",
+        "Arquivo":  "assets\\audio\\sfx\\README.md",
+        "Hash":  "C761CDDD333AAA266559650F044B7042E71B323043E69BCF32A3273A3D7C64A4"
+    },
+    {
+        "Nome":  "README.md",
+        "Repo":  "JWQuizFlutter",
+        "Arquivo":  "assets\\images\\README.md",
+        "Hash":  "5374BBAC15D2B8349D60B1476AF1DA4AB562114B57DF36451A2C0CE42878ACD5"
+    },
+    {
+        "Nome":  "README.md",
+        "Repo":  "JWQuizFlutter",
+        "Arquivo":  "ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\README.md",
+        "Hash":  "853AC958E2416FE2540F6F61165283A3618B71A7BA5F85F65AC41C2158DFCD21"
+    },
+    {
+        "Nome":  "README.md",
+        "Repo":  "JWQuizAndroid",
+        "Arquivo":  "README.md",
+        "Hash":  "8EE552B6BC5141BD7C32DA22442B09F105FA12E42724EE991654505D79C1ECB4"
+    }
+]

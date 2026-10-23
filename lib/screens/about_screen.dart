@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
+import 'terms_screen.dart' show privacyPolicyUrl;
 
 /// Tela "Sobre o Jogo"
-/// 
-/// TODO: Esta tela atualmente mostra conteúdo placeholder.
-/// No futuro, deve carregar informações de uma página online dedicada.
-/// Considerar usar WebView ou integração com site oficial quando disponível.
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
@@ -108,46 +106,20 @@ class AboutScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               
-              // TODO Note for developers
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.amber.shade300),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, color: Colors.amber.shade700),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        l10n.aboutUpdateNote,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.amber.shade900,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              _buildCard(
+                icon: '🎵',
+                title: l10n.aboutCredits,
+                content: l10n.aboutMusicCredits,
               ),
               const SizedBox(height: 24),
-              
-              // GitHub Link
+
               ElevatedButton.icon(
-                onPressed: () {
-                  // TODO: Abrir GitHub no navegador
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('GitHub: leniredenis-bit/JWQuizAndroid'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.code),
-                label: Text(l10n.aboutVisitGithub),
+                onPressed: () => launchUrl(
+                  Uri.parse(privacyPolicyUrl),
+                  mode: LaunchMode.externalApplication,
+                ),
+                icon: const Icon(Icons.privacy_tip_outlined),
+                label: Text(l10n.privacyPolicy),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4A90E2),
                   foregroundColor: Colors.white,

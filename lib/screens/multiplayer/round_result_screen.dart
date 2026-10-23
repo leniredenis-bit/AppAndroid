@@ -24,6 +24,7 @@ class RoundResultScreen extends StatefulWidget {
 class _RoundResultScreenState extends State<RoundResultScreen> with SingleTickerProviderStateMixin {
   StreamSubscription<Room>? _roomSubscription;
   Room? _currentRoom;
+  bool _leaving = false; // evita navegar/mostrar diálogo mais de uma vez
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -78,6 +79,8 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
   }
 
   Future<void> _navigateToNextQuestion() async {
+    if (_leaving) return;
+    _leaving = true;
     if (!mounted) return;
     
     await Future.delayed(Duration(milliseconds: 300));
@@ -96,6 +99,8 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
   }
 
   Future<void> _navigateToFinalResults() async {
+    if (_leaving) return;
+    _leaving = true;
     if (!mounted) return;
     
     await Future.delayed(Duration(milliseconds: 300));

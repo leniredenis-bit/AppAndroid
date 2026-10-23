@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/achievement.dart';
+import '../models/achievement_texts.dart';
 import '../services/achievement_service.dart';
 import '../services/audio_service.dart';
 import '../l10n/app_localizations.dart';
@@ -311,7 +312,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
 
               // Nome (temporário - será substituído por i18n)
               Text(
-                achievement.nameKey.replaceAll('achievement_', '').replaceAll('_', ' ').toUpperCase(),
+                achievementName(achievement.nameKey),
                 style: TextStyle(
                   color: isUnlocked ? Colors.white : Colors.white60,
                   fontSize: 14,
@@ -379,7 +380,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
 
               // Nome
               Text(
-                achievement.nameKey.replaceAll('achievement_', '').replaceAll('_', ' ').toUpperCase(),
+                achievementName(achievement.nameKey),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -392,7 +393,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
 
               // Descrição (temporária)
               Text(
-                achievement.descriptionKey,
+                achievementDescription(achievement.nameKey),
                 style: TextStyle(color: Colors.white70, fontSize: 14),
                 textAlign: TextAlign.center,
               ),

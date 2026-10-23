@@ -1,4 +1,4 @@
-# 💡 Sugestões de Melhorias - JW Quiz Flutter
+# 💡 Sugestões de Melhorias - JW Splash Games
 
 > Análise detalhada com sugestões técnicas e de UX para elevar o app ao próximo nível
 

@@ -1,34 +1,52 @@
-// ============================================================
-// VERSÃO MOCK TEMPORÁRIA - Firebase desabilitado para teste web
-// Ver docs/FIREBASE_BACKUP.md para código original
-// ============================================================
-
-// import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
+import 'firebase_service.dart';
 
+/// Identidade do jogador para o multiplayer.
+///
+/// - Com Firebase disponível (Android/iOS): login anônimo do Firebase Auth.
+///   O UID é usado como playerId e validado pelas regras do Realtime Database.
+/// - Sem Firebase (web/testes): gera um ID local (modo mock).
+///
+/// Requer o provedor "Anônimo" ativo no Firebase Console
+/// (Authentication > Sign-in method > Anonymous).
 class AuthService {
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
   AuthService._internal();
 
-  String? _mockUserId;
+  String? _localUserId;
 
-  /// Retorna o usuário atual (mock)
-  Future<dynamic> getCurrentUser() async {
-    if (_mockUserId == null) {
-      _mockUserId = const Uuid().v4();
-      debugPrint('AuthService (MOCK): Usuário criado: $_mockUserId');
+  bool get _useFirebase => FirebaseService().isInitialized;
+
+  /// ID do usuário atual (null se ainda não autenticado)
+  String? get userId =>
+      _useFirebase ? FirebaseAuth.instance.currentUser?.uid : _localUserId;
+
+  /// Garante que existe um usuário autenticado e retorna seu ID.
+  Future<String> ensureSignedIn() async {
+    if (!_useFirebase) {
+      return _localUserId ??= const Uuid().v4();
     }
-    return _mockUserId;
+
+    final auth = FirebaseAuth.instance;
+    if (auth.currentUser != null) return auth.currentUser!.uid;
+
+    try {
+      final credential = await auth.signInAnonymously();
+      debugPrint('AuthService: login anônimo ${credential.user!.uid}');
+      return credential.user!.uid;
+    } on FirebaseAuthException catch (e) {
+      debugPrint('AuthService: falha no login anônimo: ${e.code}');
+      throw Exception(
+        'Não foi possível conectar ao modo online. Verifique sua internet e tente novamente.',
+      );
+    }
   }
 
-  /// Retorna o ID do usuário atual
-  String? get userId => _mockUserId;
-
-  /// Faz logout (mock)
   Future<void> signOut() async {
-    _mockUserId = null;
-    debugPrint('AuthService (MOCK): Logout realizado');
+    _localUserId = null;
+    if (_useFirebase) await FirebaseAuth.instance.signOut();
   }
 }

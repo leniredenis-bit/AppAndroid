@@ -470,8 +470,8 @@ class MinigameContentService {
     'BARNABÉ', 'SILAS', 'TIMÓTEO', 'TITO',
     
     // Lugares
-    'BELÉM', 'NAZARÉ', 'JERUSALÉM', 'GALILEIA', 'EGITO', 
-    'SINAI', 'JORDAN', 'CANAÃ', 'BABEL', 'NÍNIVE',
+    'BELÉM', 'NAZARÉ', 'JERUSALÉM', 'GALILEIA', 'EGITO',
+    'SINAI', 'JORDÃO', 'CANAÃ', 'BABEL', 'NÍNIVE',
     
     // Conceitos e virtudes
     'AMOR', 'FÉ', 'PAZ', 'VIDA', 'LUZ', 'REINO', 'GRAÇA',

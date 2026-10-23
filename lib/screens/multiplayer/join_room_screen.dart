@@ -54,7 +54,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
       }
 
       // Gerar ID único para o jogador
-      final playerId = DateTime.now().millisecondsSinceEpoch.toString();
+      final playerId = await FirebaseMultiplayerService().currentPlayerId();
       
       // Entrar na sala
       await FirebaseMultiplayerService().joinRoom(

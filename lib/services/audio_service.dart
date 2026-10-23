@@ -8,9 +8,12 @@ class AudioService {
   factory AudioService() => _instance;
   AudioService._internal();
 
-  // Players separados para música e efeitos sonoros
+  // Player de música + pool de players de efeitos (permite sons sobrepostos)
   final AudioPlayer _musicPlayer = AudioPlayer();
-  final AudioPlayer _sfxPlayer = AudioPlayer();
+  static const int _sfxPoolSize = 5;
+  final List<AudioPlayer> _sfxPool = List.generate(_sfxPoolSize, (_) => AudioPlayer());
+  int _nextSfx = 0;
+  double _sfxVolume = 0.7;
 
   bool _isMusicEnabled = true;
   bool _isSfxEnabled = true;
@@ -25,15 +28,9 @@ class AudioService {
     'pie': ['assets/audio/Pixel Peeker Polka - faster.mp3'],
   };
 
-  // Efeitos sonoros (vamos criar arquivos simples ou usar beeps)
-  static const String _soundCardFlip = 'assets/audio/sfx/card_flip.mp3';
-  static const String _soundMatch = 'assets/audio/sfx/match.mp3';
-  static const String _soundMismatch = 'assets/audio/sfx/mismatch.mp3';
-  static const String _soundCorrect = 'assets/audio/sfx/correct.mp3';
-  static const String _soundWrong = 'assets/audio/sfx/wrong.mp3';
-  static const String _soundClick = 'assets/audio/sfx/click.mp3';
-  static const String _soundGameOver = 'assets/audio/sfx/game_over.mp3';
-  static const String _soundVictory = 'assets/audio/sfx/victory.mp3';
+  // Efeitos sonoros: assets/audio/sfx/{nome}.wav, gerados por scripts/generate_sfx.py
+  // click, pop, whoosh, card_flip, match, mismatch, correct, wrong, star, combo,
+  // victory, game_over, snap, pickup, step, bump, gem, paint, erase, note_0..note_8
 
   /// Inicializa o serviço de áudio
   Future<void> initialize() async {
@@ -43,9 +40,11 @@ class AudioService {
     await _musicPlayer.setReleaseMode(ReleaseMode.loop);
     await _musicPlayer.setVolume(0.4); // Volume mais baixo para música de fundo
     
-    // Configura o player de efeitos sonoros
-    await _sfxPlayer.setReleaseMode(ReleaseMode.stop);
-    await _sfxPlayer.setVolume(0.7);
+    // Configura o pool de efeitos sonoros
+    for (final player in _sfxPool) {
+      await player.setReleaseMode(ReleaseMode.stop);
+      await player.setVolume(_sfxVolume);
+    }
     
     _isInitialized = true;
   }
@@ -95,64 +94,32 @@ class AudioService {
 
   // ==================== EFEITOS SONOROS ====================
 
-  /// Toca efeito sonoro genérico
-  Future<void> _playSfx(String assetPath) async {
+  /// Toca um efeito sonoro pelo nome (ex.: 'snap', 'note_3').
+  /// Usa o próximo player do pool para que sons rápidos não se cortem.
+  Future<void> playSfx(String name, {double volume = 1.0}) async {
     if (!_isSfxEnabled) return;
-    
-    // TODO: Adicionar arquivos de SFX reais
-    // Por enquanto, desabilitado para evitar erros 404
-    return;
-    
-    /*
+    final player = _sfxPool[_nextSfx];
+    _nextSfx = (_nextSfx + 1) % _sfxPoolSize;
     try {
-      await _sfxPlayer.stop(); // Para o som anterior
-      await _sfxPlayer.play(AssetSource(assetPath.replaceFirst('assets/', '')));
+      await player.stop();
+      await player.setVolume((_sfxVolume * volume).clamp(0.0, 1.0));
+      await player.play(AssetSource('audio/sfx/$name.wav'));
     } catch (e) {
-      // Se o arquivo não existe, ignora silenciosamente
-      debugPrint('SFX não encontrado: $assetPath');
+      debugPrint('SFX indisponível: $name ($e)');
     }
-    */
   }
 
-  /// Som ao virar carta no jogo da memória
-  Future<void> playCardFlip() async {
-    await _playSfx(_soundCardFlip);
-  }
+  /// Nota musical dos cristais (0 a 8, escala pentatônica)
+  Future<void> playNote(int index) => playSfx('note_${index.clamp(0, 8)}');
 
-  /// Som ao fazer par correto no jogo da memória
-  Future<void> playMatch() async {
-    await _playSfx(_soundMatch);
-  }
-
-  /// Som ao errar par no jogo da memória
-  Future<void> playMismatch() async {
-    await _playSfx(_soundMismatch);
-  }
-
-  /// Som ao acertar resposta no quiz
-  Future<void> playCorrectAnswer() async {
-    await _playSfx(_soundCorrect);
-  }
-
-  /// Som ao errar resposta no quiz (buzina)
-  Future<void> playWrongAnswer() async {
-    await _playSfx(_soundWrong);
-  }
-
-  /// Som ao clicar em botão
-  Future<void> playClick() async {
-    await _playSfx(_soundClick);
-  }
-
-  /// Som de game over
-  Future<void> playGameOver() async {
-    await _playSfx(_soundGameOver);
-  }
-
-  /// Som de vitória
-  Future<void> playVictory() async {
-    await _playSfx(_soundVictory);
-  }
+  Future<void> playCardFlip() => playSfx('card_flip');
+  Future<void> playMatch() => playSfx('match');
+  Future<void> playMismatch() => playSfx('mismatch');
+  Future<void> playCorrectAnswer() => playSfx('correct');
+  Future<void> playWrongAnswer() => playSfx('wrong');
+  Future<void> playClick() => playSfx('click', volume: 0.6);
+  Future<void> playGameOver() => playSfx('game_over');
+  Future<void> playVictory() => playSfx('victory');
 
   // ==================== CONTROLES ====================
 
@@ -182,12 +149,17 @@ class AudioService {
 
   /// Ajusta volume dos efeitos sonoros (0.0 a 1.0)
   Future<void> setSfxVolume(double volume) async {
-    await _sfxPlayer.setVolume(volume.clamp(0.0, 1.0));
+    _sfxVolume = volume.clamp(0.0, 1.0);
+    for (final player in _sfxPool) {
+      await player.setVolume(_sfxVolume);
+    }
   }
 
   /// Libera recursos
   Future<void> dispose() async {
     await _musicPlayer.dispose();
-    await _sfxPlayer.dispose();
+    for (final player in _sfxPool) {
+      await player.dispose();
+    }
   }
 }

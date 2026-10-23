@@ -1,0 +1,53 @@
+# Codemagic CI/CD - build iOS na nuvem (não precisa de Mac)
+# Passo a passo de configuração: docs/guias/BUILD_IOS.md
+#
+# Pré-requisitos no painel do Codemagic (codemagic.io):
+#  1. Conectar o repositório GitHub leniredenis-bit/AppAndroid
+#  2. Teams > Integrations > Developer Portal: cadastrar a chave da
+#     App Store Connect API com o nome abaixo (APP_STORE_KEY_NAME)
+#  3. Criar o app no App Store Connect e preencher APP_STORE_APPLE_ID
+workflows:
+  ios-testflight:
+    name: iOS -> TestFlight
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: JW Splash Games ASC  # nome da chave API no Codemagic
+    environment:
+      flutter: 3.41.2
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.jwsplashgames.quiz
+      vars:
+        APP_STORE_APPLE_ID: 0000000000  # TODO: "Apple ID" do app (App Store Connect > Informações do app)
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'v*'  # ex.: git tag v1.0.0 && git push origin v1.0.0
+    scripts:
+      - name: Dependências
+        script: flutter pub get
+      - name: CocoaPods
+        script: cd ios && pod install --repo-update
+      - name: Perfis de assinatura
+        script: xcode-project use-profiles
+      - name: Build IPA
+        script: |
+          # Número de build = último do TestFlight + 1 (evita conflito no upload)
+          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          flutter build ipa --release \
+            --build-number=$((LATEST + 1)) \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+      # Para receber e-mail a cada build, adicione:
+      # email:
+      #   recipients: [seu-email@exemplo.com]

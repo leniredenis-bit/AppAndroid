@@ -1,4 +1,4 @@
-# 🧪 Como Testar o JW Quiz Flutter
+# 🧪 Como Testar o JW Splash Games
 
 ## 📋 Índice
 
@@ -23,7 +23,7 @@ flutter --version
 
 **Instalação de Dependências:**
 ```powershell
-cd "C:\Users\NOTEBOOK 63\Desktop\Bot Benefícios\jw_quiz_flutter"
+cd "C:\Users\Denis\Documents\GitHub\AppAndroid"
 flutter pub get
 ```
 
@@ -167,6 +167,9 @@ python -m http.server 8000
 
 ### 5. **Modo Multiplayer 🌐**
 
+> **Precisa de 2 aparelhos** (Android e/ou iPhone pelo TestFlight) com internet, e do Firebase configurado
+> (login anônimo + regras: [FIREBASE.md](FIREBASE.md)). No Chrome/web o multiplayer é só simulado.
+
 #### **5.1 Criar Sala**
 - [ ] Campo "Apelido" valida 3-20 caracteres
 - [ ] Detecta profanidade e sugere alternativas
@@ -213,6 +216,9 @@ python -m http.server 8000
 - [ ] Não pode mudar resposta após submeter
 - [ ] Timer congela ao responder
 
+- [ ] Quando **todos** respondem, a rodada fecha sozinha e todos vão para o resultado
+- [ ] Se um jogador fechar o app no meio, a rodada fecha ~5s após o tempo acabar (pelo anfitrião)
+
 #### **5.6 Resultado da Rodada**
 - [ ] Mostra resposta correta
 - [ ] Ranking ordenado por pontos
@@ -226,6 +232,15 @@ python -m http.server 8000
 - [ ] Ranking completo de todos
 - [ ] Botão "Jogar Novamente" (apenas anfitrião)
 - [ ] Botão "Encerrar Sala" (apenas anfitrião)
+- [ ] "Jogar Novamente" leva **todos** de volta ao Lobby com placar zerado
+
+#### **5.8 Saídas e erros**
+- [ ] Anfitrião sai do Lobby → os outros veem "sala encerrada"
+- [ ] Jogador sai do Lobby → some da lista do anfitrião
+- [ ] Código inexistente → "Sala não encontrada"
+- [ ] Sala já em andamento → não deixa entrar
+- [ ] Sem internet → mensagem de erro (sem travar)
+- [ ] Jogadores com idiomas diferentes na mesma sala → cada um vê a pergunta no seu idioma
 
 ---
 
@@ -259,6 +274,8 @@ python -m http.server 8000
 #### **6.4 Labirinto**
 - [ ] Setas do teclado funcionam (↑↓←→)
 - [ ] Botões na tela funcionam (mobile)
+- [ ] **Segurar o direcional anda sem parar** (não só 2–3 casas)
+- [ ] Trocar de direção sem soltar responde na hora
 - [ ] Colisão com paredes detectada
 - [ ] Contador de movimentos
 - [ ] Vitória ao chegar no fim
@@ -273,12 +290,22 @@ python -m http.server 8000
 - [ ] Vitória ao encontrar todas
 - [ ] Botão "Novo Jogo" gera novo grid
 
-#### **6.6 Quebra-Cabeça**
-- [ ] Puzzle 3x3 (8 peças + espaço vazio)
-- [ ] Peças movem ao clicar (adjacentes ao vazio)
-- [ ] Contador de movimentos
-- [ ] Detecção de vitória (ordem correta)
-- [ ] Botão "Embaralhar" gera novo puzzle
+#### **6.6 Quebra-Cabeça (Jigsaw)**
+- [ ] Escolha de dificuldade funciona
+- [ ] Imagens prontas (puzzle1–4) e **foto da galeria** (seletor do sistema, sem pedir permissão)
+- [ ] Tocar numa peça do estoque pega **essa** peça (não uma já encaixada)
+- [ ] Encaixes das peças combinam (saliência ↔ reentrância, sem reta com redonda)
+- [ ] Peça encaixada **fica fixa** (não gira nem pode ser arrastada)
+- [ ] Vitória ao completar
+
+#### **6.7 Sequência Rápida / Sequência Cristal**
+- [ ] Cristal: botões em formato de **cristal** (não círculos), com brilho ao acender
+- [ ] Sequência cresce a cada acerto; erro = fim de jogo
+- [ ] Música de fundo toca
+
+#### **6.8 Forca**
+- [ ] Palavras e dicas no idioma escolhido
+- [ ] Boneco desenhado parte a parte a cada erro
 
 ---
 
@@ -387,7 +414,7 @@ Após concluir todos os testes:
 ## 📝 Reportar Bugs
 
 Se encontrar problemas:
-1. Abra uma [Issue](https://github.com/leniredenis-bit/JWQuizFlutter/issues)
+1. Abra uma [Issue](https://github.com/leniredenis-bit/AppAndroid/issues)
 2. Descreva o problema
 3. Inclua prints/vídeos
 4. Informe: device, OS, Flutter version

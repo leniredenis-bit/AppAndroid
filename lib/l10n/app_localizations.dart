@@ -1915,7 +1915,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsAppUsageItem3.
   ///
   /// In pt, this message translates to:
-  /// **'Usar o modo estudo sem limite de tempo'**
+  /// **'Jogar partidas online com amigos'**
   String get termsAppUsageItem3;
 
   /// No description provided for @termsAppUsageItem4.
@@ -1939,7 +1939,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsBiblicalContentDesc.
   ///
   /// In pt, this message translates to:
-  /// **'As perguntas e respostas são baseadas na Bíblia Sagrada. Este aplicativo não substitui o estudo pessoal das Escrituras Sagradas nem representa uma organização religiosa oficial.'**
+  /// **'As perguntas e respostas são baseadas na Bíblia Sagrada. Este é um aplicativo independente, feito por voluntários: não é um aplicativo oficial e não tem vínculo com a organização das Testemunhas de Jeová nem com o site jw.org. Os links de referência apenas abrem o site público jw.org para consulta do texto bíblico.'**
   String get termsBiblicalContentDesc;
 
   /// No description provided for @termsResponsibilities.
@@ -1981,7 +1981,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyPolicyIntro.
   ///
   /// In pt, this message translates to:
-  /// **'Respeitamos sua privacidade. Este aplicativo:'**
+  /// **'Respeitamos sua privacidade. O app não pede cadastro, nome real, e-mail, telefone ou localização, e não exibe anúncios.'**
   String get privacyPolicyIntro;
 
   /// No description provided for @privacyDataCollected.
@@ -1993,19 +1993,19 @@ abstract class AppLocalizations {
   /// No description provided for @privacyDataItem1.
   ///
   /// In pt, this message translates to:
-  /// **'Dados de uso: Estatísticas de jogo, preferências de tema'**
+  /// **'Estatísticas de uso anônimas (telas e jogos acessados), via Google Firebase Analytics, para melhorar o app.'**
   String get privacyDataItem1;
 
   /// No description provided for @privacyDataItem2.
   ///
   /// In pt, this message translates to:
-  /// **'Dados técnicos: Tipo de dispositivo, navegador, sistema operacional'**
+  /// **'Relatórios de falhas (modelo do aparelho, versão do sistema e do app), via Firebase Crashlytics, para corrigir erros.'**
   String get privacyDataItem2;
 
   /// No description provided for @privacyDataItem3.
   ///
   /// In pt, this message translates to:
-  /// **'Dados de sessão: Tempo de uso, páginas visitadas'**
+  /// **'Modo online: um identificador anônimo, o apelido escolhido e a pontuação da partida, armazenados temporariamente no Firebase e apagados quando a sala é encerrada.'**
   String get privacyDataItem3;
 
   /// No description provided for @privacyStorage.
@@ -2017,38 +2017,20 @@ abstract class AppLocalizations {
   /// No description provided for @privacyStorageDesc.
   ///
   /// In pt, this message translates to:
-  /// **'Todos os dados são armazenados localmente no seu dispositivo. Não enviamos dados para servidores externos.'**
+  /// **'Estatísticas pessoais, conquistas e preferências (idioma, som) ficam salvas apenas no seu aparelho. Fotos escolhidas para o quebra-cabeça nunca saem do aparelho.'**
   String get privacyStorageDesc;
 
-  /// No description provided for @privacyLocalStorage.
+  /// No description provided for @privacySupportChat.
   ///
   /// In pt, this message translates to:
-  /// **'3. LocalStorage'**
-  String get privacyLocalStorage;
+  /// **'3. Chat de Suporte'**
+  String get privacySupportChat;
 
-  /// No description provided for @privacyLocalStorageDesc.
+  /// No description provided for @privacySupportChatDesc.
   ///
   /// In pt, this message translates to:
-  /// **'Usamos localStorage do navegador para salvar:'**
-  String get privacyLocalStorageDesc;
-
-  /// No description provided for @privacyLocalStorageItem1.
-  ///
-  /// In pt, this message translates to:
-  /// **'Preferências do usuário (tema, idioma)'**
-  String get privacyLocalStorageItem1;
-
-  /// No description provided for @privacyLocalStorageItem2.
-  ///
-  /// In pt, this message translates to:
-  /// **'Estatísticas pessoais de jogo'**
-  String get privacyLocalStorageItem2;
-
-  /// No description provided for @privacyLocalStorageItem3.
-  ///
-  /// In pt, this message translates to:
-  /// **'Conquistas desbloqueadas'**
-  String get privacyLocalStorageItem3;
+  /// **'Se você usar o chat de suporte, as mensagens enviadas e dados técnicos do aparelho são processados pelo Crisp (crisp.chat) apenas para responder ao seu atendimento.'**
+  String get privacySupportChatDesc;
 
   /// No description provided for @privacySharing.
   ///
@@ -2059,8 +2041,20 @@ abstract class AppLocalizations {
   /// No description provided for @privacySharingDesc.
   ///
   /// In pt, this message translates to:
-  /// **'Não compartilhamos seus dados pessoais com terceiros. Os dados permanecem exclusivamente no seu dispositivo.'**
+  /// **'Não vendemos nem compartilhamos seus dados com terceiros para publicidade. Os serviços citados (Google Firebase e Crisp) atuam somente como operadores técnicos.'**
   String get privacySharingDesc;
+
+  /// No description provided for @privacyRights.
+  ///
+  /// In pt, this message translates to:
+  /// **'5. Seus Direitos (LGPD)'**
+  String get privacyRights;
+
+  /// No description provided for @privacyRightsDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você pode pedir a exclusão de dados pelo chat de suporte. Desinstalar o app apaga todos os dados locais. Política completa:'**
+  String get privacyRightsDesc;
 
   /// No description provided for @copyright.
   ///
@@ -2128,10 +2122,16 @@ abstract class AppLocalizations {
   /// **'Para dúvidas, sugestões ou relatar problemas:'**
   String get contactDesc;
 
+  /// No description provided for @contactSupportChat.
+  ///
+  /// In pt, this message translates to:
+  /// **'Chat de suporte: menu Configurações do app'**
+  String get contactSupportChat;
+
   /// No description provided for @lastUpdated.
   ///
   /// In pt, this message translates to:
-  /// **'📅 Última Atualização: Novembro 2025'**
+  /// **'📅 Última Atualização: Outubro 2026'**
   String get lastUpdated;
 
   /// No description provided for @aboutTitle.
@@ -2179,7 +2179,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutDevelopedByDesc.
   ///
   /// In pt, this message translates to:
-  /// **'Equipe JW SPLASH GAMES\nProjeto open-source disponível no GitHub'**
+  /// **'Equipe JW SPLASH GAMES\nProjeto voluntário e independente'**
   String get aboutDevelopedByDesc;
 
   /// No description provided for @aboutObjective.
@@ -2194,17 +2194,17 @@ abstract class AppLocalizations {
   /// **'Proporcionar uma forma divertida e educativa de aprender e memorizar conhecimentos bíblicos, adequado para todas as idades.'**
   String get aboutObjectiveDesc;
 
-  /// No description provided for @aboutUpdateNote.
+  /// No description provided for @aboutMusicCredits.
   ///
   /// In pt, this message translates to:
-  /// **'📝 Esta página será atualizada em breve com mais informações e link para página online oficial.'**
-  String get aboutUpdateNote;
+  /// **'Cheery Monday, Carefree, Cipher, Life of Riley, Pixel Peeker Polka\nKevin MacLeod (incompetech.com)\nLicença: Creative Commons By Attribution 4.0\ncreativecommons.org/licenses/by/4.0'**
+  String get aboutMusicCredits;
 
-  /// No description provided for @aboutVisitGithub.
+  /// No description provided for @aboutCredits.
   ///
   /// In pt, this message translates to:
-  /// **'Visitar GitHub'**
-  String get aboutVisitGithub;
+  /// **'Créditos'**
+  String get aboutCredits;
 
   /// No description provided for @statsTabQuiz.
   ///

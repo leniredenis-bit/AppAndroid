@@ -216,11 +216,23 @@ class MockMultiplayerService {
       score: player.score + (isCorrect ? points : 0),
     );
 
-    final updatedRoom = room.updatePlayer(playerId, updatedPlayer);
+    var updatedRoom = room.updatePlayer(playerId, updatedPlayer);
+    if (updatedRoom.allPlayersAnswered) {
+      updatedRoom = updatedRoom.copyWith(status: RoomStatus.roundEnd);
+    }
     _rooms[roomCode] = updatedRoom;
     _roomControllers[roomCode]?.add(updatedRoom);
 
     return updatedRoom;
+  }
+
+  /// Encerra a rodada atual (mostra resultados)
+  static Future<void> endRound(String roomCode) async {
+    final room = _rooms[roomCode];
+    if (room == null || room.status != RoomStatus.playing) return;
+    final updatedRoom = room.copyWith(status: RoomStatus.roundEnd);
+    _rooms[roomCode] = updatedRoom;
+    _roomControllers[roomCode]?.add(updatedRoom);
   }
 
   /// Avança para a próxima pergunta
@@ -305,11 +317,14 @@ class MockMultiplayerService {
   }
 
   /// Stream da sala (tempo real)
-  static Stream<Room> roomStream(String roomCode) {
+  static Stream<Room> roomStream(String roomCode) async* {
     if (!_roomControllers.containsKey(roomCode)) {
       _roomControllers[roomCode] = StreamController<Room>.broadcast();
     }
-    return _roomControllers[roomCode]!.stream;
+    // Emite o estado atual primeiro (igual ao Firebase onValue)
+    final current = _rooms[roomCode];
+    if (current != null) yield current;
+    yield* _roomControllers[roomCode]!.stream;
   }
 
   /// Obtém dados da sala (sem stream)

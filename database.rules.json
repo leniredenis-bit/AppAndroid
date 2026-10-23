@@ -1,0 +1,26 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rooms": {
+      "$roomCode": {
+        ".read": "auth != null",
+        ".write": "auth != null && ((!data.exists() && newData.child('hostId').val() === auth.uid) || data.child('hostId').val() === auth.uid)",
+        ".validate": "$roomCode.matches(/^[0-9]{6}$/)",
+        "players": {
+          "$uid": {
+            ".write": "auth != null && $uid === auth.uid && data.parent().parent().exists()",
+            "nickname": { ".validate": "newData.isString() && newData.val().length <= 20" }
+          }
+        },
+        "status": {
+          ".write": "auth != null && data.parent().child('players').child(auth.uid).exists()",
+          ".validate": "newData.isString() && (newData.parent().child('hostId').val() === auth.uid || newData.val() === 'roundEnd')"
+        },
+        "lastActivity": {
+          ".write": "auth != null && data.parent().child('players').child(auth.uid).exists()"
+        }
+      }
+    }
+  }
+}

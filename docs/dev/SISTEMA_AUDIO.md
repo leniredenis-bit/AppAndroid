@@ -1,4 +1,4 @@
-# 🎵 Sistema de Áudio - JW Quiz Flutter
+# 🎵 Sistema de Áudio - JW Splash Games
 
 ## ✅ O QUE JÁ ESTÁ FUNCIONANDO
 

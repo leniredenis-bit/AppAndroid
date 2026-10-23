@@ -280,4 +280,4 @@ Para ajustar os parâmetros:
 
 **Status**: ✅ Implementado e funcional  
 **Última atualização**: 2024  
-**Desenvolvido para**: JW Quiz Flutter
+**Desenvolvido para**: JW Splash Games

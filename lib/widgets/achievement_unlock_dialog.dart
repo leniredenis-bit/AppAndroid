@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
 import '../models/achievement.dart';
+import '../models/achievement_texts.dart';
 import '../services/audio_service.dart';
 
 /// Dialog animado para mostrar quando uma conquista é desbloqueada
@@ -224,10 +225,7 @@ class _AchievementUnlockDialogState extends State<AchievementUnlockDialog>
 
                       // Nome da conquista
                       Text(
-                        widget.achievement.nameKey
-                            .replaceAll('achievement_', '')
-                            .replaceAll('_', ' ')
-                            .toUpperCase(),
+                        achievementName(widget.achievement.nameKey),
                         style: TextStyle(
                           color: Color(0xFFFFD700),
                           fontSize: 24,
@@ -240,7 +238,7 @@ class _AchievementUnlockDialogState extends State<AchievementUnlockDialog>
 
                       // Descrição
                       Text(
-                        widget.achievement.descriptionKey,
+                        achievementDescription(widget.achievement.nameKey),
                         style: TextStyle(
                           color: Colors.white70,
                           fontSize: 14,

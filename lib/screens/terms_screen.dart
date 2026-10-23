@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 
+/// Versão pública da política (exigida pelas lojas): web/privacidade.html,
+/// publicada pelo workflow .github/workflows/deploy.yml
+const String privacyPolicyUrl = 'https://leniredenis-bit.github.io/AppAndroid/privacidade.html';
+
 class TermsScreen extends StatelessWidget {
   const TermsScreen({super.key});
 
@@ -66,15 +70,13 @@ class TermsScreen extends StatelessWidget {
                   ]),
                   _buildSubtitle(l10n.privacyStorage),
                   _buildParagraph(l10n.privacyStorageDesc),
-                  _buildSubtitle(l10n.privacyLocalStorage),
-                  _buildParagraph(l10n.privacyLocalStorageDesc),
-                  _buildBulletList([
-                    l10n.privacyLocalStorageItem1,
-                    l10n.privacyLocalStorageItem2,
-                    l10n.privacyLocalStorageItem3,
-                  ]),
+                  _buildSubtitle(l10n.privacySupportChat),
+                  _buildParagraph(l10n.privacySupportChatDesc),
                   _buildSubtitle(l10n.privacySharing),
                   _buildParagraph(l10n.privacySharingDesc),
+                  _buildSubtitle(l10n.privacyRights),
+                  _buildParagraph(l10n.privacyRightsDesc),
+                  _buildParagraph(privacyPolicyUrl),
                 ],
               ),
               const SizedBox(height: 24),
@@ -97,7 +99,7 @@ class TermsScreen extends StatelessWidget {
                 content: [
                   _buildParagraph(l10n.contactDesc),
                   _buildBulletList([
-                    'GitHub: leniredenis-bit/JWQuizAndroid',
+                    l10n.contactSupportChat,
                   ]),
                 ],
               ),

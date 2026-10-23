@@ -55,7 +55,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
       }
 
       // Gerar ID único para o host
-      final hostId = DateTime.now().millisecondsSinceEpoch.toString();
+      final hostId = await FirebaseMultiplayerService().currentPlayerId();
       
       // Criar sala (roundTimeLimit será ignorado - tempo é calculado dinamicamente)
       final room = await FirebaseMultiplayerService().createRoom(

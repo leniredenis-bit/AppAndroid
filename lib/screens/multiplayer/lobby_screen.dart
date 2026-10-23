@@ -24,6 +24,7 @@ class LobbyScreen extends StatefulWidget {
 class _LobbyScreenState extends State<LobbyScreen> {
   StreamSubscription<Room>? _roomSubscription;
   Room? _currentRoom;
+  bool _leaving = false; // evita navegar/mostrar diálogo mais de uma vez
   bool _isStarting = false;
 
   @override
@@ -63,6 +64,8 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   Future<void> _navigateToQuiz() async {
+    if (_leaving) return;
+    _leaving = true;
     if (!mounted) return;
     
     // Pequeno delay para suavizar transição
@@ -144,7 +147,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
         title: Text(l10n.multiplayerLeaveRoom, style: TextStyle(color: Colors.white)),
         content: Text(
           _isHost
-              ? 'Você é o anfitrião. Outro jogador será promovido automaticamente.'
+              ? 'Você é o anfitrião. Ao sair, a sala será encerrada para todos.'
               : 'Tem certeza que deseja sair?',
           style: TextStyle(color: Colors.white70),
         ),
@@ -162,6 +165,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
     );
 
     if (confirmed == true) {
+      _leaving = true;
       try {
         await FirebaseMultiplayerService().removePlayer(
           roomCode: widget.roomCode,
@@ -199,6 +203,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
     );
 
     if (confirmed == true) {
+      _leaving = true;
       try {
         await FirebaseMultiplayerService().closeRoom(widget.roomCode);
         if (!mounted) return;
@@ -236,6 +241,8 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   void _showRoomClosedDialog() {
+    if (_leaving) return;
+    _leaving = true;
     final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,

@@ -1,0 +1,15 @@
+# Gera os ícones Android/iOS/Web a partir da arte em assets/icon/
+# Uso: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: "assets/icon/app_icon.png"          # 1024x1024, SEM transparência (exigência da Apple)
+  android: "ic_launcher"
+  adaptive_icon_background: "#162447"             # cor de fundo do ícone adaptativo (azul do app)
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"  # 1024x1024 com transparência, desenho dentro dos 66% centrais
+  ios: true
+  remove_alpha_ios: true
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
+    background_color: "#101A2C"
+    theme_color: "#162447"

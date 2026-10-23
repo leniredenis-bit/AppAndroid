@@ -26,6 +26,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
     with TickerProviderStateMixin {
   StreamSubscription<Room>? _roomSubscription;
   Room? _currentRoom;
+  bool _leaving = false; // evita navegar/mostrar diálogo mais de uma vez
   
   late AnimationController _confettiController;
   late AnimationController _podiumController;
@@ -101,7 +102,8 @@ class _FinalResultScreenState extends State<FinalResultScreen>
         });
 
         // Se reiniciou, voltar para lobby
-        if (room.status == RoomStatus.waiting && _isRestarting) {
+        // Host reiniciou a partida: todos voltam ao lobby
+        if (room.status == RoomStatus.waiting) {
           _navigateToLobby();
         }
 
@@ -114,6 +116,8 @@ class _FinalResultScreenState extends State<FinalResultScreen>
   }
 
   Future<void> _navigateToLobby() async {
+    if (_leaving) return;
+    _leaving = true;
     if (!mounted) return;
     
     await Future.delayed(Duration(milliseconds: 300));
@@ -132,6 +136,8 @@ class _FinalResultScreenState extends State<FinalResultScreen>
   }
 
   void _showRoomClosedDialog() {
+    if (_leaving) return;
+    _leaving = true;
     final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
@@ -212,6 +218,7 @@ class _FinalResultScreenState extends State<FinalResultScreen>
     );
 
     if (confirm == true && mounted) {
+      _leaving = true;
       try {
         await FirebaseMultiplayerService().closeRoom(widget.roomCode);
         if (!mounted) return;

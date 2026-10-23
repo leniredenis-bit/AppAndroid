@@ -1,812 +1,842 @@
-import 'dart:io';
+import 'dart:async';
 import 'dart:math';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/audio_service.dart';
-import '../../services/storage_service.dart';
-import '../../services/achievement_service.dart';
-import '../../widgets/achievement_unlock_dialog.dart';
-import '../../l10n/app_localizations.dart';
+import 'common/game_results.dart';
+import 'common/game_text.dart';
+import 'common/game_ui.dart';
 
-// --- Configurações do Quebra-Cabeça ---
-const int defaultGridSize = 3; // 3x3 (fácil: 3, médio: 4, difícil: 5)
-const double snapThresholdPercent = 0.95; // 95% de proximidade para encaixar
+const Color _accent = Color(0xFF2DD4BF);
 
-// --- Estrutura da Peça ---
-class JigsawPiece {
-  final int id;
-  final int row;
-  final int col;
-  final ImageProvider image;
-  final Size originalImageSize;
-  Offset currentPos;
-  final Offset correctPos;
-  bool isLocked;
-  
-  // Definição das abas (0=reto, 1=pra fora, -1=pra dentro)
-  final int topTab;
-  final int rightTab;
-  final int bottomTab;
-  final int leftTab;
-
-  JigsawPiece({
-    required this.id,
-    required this.row,
-    required this.col,
-    required this.image,
-    required this.originalImageSize,
-    required this.currentPos,
-    required this.correctPos,
-    this.isLocked = false,
-    required this.topTab,
-    required this.rightTab,
-    required this.bottomTab,
-    required this.leftTab,
-  });
-}
-
+/// Quebra-cabeça clássico com peças de encaixe.
+///
+/// Todas as peças são desenhadas por um único [CustomPainter]; o toque é
+/// testado contra o formato real da peça (não a caixa retangular), então
+/// sempre se pega a peça que está visível sob o dedo.
 class JigsawPuzzleGame extends StatefulWidget {
-  const JigsawPuzzleGame({super.key});
+  /// Imagem inicial opcional (ex.: um desenho feito no jogo de colorir).
+  final Uint8List? initialImageBytes;
+
+  const JigsawPuzzleGame({super.key, this.initialImageBytes});
 
   @override
   State<JigsawPuzzleGame> createState() => _JigsawPuzzleGameState();
 }
 
-class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> {
-  final AudioService _audioService = AudioService();
-  final StorageService _storage = StorageService();
-  final AchievementService _achievementService = AchievementService();
+class _Piece {
+  final int row, col;
+  final int top, right, bottom, left; // 0 = reto, 1 = saliência, -1 = reentrância
+  Offset center = Offset.zero;
+  double scale = 1;
+  double targetScale = 1;
+  bool locked = false;
+  Offset? snapFrom; // animação de encaixe
+  double snapT = 1;
+  double flash = 0; // brilho ao encaixar
+  late Path path; // em coordenadas do núcleo (0..s)
 
-  // Estado do Jogo
-  ImageProvider? _selectedImage;
-  List<JigsawPiece> _pieces = [];
-  Size? _boardSize;
-  bool _isGameStarted = false;
-  bool _isGameWon = false;
-  bool _showPreview = true;
-  int _gridSize = defaultGridSize;
-  int _moves = 0;
-  DateTime? _gameStartTime;
-  final Random _random = Random();
+  _Piece(this.row, this.col, this.top, this.right, this.bottom, this.left);
 
-  // Imagens embutidas do app (assets)
-  final List<String> _systemImages = [
+  bool get isEdge => top == 0 || right == 0 || bottom == 0 || left == 0;
+}
+
+class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerProviderStateMixin {
+  final _audio = AudioService();
+  final _random = Random();
+
+  static const _assetImages = [
     'assets/images/puzzle1.jpg',
     'assets/images/puzzle2.jpg',
     'assets/images/puzzle3.jpg',
     'assets/images/puzzle4.jpg',
   ];
 
+  // Configuração
+  int _grid = 3;
+  bool _showSilhouette = true;
+  ImageProvider? _chosenProvider;
+
+  // Partida
+  bool _playing = false;
+  ui.Image? _image;
+  List<_Piece> _pieces = [];
+  Size _area = Size.zero;
+  Rect _board = Rect.zero;
+  Rect _tray = Rect.zero;
+  double _s = 0; // lado do núcleo da peça no tabuleiro
+  double _trayScale = 0.5;
+  int _moves = 0;
+  int _seconds = 0;
+  Timer? _clock;
+  bool _won = false;
+  bool _peek = false;
+  double _winShine = -1;
+
+  // Arraste
+  int? _pointer;
+  _Piece? _dragging;
+  Offset _grabLocal = Offset.zero;
+
+  late final Ticker _ticker;
+
   @override
   void initState() {
     super.initState();
-    _audioService.playBackgroundMusic('puzzle-theme.mp3');
+    _ticker = createTicker(_tick);
+    _audio.playBackgroundMusic('home');
+    if (widget.initialImageBytes != null) {
+      _chosenProvider = MemoryImage(widget.initialImageBytes!);
+      WidgetsBinding.instance.addPostFrameCallback((_) => _start(_chosenProvider!));
+    }
   }
 
   @override
   void dispose() {
-    _audioService.stopBackgroundMusic();
+    _ticker.dispose();
+    _clock?.cancel();
+    _audio.stopBackgroundMusic();
     super.dispose();
   }
 
+  // ==========================================================================
+  // INÍCIO / IMAGEM
+  // ==========================================================================
+
+  Future<void> _pickFromGallery() async {
+    try {
+      final file = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 1600, maxHeight: 1600);
+      if (file == null) return;
+      final bytes = await file.readAsBytes();
+      if (!mounted) return;
+      _start(MemoryImage(bytes));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(t3('Não foi possível abrir a galeria.', 'Could not open the gallery.',
+            'No se pudo abrir la galería.')),
+      ));
+    }
+  }
+
+  Future<ui.Image> _resolve(ImageProvider provider) {
+    final completer = Completer<ui.Image>();
+    final stream = provider.resolve(ImageConfiguration.empty);
+    late final ImageStreamListener listener;
+    listener = ImageStreamListener((info, _) {
+      completer.complete(info.image);
+      stream.removeListener(listener);
+    }, onError: (e, st) {
+      completer.completeError(e, st);
+      stream.removeListener(listener);
+    });
+    stream.addListener(listener);
+    return completer.future;
+  }
+
+  Future<void> _start(ImageProvider provider) async {
+    _chosenProvider = provider;
+    final image = await _resolve(provider);
+    if (!mounted) return;
+    setState(() {
+      _image = image;
+      _playing = true;
+      _won = false;
+      _winShine = -1;
+      _moves = 0;
+      _seconds = 0;
+      _pieces = _createPieces();
+      _area = Size.zero; // força novo layout
+    });
+    _clock?.cancel();
+    _clock = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && !_won) setState(() => _seconds++);
+    });
+    if (!_ticker.isActive) _ticker.start();
+  }
+
+  List<_Piece> _createPieces() {
+    final n = _grid;
+    // v[r][c]: borda entre (r,c) e (r,c+1) | h[r][c]: borda entre (r,c) e (r+1,c)
+    final v = List.generate(n, (_) => List.generate(n, (_) => _random.nextBool() ? 1 : -1));
+    final h = List.generate(n, (_) => List.generate(n, (_) => _random.nextBool() ? 1 : -1));
+    final list = <_Piece>[];
+    for (int r = 0; r < n; r++) {
+      for (int c = 0; c < n; c++) {
+        list.add(_Piece(
+          r,
+          c,
+          r == 0 ? 0 : -h[r - 1][c],
+          c == n - 1 ? 0 : v[r][c],
+          r == n - 1 ? 0 : h[r][c],
+          c == 0 ? 0 : -v[r][c - 1],
+        ));
+      }
+    }
+    list.shuffle(_random);
+    return list;
+  }
+
+  /// Calcula tabuleiro e bandeja para o espaço disponível e espalha as peças.
+  void _layout(Size area) {
+    if (area == _area) return;
+    final first = _area == Size.zero;
+    final oldBoard = _board;
+    final oldS = _s;
+    _area = area;
+
+    final boardSide = min(area.width - 24, area.height * 0.6);
+    _board = Rect.fromLTWH((area.width - boardSide) / 2, 8, boardSide, boardSide);
+    _tray = Rect.fromLTRB(8, _board.bottom + 14, area.width - 8, area.height - 6);
+    _s = boardSide / _grid;
+
+    final n = _pieces.length;
+    final footprint = _s * 1.56;
+    final cols = max(1, sqrt(n * _tray.width / max(_tray.height, 1)).ceil());
+    final rows = (n / cols).ceil();
+    final cell = min(_tray.width / cols, _tray.height / rows);
+    _trayScale = (cell / footprint * 0.98).clamp(0.22, 0.8);
+
+    for (final p in _pieces) {
+      p.path = _piecePath(p, _s);
+    }
+
+    if (first) {
+      _scatterInTray(_pieces);
+    } else {
+      // Reescala posições após rotação/redimensionamento
+      for (final p in _pieces) {
+        if (p.locked) {
+          p.center = _correctCenter(p);
+        } else if (oldS > 0) {
+          final inBoard = oldBoard.contains(p.center);
+          if (inBoard) {
+            p.center = _board.topLeft + (p.center - oldBoard.topLeft) * (_s / oldS);
+          }
+        }
+      }
+      _scatterInTray(_pieces.where((p) => !p.locked && !_board.contains(p.center)).toList());
+    }
+  }
+
+  void _scatterInTray(List<_Piece> pieces) {
+    if (pieces.isEmpty) return;
+    final n = pieces.length;
+    final cols = max(1, sqrt(n * _tray.width / max(_tray.height, 1)).ceil());
+    final rows = (n / cols).ceil();
+    final cw = _tray.width / cols;
+    final ch = _tray.height / rows;
+    final order = List<_Piece>.from(pieces)..shuffle(_random);
+    for (int i = 0; i < order.length; i++) {
+      final p = order[i];
+      final r = i ~/ cols, c = i % cols;
+      final jitter = Offset((_random.nextDouble() - 0.5) * cw * 0.18, (_random.nextDouble() - 0.5) * ch * 0.18);
+      p.center = Offset(_tray.left + cw * (c + 0.5), _tray.top + ch * (r + 0.5)) + jitter;
+      p.scale = p.targetScale = _trayScale;
+    }
+  }
+
+  Offset _correctCenter(_Piece p) => _board.topLeft + Offset((p.col + 0.5) * _s, (p.row + 0.5) * _s);
+
+  // ==========================================================================
+  // GEOMETRIA DAS PEÇAS
+  // ==========================================================================
+
+  /// Contorno de uma peça em coordenadas do núcleo (quadrado 0..s).
+  /// Saliência/reentrância simétrica, então peças vizinhas sempre encaixam.
+  static Path _piecePath(_Piece p, double s) {
+    final path = Path()..moveTo(0, 0);
+    _edge(path, Offset.zero, Offset(s, 0), const Offset(0, -1), p.top, s);
+    _edge(path, Offset(s, 0), Offset(s, s), const Offset(1, 0), p.right, s);
+    _edge(path, Offset(s, s), Offset(0, s), const Offset(0, 1), p.bottom, s);
+    _edge(path, Offset(0, s), Offset.zero, const Offset(-1, 0), p.left, s);
+    return path..close();
+  }
+
+  static void _edge(Path path, Offset a, Offset b, Offset normal, int tab, double s) {
+    if (tab == 0) {
+      path.lineTo(b.dx, b.dy);
+      return;
+    }
+    Offset m(double u, double h) => a + (b - a) * u + normal * (h * s * tab);
+    void line(double u, double h) {
+      final p = m(u, h);
+      path.lineTo(p.dx, p.dy);
+    }
+
+    void cubic(double u1, double h1, double u2, double h2, double u3, double h3) {
+      final p1 = m(u1, h1), p2 = m(u2, h2), p3 = m(u3, h3);
+      path.cubicTo(p1.dx, p1.dy, p2.dx, p2.dy, p3.dx, p3.dy);
+    }
+
+    line(0.37, 0);
+    cubic(0.42, 0.0, 0.44, 0.06, 0.40, 0.11);
+    cubic(0.33, 0.20, 0.39, 0.28, 0.50, 0.28);
+    cubic(0.61, 0.28, 0.67, 0.20, 0.60, 0.11);
+    cubic(0.56, 0.06, 0.58, 0.0, 0.63, 0.0);
+    line(1, 0);
+  }
+
+  // ==========================================================================
+  // INTERAÇÃO
+  // ==========================================================================
+
+  bool _hits(_Piece p, Offset point) {
+    final local = (point - p.center) / p.scale + Offset(_s / 2, _s / 2);
+    return p.path.contains(local);
+  }
+
+  void _onDown(PointerDownEvent e) {
+    if (_pointer != null || _won || _peek) return;
+    for (int i = _pieces.length - 1; i >= 0; i--) {
+      final p = _pieces[i];
+      if (p.locked) continue;
+      if (_hits(p, e.localPosition)) {
+        _pointer = e.pointer;
+        _dragging = p;
+        _grabLocal = (e.localPosition - p.center) / p.scale;
+        p.targetScale = 1.04;
+        _pieces
+          ..removeAt(i)
+          ..add(p);
+        _audio.playSfx('pickup', volume: 0.6);
+        HapticFeedback.selectionClick();
+        setState(() {});
+        return;
+      }
+    }
+  }
+
+  void _onMove(PointerMoveEvent e) {
+    final p = _dragging;
+    if (p == null || e.pointer != _pointer) return;
+    p.center = e.localPosition - _grabLocal * p.scale;
+    setState(() {});
+  }
+
+  void _onUp(PointerEvent e) {
+    final p = _dragging;
+    if (p == null || e.pointer != _pointer) return;
+    _pointer = null;
+    _dragging = null;
+    _moves++;
+
+    final target = _correctCenter(p);
+    if ((p.center - target).distance < _s * 0.33) {
+      p.snapFrom = p.center;
+      p.snapT = 0;
+      p.locked = true;
+      p.targetScale = 1;
+      p.flash = 1;
+      _audio.playSfx('snap');
+      HapticFeedback.mediumImpact();
+      // Peças travadas ficam por baixo das soltas
+      _pieces
+        ..remove(p)
+        ..insert(0, p);
+      if (_pieces.every((x) => x.locked)) _onWin();
+    } else {
+      // Mantém dentro da área e define o tamanho conforme onde caiu
+      p.center = Offset(
+        p.center.dx.clamp(8, _area.width - 8),
+        p.center.dy.clamp(8, _area.height - 8),
+      );
+      p.targetScale = _board.contains(p.center) ? 1 : _trayScale;
+      _audio.playSfx('click', volume: 0.4);
+    }
+    setState(() {});
+  }
+
+  void _tidyTray() {
+    final loose = _pieces.where((p) => !p.locked && p != _dragging).toList();
+    final edgesFirst = [...loose.where((p) => p.isEdge), ...loose.where((p) => !p.isEdge)];
+    final old = {for (final p in loose) p: p.center};
+    _scatterInTray(edgesFirst);
+    for (final p in loose) {
+      p.snapFrom = old[p];
+      p.snapT = 0;
+    }
+    _audio.playSfx('whoosh', volume: 0.6);
+    setState(() {});
+  }
+
+  void _tick(Duration _) {
+    bool changed = false;
+    for (final p in _pieces) {
+      if ((p.scale - p.targetScale).abs() > 0.002) {
+        p.scale += (p.targetScale - p.scale) * 0.25;
+        changed = true;
+      }
+      if (p.snapT < 1) {
+        p.snapT = min(1, p.snapT + 0.12);
+        changed = true;
+      }
+      if (p.flash > 0) {
+        p.flash = max(0, p.flash - 0.04);
+        changed = true;
+      }
+    }
+    if (_winShine >= 0 && _winShine < 1.4) {
+      _winShine += 0.02;
+      changed = true;
+    }
+    if (changed && mounted) setState(() {});
+  }
+
+  /// Centro desenhado (inclui animação de encaixe/organização).
+  Offset _drawCenter(_Piece p) {
+    if (p.snapT >= 1 || p.snapFrom == null) return p.locked ? _correctCenter(p) : p.center;
+    final target = p.locked ? _correctCenter(p) : p.center;
+    final t = Curves.easeOutCubic.transform(p.snapT);
+    return Offset.lerp(p.snapFrom, target, t)!;
+  }
+
+  Future<void> _onWin() async {
+    _won = true;
+    _clock?.cancel();
+    await Future.delayed(const Duration(milliseconds: 450));
+    if (!mounted) return;
+    setState(() => _winShine = 0);
+    await Future.delayed(const Duration(milliseconds: 1100));
+    if (!mounted) return;
+
+    final n = _pieces.length;
+    final stars = _seconds <= n * 5 ? 3 : (_seconds <= n * 10 ? 2 : 1);
+    final score = max(10, n * 100 - _seconds * 2 - max(0, _moves - n) * 5);
+    final saved = await recordGameResult(context,
+        gameId: 'jigsaw_puzzle', won: true, score: score, seconds: _seconds, perfect: _moves == n);
+    if (!mounted) return;
+    await showGameResult(
+      context,
+      won: true,
+      accent: _accent,
+      title: t3('Quebra-cabeça completo!', 'Puzzle complete!', '¡Rompecabezas completo!'),
+      stars: stars,
+      newRecord: saved.newRecord,
+      stats: [
+        ResultStat('⏱️', t3('Tempo', 'Time', 'Tiempo'), formatGameTime(_seconds)),
+        ResultStat('✋', t3('Jogadas', 'Moves', 'Jugadas'), '$_moves'),
+        ResultStat('🧩', t3('Peças', 'Pieces', 'Piezas'), '$n'),
+      ],
+      primaryLabel: t3('Jogar de novo', 'Play again', 'Jugar de nuevo'),
+      onPrimary: () => _start(_chosenProvider!),
+      secondaryLabel: t3('Outra imagem', 'Another image', 'Otra imagen'),
+      onSecondary: _backToMenu,
+    );
+  }
+
+  void _backToMenu() {
+    _clock?.cancel();
+    _ticker.stop();
+    setState(() {
+      _playing = false;
+      _pieces = [];
+      _area = Size.zero;
+    });
+  }
+
+  // ==========================================================================
+  // UI
+  // ==========================================================================
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.brown.shade800, // Mesa de madeira
-      appBar: AppBar(
-        title: const Text('🧩 Quebra-Cabeça', style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF162447),
-        iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          if (_isGameStarted)
-            IconButton(
-              icon: Icon(_showPreview ? Icons.visibility : Icons.visibility_off, color: Colors.white),
-              onPressed: () {
-                setState(() => _showPreview = !_showPreview);
-                _audioService.playClick();
-              },
-              tooltip: 'Ver gabarito',
-            ),
-          if (_isGameStarted)
-            IconButton(
-              icon: const Icon(Icons.refresh, color: Colors.white),
-              onPressed: () {
-                setState(() {
-                  _isGameStarted = false;
-                  _pieces.clear();
-                  _isGameWon = false;
-                  _moves = 0;
-                });
-                _audioService.playClick();
-              },
-            ),
-        ],
-      ),
-      body: SafeArea(
-        child: _isGameStarted ? _buildGameBoard() : _buildMenu(),
-      ),
+    return GameScaffold(
+      title: t3('🧩 Quebra-Cabeça', '🧩 Jigsaw Puzzle', '🧩 Rompecabezas'),
+      accent: _accent,
+      onBack: _playing && widget.initialImageBytes == null ? _backToMenu : null,
+      backgroundColors: const [Color(0xFF13302E), Color(0xFF0B1A1C)],
+      body: _playing ? _buildGame() : _buildMenu(),
     );
   }
 
-  // --- TELA 1: MENU DE SELEÇÃO ---
   Widget _buildMenu() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            "Escolha sua imagem",
-            style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          
-          // Seletor de Dificuldade
-          Card(
-            color: Colors.brown.shade700,
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                children: [
-                  Text(AppLocalizations.of(context)!.difficulty, style: const TextStyle(color: Colors.white70, fontSize: 18)),
-                  const SizedBox(height: 10),
-                  SegmentedButton<int>(
-                    segments: [
-                      ButtonSegment(value: 3, label: Text('${AppLocalizations.of(context)!.easy}\n3x3')),
-                      ButtonSegment(value: 4, label: Text('${AppLocalizations.of(context)!.medium}\n4x4')),
-                      ButtonSegment(value: 5, label: Text('${AppLocalizations.of(context)!.hard}\n5x5')),
-                    ],
-                    selected: {_gridSize},
-                    onSelectionChanged: (Set<int> newSelection) {
-                      setState(() => _gridSize = newSelection.first);
-                      _audioService.playClick();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          
-          const SizedBox(height: 20),
-          
-          // Botão Upload
-          ElevatedButton.icon(
-            icon: const Icon(Icons.add_photo_alternate, size: 30),
-            label: Text(AppLocalizations.of(context)!.jigsawLoadFromGallery),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.all(20),
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: _pickImageFromGallery,
-          ),
-          
-          const SizedBox(height: 20),
-          Text(AppLocalizations.of(context)!.jigsawOrChooseImage, style: const TextStyle(color: Colors.white70)),
-          const SizedBox(height: 10),
-          
-          // Grid de Imagens do Sistema
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemCount: _systemImages.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    _audioService.playClick();
-                    _startGame(AssetImage(_systemImages[index]));
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      image: DecorationImage(
-                        image: AssetImage(_systemImages[index]),
-                        fit: BoxFit.cover,
-                      ),
-                      boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 5)],
-                      border: Border.all(color: Colors.white24, width: 2),
-                    ),
-                    child: const Center(
-                      child: Icon(Icons.check_circle_outline, size: 50, color: Colors.white70),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --- Lógica de Seleção de Imagem ---
-  Future<void> _pickImageFromGallery() async {
-    try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-      
-      if (image != null) {
-        _audioService.playClick();
-        _startGame(FileImage(File(image.path)));
-      }
-    } catch (e) {
-      // Caso não tenha o pacote image_picker ou dê erro
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.jigsawGalleryError)),
-        );
-      }
-    }
-  }
-
-  // --- TELA 2: TABULEIRO DO JOGO ---
-  Widget _buildGameBoard() {
-    if (_boardSize == null) {
-      // Precisamos medir a tela antes de criar as peças
-      return LayoutBuilder(builder: (context, constraints) {
-        // Define o tamanho do tabuleiro quadrado baseado na largura da tela
-        double size = min(constraints.maxWidth, constraints.maxHeight - 100) - 40;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _generatePuzzlePieces(Size(size, size));
-        });
-        return const Center(child: CircularProgressIndicator(color: Colors.orange));
-      });
-    }
-
-    return Stack(
+    final options = [
+      OptionItem(3, t3('Fácil', 'Easy', 'Fácil'), '9'),
+      OptionItem(4, t3('Médio', 'Medium', 'Medio'), '16'),
+      OptionItem(5, t3('Difícil', 'Hard', 'Difícil'), '25'),
+      OptionItem(6, t3('Mestre', 'Master', 'Maestro'), '36'),
+    ];
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 30),
       children: [
-        // Container principal
-        Positioned.fill(
+        GameHero(
+          emoji: '🧩',
+          title: t3('Quebra-Cabeça', 'Jigsaw Puzzle', 'Rompecabezas'),
+          subtitle: t3('Escolha uma imagem e monte peça por peça',
+              'Choose an image and build it piece by piece', 'Elige una imagen y ármala pieza por pieza'),
+          accent: _accent,
+        ),
+        const SizedBox(height: 22),
+        GamePanel(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // HUD
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildStatCard(AppLocalizations.of(context)!.moves, _moves.toString(), Icons.touch_app),
-                    _buildStatCard(AppLocalizations.of(context)!.pieces, '${_pieces.where((p) => p.isLocked).length}/${_pieces.length}', Icons.extension),
-                  ],
-                ),
+              OptionPicker<int>(
+                title: t3('Peças', 'Pieces', 'Piezas'),
+                options: options,
+                selected: _grid,
+                accent: _accent,
+                onChanged: (v) => setState(() => _grid = v),
               ),
-              
-              // Área de Jogo
-              Expanded(
-                child: Center(
-                  child: SizedBox(
-                    width: _boardSize!.width,
-                    height: _boardSize!.height,
-                    child: Stack(
-                      children: [
-                        // 1. Imagem Fantasma (Guia)
-                        if (_showPreview)
-                          Opacity(
-                            opacity: 0.25,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: _selectedImage!,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ),
-                        
-                        // 2. Grade de referência
-                        CustomPaint(
-                          painter: GridPainter(
-                            gridSize: _gridSize,
-                            boardSize: _boardSize!,
-                            showGrid: _showPreview,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              const SizedBox(height: 14),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                activeTrackColor: _accent,
+                value: _showSilhouette,
+                onChanged: (v) => setState(() => _showSilhouette = v),
+                title: Text(t3('Mostrar imagem de fundo', 'Show background image', 'Mostrar imagen de fondo'),
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                subtitle: Text(t3('Uma sombra da imagem ajuda a montar', 'A faint image helps you build',
+                        'Una sombra de la imagen te ayuda'),
+                    style: const TextStyle(color: Colors.white54, fontSize: 12)),
               ),
             ],
           ),
         ),
-
-        // 3. As Peças (Renderizadas como Stack items móveis)
-        // Primeiro as peças locked (ficam por baixo), depois as soltas (por cima)
-        ..._getSortedPieces().map((piece) {
-          return Positioned(
-            left: piece.currentPos.dx,
-            top: piece.currentPos.dy,
-            // Peças travadas ignoram toques completamente
-            child: IgnorePointer(
-              ignoring: piece.isLocked,
-              child: GestureDetector(
-                onPanStart: (_) {
-                  if (!piece.isLocked && !_isGameWon) {
-                    // Move a peça para o topo da pilha (renderiza por último)
-                    setState(() {
-                      _pieces.remove(piece);
-                      _pieces.add(piece);
-                    });
-                  }
-                },
-              onPanUpdate: (details) {
-                if (piece.isLocked || _isGameWon) return;
-                setState(() {
-                  piece.currentPos += details.delta;
-                });
-              },
-              onPanEnd: (details) {
-                if (piece.isLocked) return;
-                setState(() => _moves++);
-                _checkSnap(piece);
-              },
-              child: _buildPieceWidget(piece),
-              ),
-            ),
-          );
-        }),
-
-        // 4. Tela de Vitória
-        if (_isGameWon)
-          Center(
-            child: Container(
-              padding: const EdgeInsets.all(30),
-              decoration: BoxDecoration(
-                color: Colors.green.shade900.withValues(alpha: 0.95),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: const [BoxShadow(blurRadius: 20, color: Colors.black)],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text("🧩", style: TextStyle(fontSize: 50)),
-                  const SizedBox(height: 10),
-                  Text(AppLocalizations.of(context)!.complete, style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 10),
-                  Text(
-                    AppLocalizations.of(context)!.completedInMoves(_moves),
-                    style: const TextStyle(color: Colors.white70, fontSize: 16),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      _audioService.playClick();
-                      setState(() {
-                        _isGameStarted = false;
-                        _isGameWon = false;
-                        _pieces.clear();
-                        _boardSize = null;
-                        _moves = 0;
-                      });
-                    },
-                    child: Text(AppLocalizations.of(context)!.newGame),
-                  )
-                ],
-              ),
-            ),
-          ),
+        const SizedBox(height: 20),
+        Text(t3('ESCOLHA A IMAGEM', 'CHOOSE THE IMAGE', 'ELIGE LA IMAGEN'),
+            style: const TextStyle(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
+        const SizedBox(height: 10),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          children: [
+            _galleryTile(),
+            ..._assetImages.map((a) => _imageTile(AssetImage(a))),
+          ],
+        ),
       ],
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.black45,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.orangeAccent.withValues(alpha: 0.5)),
+  Widget _imageTile(ImageProvider provider) {
+    return _PressableTile(
+      onTap: () => _start(provider),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image(image: provider, fit: BoxFit.cover),
+            Positioned(
+              right: 8,
+              bottom: 8,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 22),
+              ),
+            ),
+          ],
+        ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.orangeAccent, size: 20),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+    );
+  }
+
+  Widget _galleryTile() {
+    return _PressableTile(
+      onTap: _pickFromGallery,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: const LinearGradient(colors: [Color(0xFF14B8A6), Color(0xFF0E7490)]),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.add_photo_alternate_rounded, color: Colors.white, size: 44),
+            const SizedBox(height: 8),
+            Text(t3('Sua foto', 'Your photo', 'Tu foto'),
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
+            Text(t3('da galeria', 'from gallery', 'de la galería'),
+                style: const TextStyle(color: Colors.white70, fontSize: 12)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGame() {
+    final placed = _pieces.where((p) => p.locked).length;
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+          child: Row(
             children: [
-              Text(label, style: const TextStyle(color: Colors.white70, fontSize: 10)),
-              Text(value, style: const TextStyle(color: Colors.orangeAccent, fontSize: 16, fontWeight: FontWeight.bold)),
+              HudChip(emoji: '⏱️', value: formatGameTime(_seconds)),
+              const SizedBox(width: 8),
+              HudChip(emoji: '🧩', value: '$placed/${_pieces.length}', color: _accent, highlight: placed > 0),
+              const Spacer(),
+              _iconButton(Icons.auto_awesome_mosaic_rounded, t3('Organizar', 'Tidy up', 'Ordenar'), _tidyTray),
+              const SizedBox(width: 6),
+              GestureDetector(
+                onTapDown: (_) => setState(() => _peek = true),
+                onTapUp: (_) => setState(() => _peek = false),
+                onTapCancel: () => setState(() => _peek = false),
+                child: _iconBox(Icons.visibility_rounded, t3('Segure para espiar', 'Hold to peek', 'Mantén para ver')),
+              ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  // --- Lógica de Geração do Quebra-Cabeça ---
-  void _startGame(ImageProvider image) {
-    setState(() {
-      _selectedImage = image;
-      _isGameStarted = true;
-      _boardSize = null; // Força recálculo do layout
-      _gameStartTime = DateTime.now();
-      _moves = 0;
-    });
-  }
-
-  void _generatePuzzlePieces(Size boardSize) {
-    List<JigsawPiece> newPieces = [];
-    double pieceSize = boardSize.width / _gridSize;
-    
-    // Matriz para guardar as abas (para que a peça da direita encaixe na da esquerda)
-    var verticalTabs = List.generate(_gridSize, (_) => List.filled(_gridSize, 0));
-    var horizontalTabs = List.generate(_gridSize, (_) => List.filled(_gridSize, 0));
-
-    // Gerar conexões aleatórias
-    for (int r = 0; r < _gridSize; r++) {
-      for (int c = 0; c < _gridSize; c++) {
-        if (c < _gridSize - 1) verticalTabs[r][c] = _random.nextBool() ? 1 : -1;
-        if (r < _gridSize - 1) horizontalTabs[r][c] = _random.nextBool() ? 1 : -1;
-      }
-    }
-
-    // Calcula offset do tabuleiro para spawnar peças fora dele
-    double screenWidth = MediaQuery.of(context).size.width;
-    double boardX = (screenWidth - boardSize.width) / 2;
-    double boardY = 100; // Aproximado (HUD + margem)
-
-    for (int r = 0; r < _gridSize; r++) {
-      for (int c = 0; c < _gridSize; c++) {
-        // Define as 4 abas da peça
-        int top = (r == 0) ? 0 : -horizontalTabs[r-1][c];
-        int right = (c == _gridSize - 1) ? 0 : verticalTabs[r][c];
-        int bottom = (r == _gridSize - 1) ? 0 : horizontalTabs[r][c];
-        int left = (c == 0) ? 0 : -verticalTabs[r][c-1];
-
-        // Posição correta no tabuleiro (relativa à tela)
-        Offset correctScreen = Offset(
-          boardX + (c * pieceSize),
-          boardY + (r * pieceSize),
-        );
-        
-        // Posição inicial na ÁREA DE PEÇAS (parte superior da tela)
-        // Área de peças ocupa os primeiros ~120px da tela
-        double pieceAreaHeight = 100.0;
-        double piecePadding = 10.0;
-        
-        // Distribui as peças em uma grade na área superior
-        int piecesPerRow = (_gridSize * 2).clamp(4, 8); // Mais peças por linha para caber
-        int pieceIndex = r * _gridSize + c;
-        
-        double miniPieceSize = min(
-          (screenWidth - piecePadding * 2) / piecesPerRow - piecePadding,
-          (pieceAreaHeight - piecePadding) / 2 - piecePadding
-        );
-        
-        int rowInArea = pieceIndex ~/ piecesPerRow;
-        int colInArea = pieceIndex % piecesPerRow;
-        
-        double randomX = piecePadding + colInArea * (miniPieceSize + piecePadding) + _random.nextDouble() * 10;
-        double randomY = piecePadding + rowInArea * (miniPieceSize + piecePadding) + _random.nextDouble() * 10;
-        
-        newPieces.add(JigsawPiece(
-          id: r * _gridSize + c,
-          row: r,
-          col: c,
-          image: _selectedImage!,
-          originalImageSize: boardSize,
-          correctPos: correctScreen,
-          currentPos: Offset(randomX, randomY),
-          topTab: top,
-          rightTab: right,
-          bottomTab: bottom,
-          leftTab: left,
-        ));
-      }
-    }
-
-    setState(() {
-      _boardSize = boardSize;
-      _pieces = newPieces;
-      _pieces.shuffle(); 
-    });
-  }
-
-  // Retorna peças ordenadas: locked primeiro (por baixo), soltas por cima
-  List<JigsawPiece> _getSortedPieces() {
-    final locked = _pieces.where((p) => p.isLocked).toList();
-    final unlocked = _pieces.where((p) => !p.isLocked).toList();
-    return [...locked, ...unlocked];
-  }
-
-  void _checkSnap(JigsawPiece piece) {
-    // Calcula a distância máxima aceitável baseada no tamanho da peça
-    double pieceSize = _boardSize!.width / _gridSize;
-    double maxSnapDistance = pieceSize * (1 - snapThresholdPercent) * 2; // ~5% do tamanho da peça
-    
-    double dist = (piece.currentPos - piece.correctPos).distance;
-
-    if (dist < maxSnapDistance) {
-      // SNAP!
-      setState(() {
-        piece.currentPos = piece.correctPos;
-        piece.isLocked = true;
-      });
-      
-      _audioService.playCorrectAnswer(); // Som de encaixe
-      
-      // Verifica vitória
-      if (_pieces.every((p) => p.isLocked)) {
-        _handleVictory();
-      }
-    }
-  }
-
-  void _handleVictory() async {
-    setState(() => _isGameWon = true);
-    _audioService.playVictory();
-
-    final timeSpent = _gameStartTime != null
-        ? DateTime.now().difference(_gameStartTime!).inSeconds
-        : 0;
-
-    // Calcula pontuação (menos movimentos = melhor)
-    int baseScore = _gridSize * _gridSize * 100;
-    int penalty = _moves * 2;
-    int score = max(100, baseScore - penalty);
-
-    await _storage.saveMinigameRecord(
-      'jigsaw_puzzle',
-      score: score,
-      won: true,
-      timeInSeconds: timeSpent,
-    );
-
-    // Conquistas
-    final records = await _storage.getMinigameRecords();
-    final jigsawRecord = records.getRecord('jigsaw_puzzle');
-    final unlockedAchievements = await _achievementService.checkMinigameAchievements(
-      gameId: 'jigsaw_puzzle',
-      totalGamesPlayed: jigsawRecord.gamesPlayed,
-      won: true,
-      timeInSeconds: timeSpent,
-    );
-
-    if (mounted && unlockedAchievements.isNotEmpty) {
-      for (final achievement in unlockedAchievements) {
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AchievementUnlockDialog(achievement: achievement),
-        );
-      }
-    }
-  }
-
-  // --- Renderização Visual da Peça ---
-  Widget _buildPieceWidget(JigsawPiece piece) {
-    double baseSize = _boardSize!.width / _gridSize;
-    double drawSize = baseSize + 20;
-
-    return SizedBox(
-      width: drawSize,
-      height: drawSize,
-      child: Stack(
-        children: [
-          // Sombra
-          if (!piece.isLocked)
-            Positioned(
-              left: 3, top: 3,
+        ),
+        Expanded(
+          child: LayoutBuilder(builder: (context, constraints) {
+            _layout(Size(constraints.maxWidth, constraints.maxHeight));
+            return Listener(
+              onPointerDown: _onDown,
+              onPointerMove: _onMove,
+              onPointerUp: _onUp,
+              onPointerCancel: _onUp,
               child: CustomPaint(
-                size: Size(drawSize, drawSize),
-                painter: JigsawPathPainter(
-                  piece: piece,
-                  baseSize: baseSize,
-                  color: Colors.black.withValues(alpha: 0.5),
-                  isShadow: true,
+                size: Size(constraints.maxWidth, constraints.maxHeight),
+                painter: _JigsawPainter(
+                  image: _image!,
+                  pieces: _pieces,
+                  grid: _grid,
+                  board: _board,
+                  tray: _tray,
+                  s: _s,
+                  silhouette: _showSilhouette,
+                  peek: _peek,
+                  dragging: _dragging,
+                  won: _won,
+                  winShine: _winShine,
+                  centerOf: _drawCenter,
                 ),
               ),
-            ),
-          // A Peça com Imagem
-          ClipPath(
-            clipper: JigsawClipper(piece: piece, baseSize: baseSize),
-            child: SizedBox(
-              width: drawSize,
-              height: drawSize,
-              child: OverflowBox(
-                maxWidth: double.infinity,
-                maxHeight: double.infinity,
-                alignment: Alignment.topLeft,
-                child: Container(
-                  width: _boardSize!.width,
-                  height: _boardSize!.height,
-                  transform: Matrix4.translationValues(
-                    -piece.col * baseSize + 10,
-                    -piece.row * baseSize + 10, 
-                    0
-                  ),
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: piece.image,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Borda
-          CustomPaint(
-            size: Size(drawSize, drawSize),
-            painter: JigsawPathPainter(
-              piece: piece,
-              baseSize: baseSize,
-              color: piece.isLocked ? Colors.green.withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.3),
-              isShadow: false,
-            ),
-          ),
-        ],
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _iconButton(IconData icon, String tooltip, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
+      child: _iconBox(icon, tooltip),
+    );
+  }
+
+  Widget _iconBox(IconData icon, String tooltip) {
+    return Tooltip(
+      message: tooltip,
+      child: Container(
+        padding: const EdgeInsets.all(9),
+        decoration: BoxDecoration(
+          color: GameColors.panel,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white12),
+        ),
+        child: Icon(icon, color: Colors.white, size: 22),
       ),
     );
   }
 }
 
-// --- Painter da Grade de Referência ---
-class GridPainter extends CustomPainter {
-  final int gridSize;
-  final Size boardSize;
-  final bool showGrid;
-
-  GridPainter({required this.gridSize, required this.boardSize, required this.showGrid});
+class _PressableTile extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  const _PressableTile({required this.child, required this.onTap});
 
   @override
-  void paint(Canvas canvas, Size size) {
-    if (!showGrid) return;
+  State<_PressableTile> createState() => _PressableTileState();
+}
 
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.1)
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
+class _PressableTileState extends State<_PressableTile> {
+  bool _down = false;
 
-    double cellSize = boardSize.width / gridSize;
-
-    for (int i = 0; i <= gridSize; i++) {
-      // Linhas horizontais
-      canvas.drawLine(
-        Offset(0, i * cellSize),
-        Offset(boardSize.width, i * cellSize),
-        paint,
-      );
-      // Linhas verticais
-      canvas.drawLine(
-        Offset(i * cellSize, 0),
-        Offset(i * cellSize, boardSize.height),
-        paint,
-      );
-    }
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _down = true),
+      onTapCancel: () => setState(() => _down = false),
+      onTapUp: (_) {
+        setState(() => _down = false);
+        AudioService().playClick();
+        widget.onTap();
+      },
+      child: AnimatedScale(
+        scale: _down ? 0.95 : 1,
+        duration: const Duration(milliseconds: 100),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 10, offset: Offset(0, 5))],
+          ),
+          child: widget.child,
+        ),
+      ),
+    );
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-// --- Geometria do Quebra-Cabeça ---
-class JigsawClipper extends CustomClipper<Path> {
-  final JigsawPiece piece;
-  final double baseSize;
+// ============================================================================
+// PINTURA
+// ============================================================================
 
-  JigsawClipper({required this.piece, required this.baseSize});
+class _JigsawPainter extends CustomPainter {
+  final ui.Image image;
+  final List<_Piece> pieces;
+  final int grid;
+  final Rect board, tray;
+  final double s;
+  final bool silhouette, peek, won;
+  final _Piece? dragging;
+  final double winShine;
+  final Offset Function(_Piece) centerOf;
 
-  @override
-  Path getClip(Size size) => getPiecePath(piece, baseSize);
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => true;
-}
-
-class JigsawPathPainter extends CustomPainter {
-  final JigsawPiece piece;
-  final double baseSize;
-  final Color color;
-  final bool isShadow;
-
-  JigsawPathPainter({
-    required this.piece,
-    required this.baseSize,
-    required this.color,
-    required this.isShadow,
+  _JigsawPainter({
+    required this.image, required this.pieces, required this.grid, required this.board,
+    required this.tray, required this.s, required this.silhouette, required this.peek,
+    required this.dragging, required this.won, required this.winShine, required this.centerOf,
   });
 
+  Rect get _src {
+    final w = image.width.toDouble(), h = image.height.toDouble();
+    final side = min(w, h);
+    return Rect.fromLTWH((w - side) / 2, (h - side) / 2, side, side);
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = isShadow ? PaintingStyle.fill : PaintingStyle.stroke
-      ..strokeWidth = isShadow ? 0 : 2.0;
-      
-    if (isShadow) {
-      paint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+    final src = _src;
+    final boardR = RRect.fromRectAndRadius(board.inflate(6), const Radius.circular(14));
+
+    // Tabuleiro (moldura + feltro)
+    canvas.drawRRect(boardR.shift(const Offset(0, 4)), Paint()..color = Colors.black38);
+    canvas.drawRRect(boardR, Paint()..color = const Color(0xFF0F2A2A));
+    canvas.drawRRect(
+        boardR,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..color = const Color(0x5532E0C8));
+
+    if (silhouette && !won) {
+      canvas.drawImageRect(image, src, board, Paint()..color = const Color(0x2EFFFFFF));
     }
 
-    canvas.drawPath(getPiecePath(piece, baseSize), paint);
+    // Bandeja
+    canvas.drawRRect(RRect.fromRectAndRadius(tray, const Radius.circular(18)),
+        Paint()..color = Colors.black.withValues(alpha: 0.22));
+
+    // Encaixes vazios (contorno tracejado leve)
+    if (!won) {
+      final slot = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2
+        ..color = Colors.white.withValues(alpha: 0.12);
+      for (final p in pieces) {
+        if (p.locked) continue;
+        canvas.save();
+        canvas.translate(board.left + p.col * s, board.top + p.row * s);
+        canvas.drawPath(p.path, slot);
+        canvas.restore();
+      }
+    }
+
+    if (won && winShine >= 0) {
+      // Imagem final inteira, sem emendas
+      canvas.drawImageRect(image, src, board, Paint());
+    } else {
+      for (final p in pieces) {
+        _drawPiece(canvas, p, src);
+      }
+    }
+
+    // Brilho de vitória
+    if (winShine >= 0 && winShine < 1.4) {
+      canvas.save();
+      canvas.clipRect(board);
+      final x = board.left + (winShine - 0.2) * board.width * 1.6;
+      final shine = Paint()
+        ..shader = ui.Gradient.linear(
+          Offset(x - 80, board.top),
+          Offset(x + 80, board.bottom),
+          [Colors.white.withValues(alpha: 0), Colors.white.withValues(alpha: 0.45), Colors.white.withValues(alpha: 0)],
+          [0, 0.5, 1],
+        );
+      canvas.drawRect(board, shine);
+      canvas.restore();
+    }
+
+    // Espiar: imagem por cima de tudo
+    if (peek) {
+      canvas.drawRRect(boardR, Paint()..color = Colors.black54);
+      canvas.drawImageRect(image, src, board, Paint()..color = const Color(0xF2FFFFFF));
+    }
+  }
+
+  void _drawPiece(Canvas canvas, _Piece p, Rect src) {
+    final c = centerOf(p);
+    final lifted = identical(p, dragging);
+    canvas.save();
+    canvas.translate(c.dx, c.dy);
+    canvas.scale(p.scale);
+    canvas.translate(-s / 2, -s / 2);
+
+    if (!p.locked) {
+      canvas.drawShadow(p.path, Colors.black, lifted ? 10 : 3, false);
+    }
+
+    canvas.save();
+    canvas.clipPath(p.path);
+    final dst = Rect.fromLTWH(-p.col * s, -p.row * s, grid * s, grid * s);
+    canvas.drawImageRect(image, src, dst, Paint()..filterQuality = FilterQuality.medium);
+    canvas.restore();
+
+    // Relevo: luz em cima/esquerda, sombra embaixo/direita
+    if (!p.locked) {
+      canvas.save();
+      canvas.translate(-0.8, -0.8);
+      canvas.drawPath(
+          p.path,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.6
+            ..color = Colors.white.withValues(alpha: 0.45));
+      canvas.restore();
+      canvas.save();
+      canvas.translate(0.8, 0.8);
+      canvas.drawPath(
+          p.path,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.6
+            ..color = Colors.black.withValues(alpha: 0.45));
+      canvas.restore();
+    } else {
+      canvas.drawPath(
+          p.path,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 0.8
+            ..color = Colors.black.withValues(alpha: 0.18));
+    }
+
+    if (p.flash > 0) {
+      canvas.drawPath(
+          p.path,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 4
+            ..color = const Color(0xFF5EEAD4).withValues(alpha: p.flash)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
+    }
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
-// Função que desenha o caminho com curvas Bézier
-Path getPiecePath(JigsawPiece piece, double size) {
-  final path = Path();
-  double padding = 10.0;
-  double width = size;
-  double height = size;
-  
-  double left = padding;
-  double top = padding;
-  double right = padding + width;
-  double bottom = padding + height;
-  double tabSize = size / 4;
-
-  path.moveTo(left, top);
-
-  // TOPO
-  if (piece.topTab == 0) {
-    path.lineTo(right, top);
-  } else {
-    double midX = left + width / 2;
-    double sgn = (piece.topTab == 1) ? -1.0 : 1.0;
-    path.lineTo(midX - tabSize/2, top);
-    path.cubicTo(
-      midX - tabSize, top + (tabSize * sgn),
-      midX + tabSize, top + (tabSize * sgn),
-      midX + tabSize/2, top
-    );
-    path.lineTo(right, top);
-  }
-
-  // DIREITA
-  if (piece.rightTab == 0) {
-    path.lineTo(right, bottom);
-  } else {
-    double midY = top + height / 2;
-    double sgn = (piece.rightTab == 1) ? 1.0 : -1.0;
-    path.lineTo(right, midY - tabSize/2);
-    path.cubicTo(
-      right + (tabSize * sgn), midY - tabSize,
-      right + (tabSize * sgn), midY + tabSize,
-      right, midY + tabSize/2
-    );
-    path.lineTo(right, bottom);
-  }
-
-  // EMBAIXO
-  if (piece.bottomTab == 0) {
-    path.lineTo(left, bottom);
-  } else {
-    double midX = left + width / 2;
-    double sgn = (piece.bottomTab == 1) ? 1.0 : -1.0;
-    path.lineTo(midX + tabSize/2, bottom);
-    path.cubicTo(
-      midX + tabSize, bottom + (tabSize * sgn),
-      midX - tabSize, bottom + (tabSize * sgn),
-      midX - tabSize/2, bottom
-    );
-    path.lineTo(left, bottom);
-  }
-
-  // ESQUERDA
-  if (piece.leftTab == 0) {
-    path.lineTo(left, top);
-  } else {
-    double midY = top + height / 2;
-    double sgn = (piece.leftTab == 1) ? -1.0 : 1.0;
-    path.lineTo(left, midY + tabSize/2);
-    path.cubicTo(
-      left + (tabSize * sgn), midY + tabSize,
-      left + (tabSize * sgn), midY - tabSize,
-      left, midY - tabSize/2
-    );
-    path.lineTo(left, top);
-  }
-
-  path.close();
-  return path;
+  bool shouldRepaint(covariant _JigsawPainter old) => true;
 }

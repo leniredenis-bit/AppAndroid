@@ -26,6 +26,7 @@ class MultiplayerQuizScreen extends StatefulWidget {
 class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
   StreamSubscription<Room>? _roomSubscription;
   Room? _currentRoom;
+  bool _leaving = false; // evita navegar/mostrar diálogo mais de uma vez
   List<Question> _allQuestions = [];
   Question? _currentQuestion;
   
@@ -146,6 +147,23 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
         if (!_hasSubmitted) {
           _submitAnswer(null); // Tempo esgotado, resposta nula
         }
+        _scheduleRoundTimeout();
+      }
+    });
+  }
+
+  /// Se algum jogador desconectou e não respondeu, o host encerra a
+  /// rodada alguns segundos após o fim do tempo para o jogo não travar.
+  void _scheduleRoundTimeout() {
+    final room = _currentRoom;
+    if (room == null || room.hostId != widget.playerId) return;
+    final questionIndex = room.currentQuestionIndex;
+    Future.delayed(const Duration(seconds: 5), () {
+      final current = _currentRoom;
+      if (!mounted || current == null) return;
+      if (current.status == RoomStatus.playing &&
+          current.currentQuestionIndex == questionIndex) {
+        FirebaseMultiplayerService().endRound(widget.roomCode);
       }
     });
   }
@@ -198,6 +216,8 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
   }
 
   Future<void> _navigateToRoundResults() async {
+    if (_leaving) return;
+    _leaving = true;
     if (!mounted) return;
     
     // Delay para permitir visualizar feedback da resposta
@@ -217,6 +237,8 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
   }
 
   void _showRoomClosedDialog() {
+    if (_leaving) return;
+    _leaving = true;
     final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,

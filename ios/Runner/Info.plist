@@ -5,15 +5,21 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Jw Quiz Flutter</string>
+	<string>JW Splash Games</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>pt-BR</string>
+		<string>en</string>
+		<string>es</string>
+	</array>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>jw_quiz_flutter</string>
+	<string>JW Splash Games</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -45,10 +51,18 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<!-- Permissões para image_picker -->
+	<!-- image_picker (somente galeria) - Quebra-Cabeça com foto -->
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Este app precisa acessar sua galeria de fotos para você escolher imagens para o quebra-cabeça.</string>
+	<string>Escolha uma foto da sua galeria para montar o quebra-cabeça. A imagem fica apenas no seu aparelho.</string>
+	<!-- Exigidos pelo SDK do chat de suporte (Crisp) para enviar anexos -->
 	<key>NSCameraUsageDescription</key>
-	<string>Este app precisa acessar sua câmera para tirar fotos para o quebra-cabeça.</string>
+	<string>Permite tirar uma foto para enviar como anexo no chat de suporte.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Permite salvar imagens recebidas no chat de suporte.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Permite gravar áudio para enviar no chat de suporte.</string>
+	<!-- Só usa HTTPS padrão: dispensa documentação de exportação de criptografia -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

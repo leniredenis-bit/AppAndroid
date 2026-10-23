@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Assinatura Android (NUNCA versionar)
+/android/key.properties
+*.jks
+*.keystore
+
+# Arquivos temporários
+*.bak

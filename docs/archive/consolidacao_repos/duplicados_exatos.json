@@ -1,0 +1,182 @@
+﻿[
+    {
+        "Hash":  "4599142A11EA54B7E2450DD46D45AEAF8642D2D4CF8946519F16955B61024413",
+        "Canonico":  "AppAndroid/CONTRIBUTING.md",
+        "Duplicados":  "JWQuizFlutter/CONTRIBUTING.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "14566EAF185CD27700B46E61ABC75835C87B3E72E4F925B965794E3AB2220527",
+        "Canonico":  "AppAndroid/EXECUTIVE_SUMMARY.md",
+        "Duplicados":  "JWQuizFlutter/EXECUTIVE_SUMMARY.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "F79BB1D7D4606068F4C9BA060C1F8BC68604E3311E50792B866A25FEC253EEF1",
+        "Canonico":  "AppAndroid/NEXT_STEPS.md",
+        "Duplicados":  "JWQuizFlutter/NEXT_STEPS.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "D7B7B9EC05031D0430462A7432881162617C3B0846BFCD8A522AC20FF4731ADF",
+        "Canonico":  "AppAndroid/PROJECT_STATUS.md",
+        "Duplicados":  "JWQuizFlutter/PROJECT_STATUS.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "2058F84E20CEAA85E1BDFDA41EED1BAD72F0DF4588A50039383EB7FA1DB98C79",
+        "Canonico":  "AppAndroid/PUBLICATION_CHECKLIST.md",
+        "Duplicados":  "JWQuizFlutter/PUBLICATION_CHECKLIST.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "EBA33D0F830C12DAE98D81872F3F4690969C79995909D1C195EB0879ECBDB290",
+        "Canonico":  "AppAndroid/README.md",
+        "Duplicados":  "JWQuizFlutter/README.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "C761CDDD333AAA266559650F044B7042E71B323043E69BCF32A3273A3D7C64A4",
+        "Canonico":  "AppAndroid/assets\\audio\\sfx\\README.md",
+        "Duplicados":  "JWQuizFlutter/assets\\audio\\sfx\\README.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "5374BBAC15D2B8349D60B1476AF1DA4AB562114B57DF36451A2C0CE42878ACD5",
+        "Canonico":  "AppAndroid/assets\\images\\README.md",
+        "Duplicados":  "JWQuizFlutter/assets\\images\\README.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "3F11596D6C4938D4379F10CC0526042E9A677F89F94B29959EDCEDAD71F864A1",
+        "Canonico":  "AppAndroid/docs\\archive\\ANALISE_PROBLEMAS.md",
+        "Duplicados":  "JWQuizFlutter/docs\\archive\\ANALISE_PROBLEMAS.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "67E1EE74C0148492E177D88C83D3F1C48BC15930D52EC334604F83CE4B0CB5C6",
+        "Canonico":  "AppAndroid/docs\\archive\\FUNCIONALIDADES_COMPLETAS.md",
+        "Duplicados":  "JWQuizFlutter/docs\\archive\\FUNCIONALIDADES_COMPLETAS.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "0F7397D79521CA15C438C36C5A97290850024D3900C9DC12A6CE24A2FF3AD3FE",
+        "Canonico":  "AppAndroid/docs\\archive\\MIGRACAO_CONCLUIDA.md",
+        "Duplicados":  "JWQuizFlutter/docs\\archive\\MIGRACAO_CONCLUIDA.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "FB3EDC8664A9778ADC1EE71108D4A6AAE60352F9CC91F93C42C1BAEB162468D8",
+        "Canonico":  "AppAndroid/docs\\archive\\POR_QUE_INCOMPLETO.md",
+        "Duplicados":  "JWQuizFlutter/docs\\archive\\POR_QUE_INCOMPLETO.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "66FB83C952FEDC00B049E016A6E8456B4D78F22BC2C460DFC0F95DA642D01367",
+        "Canonico":  "AppAndroid/docs\\archive\\README_OLD.md",
+        "Duplicados":  "JWQuizFlutter/docs\\archive\\README_OLD.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "E91C063801EEBCFBA5B31E73B7617457DFDEAFE5E5AE14387B050068E20379C8",
+        "Canonico":  "AppAndroid/docs\\checklists\\CHECKLIST_FINAL.md",
+        "Duplicados":  "JWQuizFlutter/docs\\checklists\\CHECKLIST_FINAL.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "8C570AD9D074814A84B9C7462A429B302F9FCEED4AB394A07BF96392DED19101",
+        "Canonico":  "AppAndroid/docs\\checklists\\ICONS_CHECKLIST.md",
+        "Duplicados":  "JWQuizFlutter/docs\\checklists\\ICONS_CHECKLIST.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "A34B4168ED987F435C044418D46CDEA9C6B811604CC74C32D3A3A23653A77992",
+        "Canonico":  "AppAndroid/docs\\dev\\CORRECOES_BUGS.md",
+        "Duplicados":  "JWQuizFlutter/docs\\dev\\CORRECOES_BUGS.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "D4709836DD6DE54C61EA880BE8110138B09C1091FA38F6A9C62960475FA86E04",
+        "Canonico":  "AppAndroid/docs\\dev\\JIGSAW_PUZZLE_DOCS.md",
+        "Duplicados":  "JWQuizFlutter/docs\\dev\\JIGSAW_PUZZLE_DOCS.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "753D1D98ACE02D6B17C67766C57EE6A1DD2DB504D10B031B217C546CFEDABEA6",
+        "Canonico":  "AppAndroid/docs\\dev\\MELHORIAS_APLICADAS.md",
+        "Duplicados":  "JWQuizFlutter/docs\\dev\\MELHORIAS_APLICADAS.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "8911387A6DA09160A0BB64D454ECAD749373345D26B013BDA8D1F309FB912F38",
+        "Canonico":  "AppAndroid/docs\\dev\\MELHORIAS_AUDIO_PENDENTES.md",
+        "Duplicados":  "JWQuizFlutter/docs\\dev\\MELHORIAS_AUDIO_PENDENTES.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "EBE3E783A95EF8AD08D1B118586339422AC1625CA90CB94D488167D5E39D6547",
+        "Canonico":  "AppAndroid/docs\\dev\\MULTIPLAYER_README.md",
+        "Duplicados":  "JWQuizFlutter/docs\\dev\\MULTIPLAYER_README.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "5CE73AD679A89581AE76EFE468466EC60B2643A2B5BF0915B3E2FA88D27F7D05",
+        "Canonico":  "AppAndroid/docs\\dev\\RESUMO_MELHORIAS.md",
+        "Duplicados":  "JWQuizFlutter/docs\\dev\\RESUMO_MELHORIAS.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "B628C08EA243355E1C68D543015B44FE4A0A164657BC27CD5F28EB0CCE40C7DF",
+        "Canonico":  "AppAndroid/docs\\dev\\RESUMO_TIMER_IMPLEMENTACAO.md",
+        "Duplicados":  "JWQuizFlutter/docs\\dev\\RESUMO_TIMER_IMPLEMENTACAO.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "0A40D701EDA1C72C0A76AB077E0EBD138ABDC500CC398929470A0613050666CC",
+        "Canonico":  "AppAndroid/docs\\dev\\REVISAO_BOTOES_COMPLETA.md",
+        "Duplicados":  "JWQuizFlutter/docs\\dev\\REVISAO_BOTOES_COMPLETA.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "F71EB3A8BDECD3D3940D578FDA287596ACB234874B86B38BA3685D424590E19E",
+        "Canonico":  "AppAndroid/docs\\dev\\SISTEMA_AUDIO.md",
+        "Duplicados":  "JWQuizFlutter/docs\\dev\\SISTEMA_AUDIO.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "46B59A925C847B640C380EB52CA49C8844F3D6E9D65A6E71CAC326B6B24213B8",
+        "Canonico":  "AppAndroid/docs\\dev\\SUGESTOES_MELHORIAS.md",
+        "Duplicados":  "JWQuizFlutter/docs\\dev\\SUGESTOES_MELHORIAS.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "FBFD06DB9067746721C6A02E3BABE36C6F01F7137A15EB3FE7F8425E58FA46D9",
+        "Canonico":  "AppAndroid/docs\\dev\\TIMER_SYSTEM.md",
+        "Duplicados":  "JWQuizFlutter/docs\\dev\\TIMER_SYSTEM.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "0DE50E42E046091993CF3975E183CAC25AA2428D711CE7E9E570D288B3FF0A4D",
+        "Canonico":  "AppAndroid/docs\\guides\\COMO_TESTAR.md",
+        "Duplicados":  "JWQuizFlutter/docs\\guides\\COMO_TESTAR.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "68549B24ABB29B330BE16EA3DAD7C0FB10C537FDD43F4F591747BFC78986F421",
+        "Canonico":  "AppAndroid/docs\\guides\\FIREBASE_SETUP.md",
+        "Duplicados":  "JWQuizFlutter/docs\\guides\\FIREBASE_SETUP.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "DFCA840E5E6D43C2DE8F70E9A9EACB76D05248039A8DD4C5232FC51273D8F833",
+        "Canonico":  "AppAndroid/docs\\guides\\MULTIPLAYER_QUICKSTART.md",
+        "Duplicados":  "JWQuizFlutter/docs\\guides\\MULTIPLAYER_QUICKSTART.md",
+        "Total":  2
+    },
+    {
+        "Hash":  "853AC958E2416FE2540F6F61165283A3618B71A7BA5F85F65AC41C2158DFCD21",
+        "Canonico":  "AppAndroid/ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\README.md",
+        "Duplicados":  "JWQuizFlutter/ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\README.md",
+        "Total":  2
+    }
+]

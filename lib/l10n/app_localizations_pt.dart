@@ -988,7 +988,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get termsAppUsageItem2 => 'Acessar estatísticas pessoais';
 
   @override
-  String get termsAppUsageItem3 => 'Usar o modo estudo sem limite de tempo';
+  String get termsAppUsageItem3 => 'Jogar partidas online com amigos';
 
   @override
   String get termsAppUsageItem4 => 'Jogar minigames educativos';
@@ -1001,7 +1001,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get termsBiblicalContentDesc =>
-      'As perguntas e respostas são baseadas na Bíblia Sagrada. Este aplicativo não substitui o estudo pessoal das Escrituras Sagradas nem representa uma organização religiosa oficial.';
+      'As perguntas e respostas são baseadas na Bíblia Sagrada. Este é um aplicativo independente, feito por voluntários: não é um aplicativo oficial e não tem vínculo com a organização das Testemunhas de Jeová nem com o site jw.org. Os links de referência apenas abrem o site público jw.org para consulta do texto bíblico.';
 
   @override
   String get termsResponsibilities => '3. Responsabilidades';
@@ -1027,53 +1027,50 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get privacyPolicyIntro =>
-      'Respeitamos sua privacidade. Este aplicativo:';
+      'Respeitamos sua privacidade. O app não pede cadastro, nome real, e-mail, telefone ou localização, e não exibe anúncios.';
 
   @override
   String get privacyDataCollected => '1. Dados Coletados';
 
   @override
   String get privacyDataItem1 =>
-      'Dados de uso: Estatísticas de jogo, preferências de tema';
+      'Estatísticas de uso anônimas (telas e jogos acessados), via Google Firebase Analytics, para melhorar o app.';
 
   @override
   String get privacyDataItem2 =>
-      'Dados técnicos: Tipo de dispositivo, navegador, sistema operacional';
+      'Relatórios de falhas (modelo do aparelho, versão do sistema e do app), via Firebase Crashlytics, para corrigir erros.';
 
   @override
   String get privacyDataItem3 =>
-      'Dados de sessão: Tempo de uso, páginas visitadas';
+      'Modo online: um identificador anônimo, o apelido escolhido e a pontuação da partida, armazenados temporariamente no Firebase e apagados quando a sala é encerrada.';
 
   @override
   String get privacyStorage => '2. Armazenamento';
 
   @override
   String get privacyStorageDesc =>
-      'Todos os dados são armazenados localmente no seu dispositivo. Não enviamos dados para servidores externos.';
+      'Estatísticas pessoais, conquistas e preferências (idioma, som) ficam salvas apenas no seu aparelho. Fotos escolhidas para o quebra-cabeça nunca saem do aparelho.';
 
   @override
-  String get privacyLocalStorage => '3. LocalStorage';
+  String get privacySupportChat => '3. Chat de Suporte';
 
   @override
-  String get privacyLocalStorageDesc =>
-      'Usamos localStorage do navegador para salvar:';
-
-  @override
-  String get privacyLocalStorageItem1 =>
-      'Preferências do usuário (tema, idioma)';
-
-  @override
-  String get privacyLocalStorageItem2 => 'Estatísticas pessoais de jogo';
-
-  @override
-  String get privacyLocalStorageItem3 => 'Conquistas desbloqueadas';
+  String get privacySupportChatDesc =>
+      'Se você usar o chat de suporte, as mensagens enviadas e dados técnicos do aparelho são processados pelo Crisp (crisp.chat) apenas para responder ao seu atendimento.';
 
   @override
   String get privacySharing => '4. Compartilhamento';
 
   @override
   String get privacySharingDesc =>
-      'Não compartilhamos seus dados pessoais com terceiros. Os dados permanecem exclusivamente no seu dispositivo.';
+      'Não vendemos nem compartilhamos seus dados com terceiros para publicidade. Os serviços citados (Google Firebase e Crisp) atuam somente como operadores técnicos.';
+
+  @override
+  String get privacyRights => '5. Seus Direitos (LGPD)';
+
+  @override
+  String get privacyRightsDesc =>
+      'Você pode pedir a exclusão de dados pelo chat de suporte. Desinstalar o app apaga todos os dados locais. Política completa:';
 
   @override
   String get copyright => '©️ Direitos Autorais';
@@ -1113,7 +1110,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get contactDesc => 'Para dúvidas, sugestões ou relatar problemas:';
 
   @override
-  String get lastUpdated => '📅 Última Atualização: Novembro 2025';
+  String get contactSupportChat => 'Chat de suporte: menu Configurações do app';
+
+  @override
+  String get lastUpdated => '📅 Última Atualização: Outubro 2026';
 
   @override
   String get aboutTitle => '📱 Sobre o Jogo';
@@ -1140,7 +1140,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get aboutDevelopedByDesc =>
-      'Equipe JW SPLASH GAMES\nProjeto open-source disponível no GitHub';
+      'Equipe JW SPLASH GAMES\nProjeto voluntário e independente';
 
   @override
   String get aboutObjective => 'Objetivo';
@@ -1150,11 +1150,11 @@ class AppLocalizationsPt extends AppLocalizations {
       'Proporcionar uma forma divertida e educativa de aprender e memorizar conhecimentos bíblicos, adequado para todas as idades.';
 
   @override
-  String get aboutUpdateNote =>
-      '📝 Esta página será atualizada em breve com mais informações e link para página online oficial.';
+  String get aboutMusicCredits =>
+      'Cheery Monday, Carefree, Cipher, Life of Riley, Pixel Peeker Polka\nKevin MacLeod (incompetech.com)\nLicença: Creative Commons By Attribution 4.0\ncreativecommons.org/licenses/by/4.0';
 
   @override
-  String get aboutVisitGithub => 'Visitar GitHub';
+  String get aboutCredits => 'Créditos';
 
   @override
   String get statsTabQuiz => 'Quiz';

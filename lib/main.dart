@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -72,6 +73,10 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'JW SPLASH GAMES',
           debugShowCheckedModeBanner: false,
+          // Permite arrastar listas com mouse/trackpad (web e desktop), como no toque
+          scrollBehavior: const MaterialScrollBehavior().copyWith(
+            dragDevices: PointerDeviceKind.values.toSet(),
+          ),
           
           // Suporte a internacionalização
           locale: LanguageService().currentLocale,

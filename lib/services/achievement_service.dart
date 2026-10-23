@@ -9,6 +9,8 @@ class AchievementService {
   factory AchievementService() => _instance;
   AchievementService._internal();
 
+  static const String _keyPlayedMinigames = 'played_minigames';
+
   // Cache local de conquistas
   List<Achievement> _achievements = [];
   bool _isLoaded = false;
@@ -234,25 +236,31 @@ class AchievementService {
   }
 
   /// Verificar conquistas relacionadas a minigames
+  ///
+  /// [perfect] = partida sem erros (ex.: memória sem errar nenhum par).
   Future<List<Achievement>> checkMinigameAchievements({
     required String gameId,
     required int totalGamesPlayed,
     required bool won,
     required int? timeInSeconds,
+    bool perfect = false,
   }) async {
     await loadAchievements();
     List<Achievement> unlocked = [];
 
-    // Explorador - jogar todos os 7 minigames (incrementar quando jogar pela primeira vez)
-    unlocked.addAll(await incrementProgress('explorador', 1));
+    // Explorador - jogar 7 minigames DIFERENTES
+    final prefs = await SharedPreferences.getInstance();
+    final played = (prefs.getStringList(_keyPlayedMinigames) ?? []).toSet()..add(gameId);
+    await prefs.setStringList(_keyPlayedMinigames, played.toList());
+    unlocked.addAll(await updateProgress('explorador', played.length));
 
-    // Mestre dos Puzzles - completar puzzle em menos de 2 minutos
-    if (gameId == 'puzzle' && timeInSeconds != null && timeInSeconds < 120 && won) {
+    // Mestre dos Puzzles - completar o quebra-cabeça em menos de 2 minutos
+    if (gameId == 'jigsaw_puzzle' && timeInSeconds != null && timeInSeconds < 120 && won) {
       unlocked.addAll(await updateProgress('mestre_puzzles', 1));
     }
 
-    // Memória Fotográfica - memory game sem erros
-    if (gameId == 'memory' && won) {
+    // Memória Fotográfica - jogo da memória sem nenhum erro
+    if (gameId == 'memory' && won && perfect) {
       unlocked.addAll(await updateProgress('memoria_fotografica', 1));
     }
 
@@ -261,7 +269,7 @@ class AchievementService {
       unlocked.addAll(await incrementProgress('atirador_elite', 1));
     }
 
-    // Campeão dos Minigames - vencer cada minigame 3 vezes
+    // Campeão dos Minigames - 21 vitórias em minigames
     if (won) {
       unlocked.addAll(await incrementProgress('campeao_minigames', 1));
     }

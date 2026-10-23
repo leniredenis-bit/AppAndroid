@@ -1,10 +1,17 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/stats_service.dart';
-import '../widgets/emoji_text.dart';
 import '../services/audio_service.dart';
 import '../services/minigame_content_service.dart';
-import '../l10n/app_localizations.dart';
+import '../widgets/emoji_text.dart';
+import 'minigames/common/game_results.dart';
+import 'minigames/common/game_text.dart';
+import 'minigames/common/game_ui.dart';
+
+const Color _accent = Color(0xFFFF6B6B);
+const List<Color> _playerColors = [Color(0xFF60A5FA), Color(0xFFF472B6), Color(0xFF4ADE80), Color(0xFFFBBF24)];
 
 class MemoryGameScreen extends StatefulWidget {
   const MemoryGameScreen({super.key});
@@ -19,92 +26,83 @@ class MemoryCard {
   final String name;
   bool isFlipped;
   bool isMatched;
+  int shake = 0;
+  int matchedBy = -1;
 
-  MemoryCard({
-    required this.id,
-    required this.emoji,
-    required this.name,
-    this.isFlipped = false,
-    this.isMatched = false,
-  });
+  MemoryCard({required this.id, required this.emoji, required this.name, this.isFlipped = false, this.isMatched = false});
 }
 
-// Helper class para acessar temas do jogo da memória com suporte multi-idioma
+/// Temas do jogo da memória com nomes traduzidos.
 class MemoryThemes {
   static final MinigameContentService _contentService = MinigameContentService();
-  
-  // Retorna os temas do idioma atual
+
+  static const List<String> keys = [
+    'animais', 'frutas', 'aves', 'vida_marinha', 'natureza', 'transportes', 'objetos', 'numeros', 'todos',
+  ];
+
   static Map<String, List<Map<String, String>>> get themes => _contentService.memoryThemes;
 
-  // Retorna os itens do tema selecionado
   static List<Map<String, String>> getThemeItems(String theme) {
     if (theme == 'todos') {
-      // Mistura todos os temas
-      List<Map<String, String>> allItems = [];
-      themes.forEach((key, value) {
-        allItems.addAll(value);
-      });
-      allItems.shuffle();
-      return allItems;
+      final seen = <String>{};
+      final all = <Map<String, String>>[];
+      for (final list in themes.values) {
+        for (final item in list) {
+          if (seen.add(item['emoji']!)) all.add(item);
+        }
+      }
+      return all..shuffle();
     }
     return List<Map<String, String>>.from(themes[theme] ?? themes['animais']!);
   }
 
-  // Retorna o nome de exibição do tema
-  static String getThemeDisplayName(String theme) {
-    const Map<String, String> displayNames = {
-      'animais': '🐶 Animais',
-      'frutas': '🍎 Frutas',
-      'transportes': '🚗 Transportes',
-      'vida_marinha': '🐟 Vida Marinha',
-      'aves': '🦅 Aves',
-      'numeros': '🔢 Números',
-      'objetos': '📱 Objetos',
-      'natureza': '🌸 Natureza',
-      'todos': '🎲 Todos',
-    };
-    return displayNames[theme] ?? theme;
+  static String emoji(String theme) => const {
+        'animais': '🐶', 'frutas': '🍎', 'transportes': '🚗', 'vida_marinha': '🐠', 'aves': '🦜',
+        'numeros': '🔢', 'objetos': '💡', 'natureza': '🌸', 'todos': '🎲',
+      }[theme] ?? '🎴';
+
+  static String name(String theme) {
+    switch (theme) {
+      case 'animais': return t3('Animais', 'Animals', 'Animales');
+      case 'frutas': return t3('Frutas', 'Fruits', 'Frutas');
+      case 'transportes': return t3('Transportes', 'Transport', 'Transportes');
+      case 'vida_marinha': return t3('Vida Marinha', 'Sea Life', 'Vida Marina');
+      case 'aves': return t3('Aves', 'Birds', 'Aves');
+      case 'numeros': return t3('Números', 'Numbers', 'Números');
+      case 'objetos': return t3('Objetos', 'Objects', 'Objetos');
+      case 'natureza': return t3('Natureza', 'Nature', 'Naturaleza');
+      default: return t3('Todos', 'All', 'Todos');
+    }
   }
 }
 
 class _MemoryGameScreenState extends State<MemoryGameScreen> {
-  List<MemoryCard> cards = [];
-  List<int> flippedIndices = [];
-  int attempts = 0;
-  int matches = 0;
+  // Configuração
+  bool _configuring = true;
+  String _theme = 'animais';
+  int _pairs = 10;
+  int _players = 1;
+
+  // Partida
+  List<MemoryCard> _cards = [];
+  final List<int> _open = [];
+  int _attempts = 0;
+  int _matches = 0;
+  int _combo = 0;
+  int _bestCombo = 0;
+  int _seconds = 0;
+  int _current = 0;
+  List<int> _scores = [0];
+  bool _busy = false;
+  bool _peeking = false;
+  String? _toast;
+  int _toastId = 0;
   Timer? _timer;
-  int secondsElapsed = 0;
-  bool isProcessing = false;
-
-  // Key para animações de nova partida
-  Key _gameKey = UniqueKey();
-
-  // Configurações do jogo
-  bool showConfig = true; // Mostra tela de config primeiro
-  String selectedTheme = 'animais';
-  String selectedDifficulty = 'medio'; // facil=6, medio=10, dificil=15 pares
-  int numPlayers = 1;
-  int currentPlayer = 0;
-  List<int> playerScores = [0]; // Pontos de cada jogador
-
-  // Dados bíblicos para o jogo (mantidos para compatibilidade - não mais usado)
-  final List<Map<String, String>> biblicalPairs = [
-    {'emoji': '🍎', 'name': 'Adão e Eva'},
-    {'emoji': '⛵', 'name': 'Arca de Noé'},
-    {'emoji': '👑', 'name': 'Rei Davi'},
-    {'emoji': '🐟', 'name': 'Jonas e o Peixe'},
-    {'emoji': '🦁', 'name': 'Daniel e Leões'},
-    {'emoji': '⭐', 'name': 'Estrela de Belém'},
-    {'emoji': '🍞', 'name': 'Pães e Peixes'},
-    {'emoji': '✝️', 'name': 'Cruz de Jesus'},
-  ];
 
   @override
   void initState() {
     super.initState();
-    // Inicia música de fundo
     AudioService().playBackgroundMusic('memory');
-    // Não inicia o jogo automaticamente - espera configuração
   }
 
   @override
@@ -114,917 +112,575 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     super.dispose();
   }
 
-  void startGame() {
-    setState(() {
-      showConfig = false;
-      playerScores = List.filled(numPlayers, 0);
-      currentPlayer = 0;
-      attempts = 0;
-      matches = 0;
-      secondsElapsed = 0;
-    });
-    initializeGame();
-    startTimer();
-  }
-
-  void startTimer() {
-    _timer?.cancel();
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (!showConfig && mounted) {
-        setState(() {
-          secondsElapsed++;
-        });
-      }
-    });
-  }
-
-  void initializeGame() {
-    cards.clear();
-    
-    // Obter número de pares baseado na dificuldade
-    int numPairs;
-    switch (selectedDifficulty) {
-      case 'facil':
-        numPairs = 6;
-        break;
-      case 'dificil':
-        numPairs = 15;
-        break;
-      default: // medio
-        numPairs = 10;
-    }
-    
-    // Obter itens do tema selecionado
-    List<Map<String, String>> themeItems = MemoryThemes.getThemeItems(selectedTheme);
-    themeItems.shuffle();
-    
-    // Pegar apenas o número de pares necessários
-    List<Map<String, String>> selectedItems = themeItems.take(numPairs).toList();
-    
+  void _start() {
+    final items = MemoryThemes.getThemeItems(_theme)..shuffle();
+    final chosen = items.take(_pairs).toList();
     int id = 0;
-    
-    // Criar pares de cartas
-    for (var item in selectedItems) {
-      // Adiciona o primeiro card do par
-      cards.add(MemoryCard(
-        id: id++,
-        emoji: item['emoji']!,
-        name: item['name']!,
-      ));
-      // Adiciona o segundo card do par
-      cards.add(MemoryCard(
-        id: id++,
-        emoji: item['emoji']!,
-        name: item['name']!,
-      ));
+    final cards = <MemoryCard>[];
+    for (final item in chosen) {
+      cards.add(MemoryCard(id: id++, emoji: item['emoji']!, name: item['name']!));
+      cards.add(MemoryCard(id: id++, emoji: item['emoji']!, name: item['name']!));
     }
-    
-    // Embaralhar
     cards.shuffle();
-  }
-
-  void onCardTap(int index) {
-    if (isProcessing) return;
-    if (cards[index].isFlipped || cards[index].isMatched) return;
-    if (flippedIndices.length >= 2) return;
-
-    // Som ao virar carta
-    AudioService().playCardFlip();
 
     setState(() {
-      cards[index].isFlipped = true;
-      flippedIndices.add(index);
+      _configuring = false;
+      _cards = cards;
+      _open.clear();
+      _attempts = 0;
+      _matches = 0;
+      _combo = 0;
+      _bestCombo = 0;
+      _seconds = 0;
+      _current = 0;
+      _scores = List.filled(_players, 0);
+      _busy = true;
+      _peeking = true;
     });
 
-    if (flippedIndices.length == 2) {
-      isProcessing = true;
-      checkMatch();
-    }
-  }
-
-  void checkMatch() {
-    final index1 = flippedIndices[0];
-    final index2 = flippedIndices[1];
-    final card1 = cards[index1];
-    final card2 = cards[index2];
-
-    setState(() {
-      attempts++;
-    });
-
-    if (card1.name == card2.name) {
-      // Par encontrado!
-      // Som de acerto
-      AudioService().playMatch();
-      
+    // Espiada inicial: mais longa no fácil, nenhuma no difícil
+    final peekMs = _pairs <= 6 ? 1800 : (_pairs <= 10 ? 1100 : 0);
+    Future.delayed(const Duration(milliseconds: 350), () {
+      if (!mounted || peekMs == 0) return;
       setState(() {
-        card1.isMatched = true;
-        card2.isMatched = true;
-        matches++;
-        
-        // Adiciona ponto ao jogador atual
-        playerScores[currentPlayer]++;
-      });
-      
-      flippedIndices.clear();
-      isProcessing = false;
-
-      // Obter número total de pares baseado na dificuldade
-      int totalPairs;
-      switch (selectedDifficulty) {
-        case 'facil':
-          totalPairs = 6;
-          break;
-        case 'dificil':
-          totalPairs = 15;
-          break;
-        default: // medio
-          totalPairs = 10;
-      }
-
-      // Verificar se o jogo terminou
-      if (matches == totalPairs) {
-        _timer?.cancel();
-        // Som de vitória
-        AudioService().playVictory();
-        // Salvar estatísticas
-        StatsService.saveMemoryGameStats(timeInSeconds: secondsElapsed);
-        Future.delayed(Duration(milliseconds: 500), () {
-          showVictoryDialog();
-        });
-      }
-    } else {
-      // Não é par, virar de volta
-      // Som de erro
-      AudioService().playMismatch();
-      
-      Future.delayed(Duration(milliseconds: 800), () {
-        setState(() {
-          card1.isFlipped = false;
-          card2.isFlipped = false;
-          flippedIndices.clear();
-          isProcessing = false;
-          
-          // Trocar jogador em modo multiplayer
-          if (numPlayers > 1) {
-            currentPlayer = (currentPlayer + 1) % numPlayers;
-          }
-        });
-      });
-    }
-  }
-
-  void showVictoryDialog() {
-    final minutes = secondsElapsed ~/ 60;
-    final seconds = secondsElapsed % 60;
-    final timeString = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-
-    // Encontrar vencedor em modo multiplayer
-    String resultText;
-    Widget resultsWidget;
-    
-    if (numPlayers > 1) {
-      int maxScore = playerScores.reduce((a, b) => a > b ? a : b);
-      List<int> winners = [];
-      for (int i = 0; i < playerScores.length; i++) {
-        if (playerScores[i] == maxScore) {
-          winners.add(i);
+        for (final c in _cards) {
+          c.isFlipped = true;
         }
-      }
-      
-      if (winners.length == 1) {
-        resultText = '🏆 Jogador ${winners[0] + 1} venceu!';
-      } else {
-        resultText = '🤝 Empate!';
-      }
-      
-      resultsWidget = Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            resultText,
-            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 16),
-          ...List.generate(numPlayers, (i) {
-            bool isWinner = winners.contains(i);
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    isWinner ? '👑 ' : '   ',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  Text(
-                    'Jogador ${i + 1}: ',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: isWinner ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  ),
-                  Text(
-                    '${playerScores[i]} pares',
-                    style: TextStyle(
-                      color: isWinner ? Colors.amber : Colors.white70,
-                      fontSize: 16,
-                      fontWeight: isWinner ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-        ],
-      );
-    } else {
-      resultText = 'Você completou o jogo!';
-      resultsWidget = Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            resultText,
-            style: TextStyle(color: Colors.white70, fontSize: 16),
-          ),
-          SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Column(
-                children: [
-                  Text('⏱️', style: TextStyle(fontSize: 32)),
-                  SizedBox(height: 8),
-                  Text(
-                    timeString,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'Tempo',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Text('🎯', style: TextStyle(fontSize: 32)),
-                  SizedBox(height: 8),
-                  Text(
-                    '$attempts',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'Tentativas',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      );
-    }
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: Color(0xFF162447),
-        title: Text(
-          '🎉 Parabéns!',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: resultsWidget,
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // Repetir com mesmas configurações
-              setState(() {
-                playerScores = List.filled(numPlayers, 0);
-                currentPlayer = 0;
-                attempts = 0;
-                matches = 0;
-                secondsElapsed = 0;
-              });
-              initializeGame();
-              startTimer();
-            },
-            child: Text('🔁 Repetir', style: TextStyle(color: Colors.white)),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              setState(() {
-                showConfig = true; // Volta para tela de configuração
-              });
-            },
-            child: Text(AppLocalizations.of(context)!.memoryNewGame, style: TextStyle(color: Colors.white70)),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
-            child: Text(AppLocalizations.of(context)!.memoryHome, style: TextStyle(color: Colors.white70)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void resetGame() {
-    setState(() {
-      _gameKey = UniqueKey();
-      showConfig = true; // Volta para tela de configuração
+      });
+      AudioService().playSfx('whoosh', volume: 0.6);
+    });
+    Future.delayed(Duration(milliseconds: 350 + peekMs + (peekMs > 0 ? 200 : 0)), () {
+      if (!mounted) return;
+      setState(() {
+        for (final c in _cards) {
+          c.isFlipped = false;
+        }
+        _peeking = false;
+        _busy = false;
+      });
       _timer?.cancel();
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (mounted) setState(() => _seconds++);
+      });
     });
   }
 
-  Widget _buildDifficultyButton(String difficulty, String label, String subtitle) {
-    bool isSelected = selectedDifficulty == difficulty;
-    return GestureDetector(
-      onTap: () {
+  void _showToast(String text) {
+    final id = ++_toastId;
+    setState(() => _toast = text);
+    Future.delayed(const Duration(milliseconds: 1100), () {
+      if (mounted && _toastId == id) setState(() => _toast = null);
+    });
+  }
+
+  void _tap(int index) {
+    final card = _cards[index];
+    if (_busy || card.isFlipped || card.isMatched || _open.length >= 2) return;
+
+    AudioService().playCardFlip();
+    HapticFeedback.selectionClick();
+    setState(() {
+      card.isFlipped = true;
+      _open.add(index);
+    });
+    if (_open.length == 2) {
+      _busy = true;
+      Future.delayed(const Duration(milliseconds: 380), _check);
+    }
+  }
+
+  void _check() {
+    if (!mounted) return;
+    final a = _cards[_open[0]];
+    final b = _cards[_open[1]];
+    _attempts++;
+
+    if (a.emoji == b.emoji) {
+      _combo++;
+      _bestCombo = max(_bestCombo, _combo);
+      setState(() {
+        a.isMatched = b.isMatched = true;
+        a.matchedBy = b.matchedBy = _current;
+        _matches++;
+        _scores[_current]++;
+        _open.clear();
+        _busy = false;
+      });
+      HapticFeedback.mediumImpact();
+      if (_combo >= 2) {
+        AudioService().playSfx('combo');
+        _showToast('🔥 Combo x$_combo!');
+      } else {
+        AudioService().playMatch();
+        _showToast('✨ ${a.name}');
+      }
+      if (_matches == _pairs) _finish();
+    } else {
+      _combo = 0;
+      AudioService().playMismatch();
+      HapticFeedback.lightImpact();
+      setState(() {
+        a.shake++;
+        b.shake++;
+      });
+      Future.delayed(const Duration(milliseconds: 650), () {
+        if (!mounted) return;
         setState(() {
-          selectedDifficulty = difficulty;
+          a.isFlipped = b.isFlipped = false;
+          _open.clear();
+          _busy = false;
+          if (_players > 1) _current = (_current + 1) % _players;
         });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? Color(0xFF23395D) : Color(0xFF101A2C),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? Colors.amber : Colors.transparent,
-            width: 2,
-          ),
-        ),
-        child: Column(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 11,
-              ),
-            ),
-          ],
-        ),
-      ),
+      });
+    }
+  }
+
+  Future<void> _finish() async {
+    _timer?.cancel();
+    await Future.delayed(const Duration(milliseconds: 700));
+    if (!mounted) return;
+
+    final perfect = _attempts == _pairs;
+    final ratio = _attempts / _pairs;
+    final stars = ratio <= 1.4 ? 3 : (ratio <= 2.0 ? 2 : 1);
+    final score = max(10, _pairs * 100 - (_attempts - _pairs) * 10 - _seconds);
+
+    StatsService.saveMemoryGameStats(timeInSeconds: _seconds);
+    final saved = await recordGameResult(context,
+        gameId: 'memory', won: true, score: score, seconds: _seconds, perfect: perfect && _players == 1);
+    if (!mounted) return;
+
+    String title;
+    String? subtitle;
+    if (_players > 1) {
+      final best = _scores.reduce(max);
+      final winners = [for (int i = 0; i < _players; i++) if (_scores[i] == best) i];
+      title = winners.length == 1
+          ? t3('Jogador ${winners.first + 1} venceu!', 'Player ${winners.first + 1} wins!',
+              '¡Jugador ${winners.first + 1} ganó!')
+          : t3('Empate!', "It's a tie!", '¡Empate!');
+      subtitle = List.generate(_players, (i) => 'J${i + 1}: ${_scores[i]}').join('   ·   ');
+    } else {
+      title = perfect ? t3('Memória perfeita!', 'Perfect memory!', '¡Memoria perfecta!') : t3('Parabéns!', 'Well done!', '¡Felicidades!');
+    }
+
+    await showGameResult(
+      context,
+      won: true,
+      accent: _accent,
+      title: title,
+      subtitle: subtitle,
+      stars: _players == 1 ? stars : -1,
+      newRecord: _players == 1 && saved.newRecord,
+      stats: [
+        ResultStat('⏱️', t3('Tempo', 'Time', 'Tiempo'), formatGameTime(_seconds)),
+        ResultStat('🎯', t3('Tentativas', 'Attempts', 'Intentos'), '$_attempts'),
+        ResultStat('🔥', t3('Maior combo', 'Best combo', 'Mejor combo'), 'x$_bestCombo'),
+      ],
+      primaryLabel: t3('Jogar de novo', 'Play again', 'Jugar de nuevo'),
+      onPrimary: _start,
+      secondaryLabel: t3('Mudar opções', 'Change options', 'Cambiar opciones'),
+      onSecondary: () => setState(() => _configuring = true),
     );
   }
 
-  Widget _buildPlayerButton(int players, String label) {
-    bool isSelected = numPlayers == players;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          numPlayers = players;
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? Color(0xFF23395D) : Color(0xFF101A2C),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? Colors.amber : Colors.transparent,
-            width: 2,
-          ),
-        ),
-        child: Column(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 2),
-            Text(
-              players == 1 ? 'Solo' : '$players jogadores',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 11,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // ==========================================================================
+  // UI
+  // ==========================================================================
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    // Tela de configuração
-    if (showConfig) {
-      return Scaffold(
-        backgroundColor: Color(0xFF101A2C),
-        appBar: AppBar(
-          title: Text(l10n.memoryConfigureGame, style: TextStyle(color: Colors.white)),
-          backgroundColor: Color(0xFF162447),
-          iconTheme: IconThemeData(color: Colors.white),
-          elevation: 0,
+    return GameScaffold(
+      title: t3('🧠 Jogo da Memória', '🧠 Memory Game', '🧠 Juego de Memoria'),
+      accent: _accent,
+      onBack: _configuring
+          ? null
+          : () {
+              _timer?.cancel();
+              setState(() => _configuring = true);
+            },
+      backgroundColors: const [Color(0xFF2A1730), Color(0xFF120E1E)],
+      body: _configuring ? _buildConfig() : _buildGame(),
+    );
+  }
+
+  Widget _buildConfig() {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 30),
+      children: [
+        GameHero(
+          emoji: '🧠',
+          title: t3('Jogo da Memória', 'Memory Game', 'Juego de Memoria'),
+          subtitle: t3('Encontre todos os pares no menor número de tentativas',
+              'Find all the pairs in as few attempts as possible', 'Encuentra todos los pares con menos intentos'),
+          accent: _accent,
         ),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.all(24),
+        const SizedBox(height: 22),
+        GamePanel(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Seleção de Tema (Expansível)
-              Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF162447),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ExpansionTile(
-                  title: Text(
-                    'Tema: ${MemoryThemes.getThemeDisplayName(selectedTheme)}',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  iconColor: Colors.white,
-                  collapsedIconColor: Colors.white70,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          'animais',
-                          'frutas',
-                          'transportes',
-                          'vida_marinha',
-                          'aves',
-                          'numeros',
-                          'objetos',
-                          'natureza',
-                          'todos',
-                        ].map((theme) {
-                          bool isSelected = selectedTheme == theme;
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedTheme = theme;
-                              });
-                            },
-                            child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: isSelected ? Color(0xFF23395D) : Color(0xFF101A2C),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: isSelected ? Colors.amber : Colors.transparent,
-                                  width: 2,
-                                ),
-                              ),
-                              child: Text(
-                                MemoryThemes.getThemeDisplayName(theme),
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
+              Text(t3('TEMA', 'THEME', 'TEMA'),
+                  style: const TextStyle(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
+              const SizedBox(height: 10),
+              GridView.count(
+                crossAxisCount: 3,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                childAspectRatio: 1.15,
+                children: MemoryThemes.keys.map((k) {
+                  final sel = k == _theme;
+                  return GestureDetector(
+                    onTap: () {
+                      AudioService().playClick();
+                      setState(() => _theme = k);
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      decoration: BoxDecoration(
+                        color: sel ? _accent.withValues(alpha: 0.22) : GameColors.panelLight.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: sel ? _accent : Colors.white10, width: sel ? 2 : 1),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 16),
-              
-              // Seleção de Dificuldade (Expansível)
-              Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF162447),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ExpansionTile(
-                  title: Text(
-                    'Dificuldade: ${selectedDifficulty == "facil" ? "Fácil (6 pares)" : selectedDifficulty == "medio" ? "Médio (10 pares)" : "Difícil (15 pares)"}',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  iconColor: Colors.white,
-                  collapsedIconColor: Colors.white70,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Expanded(
-                            child: _buildDifficultyButton('facil', 'Fácil', '6 pares'),
-                          ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: _buildDifficultyButton('medio', 'Médio', '10 pares'),
-                          ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: _buildDifficultyButton('dificil', 'Difícil', '15 pares'),
-                          ),
+                          EmojiText(MemoryThemes.emoji(k), size: 28),
+                          const SizedBox(height: 4),
+                          Text(MemoryThemes.name(k),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  color: sel ? Colors.white : Colors.white70,
+                                  fontSize: 12,
+                                  fontWeight: sel ? FontWeight.w800 : FontWeight.w600)),
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  );
+                }).toList(),
               ),
-              SizedBox(height: 16),
-              
-              // Seleção de Jogadores (Expansível)
-              Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF162447),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ExpansionTile(
-                  title: Text(
-                    'Jogadores: ${numPlayers == 1 ? "Solo" : "$numPlayers jogadores"}',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  iconColor: Colors.white,
-                  collapsedIconColor: Colors.white70,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _buildPlayerButton(1, '1'),
-                          ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: _buildPlayerButton(2, '2'),
-                          ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: _buildPlayerButton(3, '3'),
-                          ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: _buildPlayerButton(4, '4'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              const SizedBox(height: 18),
+              OptionPicker<int>(
+                title: t3('Dificuldade', 'Difficulty', 'Dificultad'),
+                accent: _accent,
+                selected: _pairs,
+                onChanged: (v) => setState(() => _pairs = v),
+                options: [
+                  OptionItem(6, t3('Fácil', 'Easy', 'Fácil'), t3('6 pares', '6 pairs', '6 pares')),
+                  OptionItem(10, t3('Médio', 'Medium', 'Medio'), t3('10 pares', '10 pairs', '10 pares')),
+                  OptionItem(15, t3('Difícil', 'Hard', 'Difícil'), t3('15 pares', '15 pairs', '15 pares')),
+                ],
               ),
-              SizedBox(height: 32),
-              
-              // Botão Iniciar
-              ElevatedButton(
-                onPressed: startGame,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF23395D),
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: Text(
-                  '🎮 Iniciar Jogo',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+              const SizedBox(height: 18),
+              OptionPicker<int>(
+                title: t3('Jogadores', 'Players', 'Jugadores'),
+                accent: _accent,
+                selected: _players,
+                onChanged: (v) => setState(() => _players = v),
+                options: [
+                  OptionItem(1, t3('Solo', 'Solo', 'Solo'), '👤'),
+                  const OptionItem(2, '2', '👥'),
+                  const OptionItem(3, '3', '👥'),
+                  const OptionItem(4, '4', '👥'),
+                ],
               ),
             ],
           ),
         ),
-      );
-    }
-
-    // Tela do jogo
-    final minutes = secondsElapsed ~/ 60;
-    final seconds = secondsElapsed % 60;
-    final timeString = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-
-    // Calcular número de pares total baseado na dificuldade
-    int totalPairs;
-    switch (selectedDifficulty) {
-      case 'facil':
-        totalPairs = 6;
-        break;
-      case 'dificil':
-        totalPairs = 15;
-        break;
-      default: // medio
-        totalPairs = 10;
-    }
-
-    // Calcular tamanho da grade baseado no número de cartas
-    int crossAxisCount;
-    double emojiSize;
-    double fontSize;
-    
-    if (cards.length <= 12) {
-      crossAxisCount = 4; // 4x3 para fácil (melhor proporção)
-      emojiSize = 48;
-      fontSize = 12;
-    } else if (cards.length <= 20) {
-      crossAxisCount = 4; // 4x5 para médio
-      emojiSize = 42;
-      fontSize = 11;
-    } else {
-      crossAxisCount = 5; // 5x6 para difícil
-      emojiSize = 36;
-      fontSize = 10;
-    }
-
-    return AnimatedSwitcher(
-      duration: Duration(milliseconds: 500),
-      transitionBuilder: (Widget child, Animation<double> animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: Offset(0.0, 0.1),
-              end: Offset.zero,
-            ).animate(animation),
-            child: child,
-          ),
-        );
-      },
-      child: Scaffold(
-        key: _gameKey,
-      appBar: AppBar(
-        title: Text(
-          numPlayers > 1 
-            ? 'Jogo da Memória - Jogador ${currentPlayer + 1}' 
-            : 'Jogo da Memória',
-          style: TextStyle(color: Colors.white),
+        const SizedBox(height: 22),
+        PillButton(
+          label: t3('Começar', 'Start', 'Comenzar'),
+          icon: Icons.play_arrow_rounded,
+          color: _accent,
+          expand: true,
+          onTap: _start,
         ),
-        backgroundColor: Color(0xFF162447),
-        iconTheme: IconThemeData(color: Colors.white),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: resetGame,
-            tooltip: 'Reiniciar',
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      ],
+    );
+  }
+
+  Widget _buildGame() {
+    return Stack(
+      children: [
+        Column(
           children: [
-            // Stats do jogo
-            Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Color(0xFF162447),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: numPlayers > 1 
-                ? Column(
-                    children: [
-                      // Placar multiplayer
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: List.generate(numPlayers, (i) {
-                          bool isActive = i == currentPlayer;
-                          return Container(
-                            padding: EdgeInsets.all(8),
-                            decoration: isActive ? BoxDecoration(
-                              border: Border.all(
-                                color: Colors.amber,
-                                width: 2,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ) : null,
-                            child: Column(
-                              children: [
-                                Text(
-                                  'J${i + 1}',
-                                  style: TextStyle(
-                                    color: isActive ? Colors.amber : Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  '${playerScores[i]}',
-                                  style: TextStyle(
-                                    color: isActive ? Colors.amber : Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                      ),
-                      Divider(color: Colors.white30, height: 24),
-                      // Tempo e tentativas
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Row(
-                            children: [
-                              Text('⏱️ ', style: TextStyle(fontSize: 20)),
-                              Text(
-                                timeString,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text('🎯 ', style: TextStyle(fontSize: 20)),
-                              Text(
-                                '$attempts',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text('✅ ', style: TextStyle(fontSize: 20)),
-                              Text(
-                                '$matches/$totalPairs',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
-                        children: [
-                          Text('⏱️', style: TextStyle(fontSize: 24)),
-                          SizedBox(height: 4),
-                          Text(
-                            timeString,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          Text('🎯', style: TextStyle(fontSize: 24)),
-                          SizedBox(height: 4),
-                          Text(
-                            '$attempts',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          Text('✅', style: TextStyle(fontSize: 24)),
-                          SizedBox(height: 4),
-                          Text(
-                            '$matches/$totalPairs',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+              child: _players > 1 ? _playersBar() : _soloBar(),
             ),
-            SizedBox(height: 16),
-            
-            // Grid de cartas
             Expanded(
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                  childAspectRatio: 0.75,
-                ),
-                itemCount: cards.length,
-                itemBuilder: (context, index) {
-                  final card = cards[index];
-                  
-                  return GestureDetector(
-                    onTap: () => onCardTap(index),
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: 300),
-                      decoration: BoxDecoration(
-                        color: card.isMatched
-                            ? Colors.green.shade700
-                            : card.isFlipped
-                                ? Color(0xFF2D4A73)
-                                : Color(0xFF1A2F4D),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: card.isFlipped || card.isMatched
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  EmojiText(
-                                    card.emoji,
-                                    size: emojiSize,
-                                  ),
-                                  SizedBox(height: 4),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                                    child: Text(
-                                      card.name,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: fontSize,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : Icon(
-                                Icons.question_mark,
-                                color: Colors.white54,
-                                size: emojiSize * 0.8,
-                              ),
-                      ),
-                    ),
-                  );
-                },
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 4, 10, 10),
+                child: LayoutBuilder(builder: (context, c) => _grid(c.maxWidth, c.maxHeight)),
               ),
             ),
           ],
         ),
+        // Mensagem flutuante (par / combo)
+        Positioned(
+          left: 0,
+          right: 0,
+          top: 64,
+          child: IgnorePointer(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: FadeTransition(opacity: anim, child: child)),
+              child: _toast == null
+                  ? const SizedBox.shrink()
+                  : Center(
+                      key: ValueKey(_toastId),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.65),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: GameColors.gold.withValues(alpha: 0.6)),
+                        ),
+                        child: Text(_toast!, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
+                      ),
+                    ),
+            ),
+          ),
+        ),
+        if (_peeking)
+          Positioned(
+            bottom: 18,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text(t3('👀 Memorize!', '👀 Memorize!', '👀 ¡Memoriza!'),
+                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _soloBar() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        HudChip(emoji: '⏱️', value: formatGameTime(_seconds)),
+        HudChip(emoji: '🎯', value: '$_attempts'),
+        HudChip(emoji: '✅', value: '$_matches/$_pairs', color: GameColors.success, highlight: _matches > 0),
+        HudChip(emoji: '🔥', value: 'x$_combo', color: GameColors.gold, highlight: _combo >= 2),
+      ],
+    );
+  }
+
+  Widget _playersBar() {
+    return Row(
+      children: List.generate(_players, (i) {
+        final active = i == _current;
+        final color = _playerColors[i];
+        return Expanded(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            margin: const EdgeInsets.symmetric(horizontal: 3),
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              color: active ? color.withValues(alpha: 0.25) : GameColors.panel,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: active ? color : Colors.white10, width: active ? 2 : 1),
+            ),
+            child: Column(
+              children: [
+                Text('${active ? '▶ ' : ''}J${i + 1}',
+                    style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 13)),
+                Text('${_scores[i]}', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  /// Grade que sempre cabe na tela: escolhe o nº de colunas que dá a maior carta.
+  Widget _grid(double w, double h) {
+    final n = _cards.length;
+    const gap = 8.0;
+    const aspect = 0.78; // largura / altura
+    int bestCols = 3;
+    double bestW = 0;
+    for (int cols = 2; cols <= 8; cols++) {
+      final rows = (n / cols).ceil();
+      final cw = (w - gap * (cols - 1)) / cols;
+      final ch = (h - gap * (rows - 1)) / rows;
+      final cardW = min(cw, ch * aspect);
+      if (cardW > bestW) {
+        bestW = cardW;
+        bestCols = cols;
+      }
+    }
+    final cardH = bestW / aspect;
+    final rows = (n / bestCols).ceil();
+    return Center(
+      child: SizedBox(
+        width: bestCols * bestW + gap * (bestCols - 1),
+        height: rows * cardH + gap * (rows - 1),
+        child: Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: List.generate(n, (i) {
+            return SizedBox(
+              width: bestW,
+              height: cardH,
+              child: _MemoryCardView(
+                card: _cards[i],
+                onTap: () => _tap(i),
+                ownerColor: _players > 1 && _cards[i].matchedBy >= 0 ? _playerColors[_cards[i].matchedBy] : null,
+              ),
+            );
+          }),
         ),
       ),
     );
   }
+}
+
+class _MemoryCardView extends StatelessWidget {
+  final MemoryCard card;
+  final VoidCallback onTap;
+  final Color? ownerColor;
+  const _MemoryCardView({required this.card, required this.onTap, this.ownerColor});
+
+  @override
+  Widget build(BuildContext context) {
+    final faceUp = card.isFlipped || card.isMatched;
+    return GestureDetector(
+      onTap: onTap,
+      child: ShakeOnChange(
+        trigger: card.shake,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(end: faceUp ? 1 : 0),
+          duration: const Duration(milliseconds: 360),
+          curve: Curves.easeInOutCubic,
+          builder: (context, v, _) {
+            final showFront = v >= 0.5;
+            final angle = v * pi;
+            return Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.0015)
+                ..rotateY(angle),
+              child: showFront
+                  ? Transform(
+                      alignment: Alignment.center,
+                      transform: Matrix4.rotationY(pi),
+                      child: _front(context),
+                    )
+                  : _back(),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _back() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF7C3AED), Color(0xFF3B1E8C)],
+        ),
+        border: Border.all(color: Colors.white24, width: 1.5),
+        boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 6, offset: Offset(0, 3))],
+      ),
+      child: CustomPaint(
+        painter: _CardBackPainter(),
+        child: const Center(child: Icon(Icons.auto_awesome, color: Color(0xCCFFE08A), size: 26)),
+      ),
+    );
+  }
+
+  Widget _front(BuildContext context) {
+    final matched = card.isMatched;
+    final border = ownerColor ?? (matched ? GameColors.gold : Colors.white24);
+    return LayoutBuilder(builder: (context, c) {
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: matched
+                ? [const Color(0xFF2E5A3E), const Color(0xFF1C3A2A)]
+                : [const Color(0xFFFDFBF7), const Color(0xFFE9E4F5)],
+          ),
+          border: Border.all(color: border, width: matched ? 2.5 : 1.5),
+          boxShadow: [
+            if (matched) BoxShadow(color: border.withValues(alpha: 0.5), blurRadius: 12),
+            const BoxShadow(color: Colors.black38, blurRadius: 6, offset: Offset(0, 3)),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: FittedBox(
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 1, end: matched ? 1.15 : 1),
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.elasticOut,
+                    builder: (_, s, child) => Transform.scale(scale: s, child: child),
+                    child: EmojiText(card.emoji, size: 44),
+                  ),
+                ),
+              ),
+              if (c.maxHeight > 64)
+                Text(
+                  card.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: matched ? Colors.white : const Color(0xFF3B2E5A),
+                    fontSize: (c.maxWidth / 7).clamp(9.0, 13.0),
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class _CardBackPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final inner = RRect.fromRectAndRadius(
+        Rect.fromLTWH(5, 5, size.width - 10, size.height - 10), const Radius.circular(10));
+    canvas.drawRRect(
+        inner,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2
+          ..color = const Color(0x55FFE08A));
+    final dot = Paint()..color = Colors.white.withValues(alpha: 0.08);
+    const step = 10.0;
+    for (double y = 10; y < size.height - 6; y += step) {
+      for (double x = 10 + (y ~/ step).isOdd.toInt() * step / 2; x < size.width - 6; x += step) {
+        canvas.drawCircle(Offset(x, y), 1.4, dot);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+extension on bool {
+  int toInt() => this ? 1 : 0;
 }

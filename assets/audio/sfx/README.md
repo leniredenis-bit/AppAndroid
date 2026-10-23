@@ -1,28 +1,21 @@
 # Efeitos Sonoros (SFX)
 
-Esta pasta contém os efeitos sonoros do jogo.
+Todos os arquivos `.wav` desta pasta são **sintetizados** por `scripts/generate_sfx.py`
+(sem samples de terceiros, sem licença a creditar). Para ajustar um som, edite o script e rode:
 
-## Arquivos necessários:
+```bash
+python scripts/generate_sfx.py
+```
 
-### Jogo da Memória:
-- `card_flip.mp3` - Som ao virar carta (som curto, tipo "flip")
-- `match.mp3` - Som ao fazer par correto (som alegre/positivo)
-- `mismatch.mp3` - Som ao errar par (som negativo suave)
+Uso no código: `AudioService().playSfx('snap')` ou os atalhos `playClick()`, `playMatch()`, `playNote(3)`…
 
-### Quiz:
-- `correct.mp3` - Som ao acertar resposta (ding/sino/positivo)
-- `wrong.mp3` - Som ao errar resposta (buzina/negativo)
-
-### Geral:
-- `click.mp3` - Som ao clicar em botões (clique sutil)
-- `victory.mp3` - Som de vitória (fanfarra curta)
-- `game_over.mp3` - Som de fim de jogo (som neutro/triste)
-
-## Sugestões de sites para download (royalty-free):
-- https://freesound.org/
-- https://mixkit.co/free-sound-effects/
-- https://www.zapsplat.com/
-
-## Dica:
-Se não adicionar os arquivos, o app funcionará normalmente sem os efeitos sonoros.
-Os sons são opcionais e não causarão erros se estiverem ausentes.
+| Som | Uso |
+|---|---|
+| click, pop, whoosh | interface |
+| card_flip, match, mismatch, combo | memória |
+| correct, wrong, star | acertos / estrelas |
+| victory, game_over | fim de partida |
+| snap, pickup | quebra-cabeça |
+| step, bump, gem | labirinto |
+| paint, erase | colorir |
+| note_0 … note_8 | notas dos cristais (sequência) |

@@ -1,5 +1,5 @@
 # ============================================
-# Script para Commit e Push - JW Quiz Flutter
+# Script para Commit e Push - JW Splash Games
 # ============================================
 # Execute este script para enviar alteracoes ao GitHub
 # 
@@ -14,7 +14,7 @@ param(
 
 Clear-Host
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "   JW Quiz Flutter - Git Push Script" -ForegroundColor Cyan
+Write-Host "   JW Splash Games - Git Push Script" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 

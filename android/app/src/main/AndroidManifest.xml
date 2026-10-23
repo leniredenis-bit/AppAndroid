@@ -1,12 +1,15 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Permissão de Internet (necessária para google_fonts, etc) -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Internet: Firebase (multiplayer, analytics), google_fonts, chat de suporte -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    
-    <!-- Permissões para image_picker -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
-    
+
+    <!-- image_picker usa o Photo Picker do sistema: não precisa de permissão de
+         galeria/câmera. READ_MEDIA_IMAGES é restrita pela política do Google Play. -->
+
+    <!-- O app não usa ID de publicidade (sem anúncios). Remove a permissão que o
+         Firebase Analytics adiciona, simplificando a declaração na Play Console. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
+
     <application
         android:label="JW Splash Games"
         android:name="${applicationName}"
@@ -38,6 +41,9 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
