@@ -1,8 +1,13 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-import '../services/storage_service.dart';
-import '../models/stats_data.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import '../l10n/app_localizations.dart';
+import '../models/stats_data.dart';
+import '../services/language_service.dart';
+import '../services/storage_service.dart';
+import '../theme/app_theme.dart';
+import '../utils/i18n.dart';
+import '../widgets/app_ui.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -13,680 +18,456 @@ class StatsScreen extends StatefulWidget {
 
 class _StatsScreenState extends State<StatsScreen> with SingleTickerProviderStateMixin {
   final StorageService _storage = StorageService();
-  GlobalStats? _globalStats;
-  MinigameRecords? _minigameRecords;
-  List<QuizHistory> _recentHistory = [];
-  bool _isLoading = true;
-  late TabController _tabController;
+  GlobalStats? _global;
+  MinigameRecords? _minigames;
+  List<QuizHistory> _history = [];
+  bool _loading = true;
+  late final TabController _tabs = TabController(length: 3, vsync: this);
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _loadStats();
+    _load();
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _tabs.dispose();
     super.dispose();
   }
 
-  Future<void> _loadStats() async {
-    setState(() => _isLoading = true);
-    
-    final globalStats = await _storage.getGlobalStats();
-    final minigameRecords = await _storage.getMinigameRecords();
-    final history = await _storage.getQuizHistory(limit: 10);
-    
+  Future<void> _load() async {
+    final g = await _storage.getGlobalStats();
+    final m = await _storage.getMinigameRecords();
+    final h = await _storage.getQuizHistory(limit: 50);
+    h.sort((a, b) => b.playedAt.compareTo(a.playedAt)); // mais recente primeiro
+    if (!mounted) return;
     setState(() {
-      _globalStats = globalStats;
-      _minigameRecords = minigameRecords;
-      _recentHistory = history;
-      _isLoading = false;
+      _global = g;
+      _minigames = m;
+      _history = h;
+      _loading = false;
     });
-  }
-
-  Widget _buildStatCard({
-    required String emoji,
-    required String title,
-    required String value,
-    Color? valueColor,
-  }) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Color(0xFF162447),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(emoji, style: TextStyle(fontSize: 36)),
-          SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              color: valueColor ?? Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 4),
-          Text(
-            title,
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProgressBar({
-    required String label,
-    required double percentage,
-    required Color color,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: LinearProgressIndicator(
-            value: percentage / 100,
-            backgroundColor: Color(0xFF23395D),
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-            minHeight: 12,
-          ),
-        ),
-        SizedBox(height: 4),
-        Text(
-          '${percentage.toStringAsFixed(1)}%',
-          style: TextStyle(
-            color: Colors.white70,
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+    final p = context.palette;
     return Scaffold(
-      backgroundColor: Color(0xFF101A2C),
+      backgroundColor: p.background,
       appBar: AppBar(
-        title: Text(l10n.statsTitle, style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF162447),
-        iconTheme: IconThemeData(color: Colors.white),
-        elevation: 0,
+        title: Text(t3('📊 Estatísticas', '📊 Statistics', '📊 Estadísticas')),
+        centerTitle: true,
         bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.amber,
-          labelColor: Colors.amber,
-          unselectedLabelColor: Colors.white70,
+          controller: _tabs,
+          indicatorColor: p.gold,
+          indicatorWeight: 3,
+          labelColor: p.gold,
+          unselectedLabelColor: Colors.white,
+          dividerColor: Colors.transparent,
           tabs: [
-            Tab(icon: Icon(Icons.quiz), text: l10n.statsTabQuiz),
-            Tab(icon: Icon(Icons.games), text: l10n.statsTabMinigames),
-            Tab(icon: Icon(Icons.history), text: l10n.statsTabHistory),
+            Tab(icon: const Icon(Icons.quiz_rounded), text: l10n.statsTabQuiz),
+            Tab(icon: const Icon(Icons.sports_esports_rounded), text: l10n.statsTabMinigames),
+            Tab(icon: const Icon(Icons.history_rounded), text: l10n.statsTabHistory),
           ],
         ),
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator(color: Colors.amber))
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildQuizStatsTab(),
-                _buildMinigamesStatsTab(),
-                _buildHistoryTab(),
-              ],
-            ),
-    );
-  }
-
-  Widget _buildQuizStatsTab() {
-    final l10n = AppLocalizations.of(context)!;
-    
-    if (_globalStats == null) {
-      return Center(
-        child: Text(
-          l10n.statsNoData,
-          style: TextStyle(color: Colors.white70),
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [p.backgroundTop, p.background],
+          ),
         ),
-      );
-    }
-
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Estatísticas principais
-          Text(
-            l10n.statsGeneralPerformance,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 16),
-          
-          GridView.count(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.1,
-            children: [
-              _buildStatCard(
-                emoji: '🧠',
-                title: l10n.statsQuizzesCompleted,
-                value: '${_globalStats!.totalQuizzes}',
-              ),
-              _buildStatCard(
-                emoji: '✅',
-                title: l10n.statsAccuracyRate,
-                value: '${_globalStats!.accuracy.toStringAsFixed(1)}%',
-                valueColor: Colors.green,
-              ),
-              _buildStatCard(
-                emoji: '🏆',
-                title: l10n.statsBestScore,
-                value: '${_globalStats!.highScore}',
-                valueColor: Colors.orange,
-              ),
-              _buildStatCard(
-                emoji: '🔥',
-                title: l10n.statsCurrentStreak,
-                value: '${_globalStats!.currentStreak}',
-                valueColor: Colors.red,
-              ),
-            ],
-          ),
-          
-          SizedBox(height: 24),
-          
-          // Streak info
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF162447), Color(0xFF1F4068)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 8,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Column(
-                      children: [
-                        Text('🔥', style: TextStyle(fontSize: 32)),
-                        SizedBox(height: 8),
-                        Text(
-                          '${_globalStats!.currentStreak}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          l10n.statsCurrentStreak.replaceAll('\n', ' '),
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Text('🏅', style: TextStyle(fontSize: 32)),
-                        SizedBox(height: 8),
-                        Text(
-                          '${_globalStats!.longestStreak}',
-                          style: TextStyle(
-                            color: Colors.amber,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          l10n.statsBestStreak,
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12),
-                Text(
-                  l10n.statsStreakTip,
-                  style: TextStyle(
-                    color: Colors.white60,
-                    fontSize: 11,
-                    fontStyle: FontStyle.italic,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-          
-          SizedBox(height: 24),
-          
-          // Desempenho por categoria
-          if (_globalStats!.scoresByCategory.isNotEmpty) ...[
-            Text(
-              l10n.statsByCategory,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 12),
-            ..._globalStats!.scoresByCategory.entries.map((entry) {
-              return Padding(
-                padding: EdgeInsets.only(bottom: 12),
-                child: _buildCategoryBar(entry.key, entry.value),
-              );
-            }),
-          ],
-          
-          SizedBox(height: 24),
-          
-          // Precisão por dificuldade
-          if (_globalStats!.accuracyByDifficulty.isNotEmpty) ...[
-            Text(
-              l10n.statsAccuracyByDifficulty,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 12),
-            Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Color(0xFF162447),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: _globalStats!.accuracyByDifficulty.entries.map((entry) {
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 12),
-                    child: _buildProgressBar(
-                      label: _getDifficultyLabel(entry.key),
-                      percentage: entry.value.toDouble(),
-                      color: _getDifficultyColor(entry.key),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
-        ],
+        child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : TabBarView(controller: _tabs, children: [
+                MaxWidth(child: _quizTab(p)),
+                MaxWidth(child: _minigamesTab(p)),
+                MaxWidth(child: _historyTab(p)),
+              ]),
       ),
     );
   }
 
-  Widget _buildMinigamesStatsTab() {
-    final l10n = AppLocalizations.of(context)!;
-    
-    if (_minigameRecords == null || _minigameRecords!.records.isEmpty) {
-      return Center(
+  // --------------------------------------------------------------------------
+  // QUIZ
+  // --------------------------------------------------------------------------
+
+  Widget _empty(AppPalette p, String emoji, String title, String text) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text('🎮', style: TextStyle(fontSize: 64)),
-            SizedBox(height: 16),
-            Text(
-              l10n.statsNoMinigames,
-              style: TextStyle(color: Colors.white70, fontSize: 16),
-            ),
+            Text(emoji, style: const TextStyle(fontSize: 64)),
+            const SizedBox(height: 12),
+            Text(title, textAlign: TextAlign.center, style: TextStyle(color: p.text, fontSize: 20, fontWeight: FontWeight.w900)),
+            const SizedBox(height: 6),
+            Text(text, textAlign: TextAlign.center, style: TextStyle(color: p.textMuted, fontSize: 15)),
           ],
         ),
-      );
+      ),
+    );
+  }
+
+  Widget _quizTab(AppPalette p) {
+    final g = _global;
+    if (g == null || g.totalQuizzes == 0) {
+      return _empty(p, '🧠', t3('Jogue seu primeiro quiz!', 'Play your first quiz!', '¡Juega tu primer quiz!'),
+          t3('Seus números e gráficos aparecem aqui.', 'Your numbers and charts will show up here.', 'Tus números y gráficos aparecerán aquí.'));
     }
-
-    final gameNames = {
-      'puzzle': l10n.statsGamePuzzle,
-      'hangman': l10n.statsGameHangman,
-      'word_search': l10n.statsGameWordSearch,
-      'maze': l10n.statsGameMaze,
-      'sequence': l10n.statsGameSequence,
-      'tictactoe': l10n.statsGameTicTacToe,
-      'memory': l10n.statsGameMemory,
-    };
-
+    final recent = _history.take(15).toList().reversed.toList();
+    final topics = _topicAccuracy();
     return ListView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       children: [
-        Text(
-          l10n.statsMinigamesTitle,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 16),
-        
-        ..._minigameRecords!.records.entries.map((entry) {
-          final gameId = entry.key;
-          final record = entry.value;
-          final gameName = gameNames[gameId] ?? '🎮 $gameId';
-          
-          return Container(
-            margin: EdgeInsets.only(bottom: 12),
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Color(0xFF162447),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
+        LayoutBuilder(builder: (context, c) {
+          final cols = c.maxWidth > 520 ? 4 : 2;
+          final w = (c.maxWidth - (cols - 1) * 10) / cols;
+          final cards = [
+            ('🧠', '${g.totalQuizzes}', t3('Quizzes', 'Quizzes', 'Quizzes'), p.text),
+            ('🎯', '${g.accuracy.toStringAsFixed(0)}%', t3('Precisão', 'Accuracy', 'Precisión'), p.success),
+            ('🏆', '${g.highScore}', t3('Recorde', 'Best score', 'Récord'), p.goldText),
+            ('🔥', '${g.longestStreak}', t3('Maior sequência', 'Best streak', 'Mejor racha'), p.danger),
+          ];
+          return Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: cards
+                .map((c) => SizedBox(
+                      width: w,
+                      child: AppCard(
+                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+                        child: Column(children: [
+                          Text(c.$1, style: const TextStyle(fontSize: 26)),
+                          const SizedBox(height: 4),
+                          Text(c.$2, style: TextStyle(color: c.$4, fontSize: 24, fontWeight: FontWeight.w900)),
+                          Text(c.$3, textAlign: TextAlign.center, style: TextStyle(color: p.textMuted, fontSize: 12)),
+                        ]),
+                      ),
+                    ))
+                .toList(),
+          );
+        }),
+        const SizedBox(height: 18),
+        if (recent.length >= 2) ...[
+          SectionLabel(t3('Evolução (últimos quizzes)', 'Progress (recent quizzes)', 'Evolución (últimos quizzes)')),
+          AppCard(
+            padding: const EdgeInsets.fromLTRB(12, 16, 16, 10),
+            child: SizedBox(
+              height: 160,
+              child: CustomPaint(
+                size: Size.infinite,
+                painter: _AccuracyChart(
+                  values: recent.map((h) => h.totalQuestions == 0 ? 0.0 : h.correctAnswers / h.totalQuestions).toList(),
+                  line: p.accent,
+                  grid: p.border,
+                  label: p.textMuted,
                 ),
-              ],
+              ),
             ),
+          ),
+          const SizedBox(height: 18),
+        ],
+        if (topics.length >= 2) ...[
+          SectionLabel(t3('Seus temas', 'Your topics', 'Tus temas')),
+          AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  gameName,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildMinigameStat('🎮', l10n.statsGames, '${record.gamesPlayed}'),
-                    _buildMinigameStat('🏆', l10n.statsWins, '${record.gamesWon}'),
-                    _buildMinigameStat('📊', l10n.statsRate, '${record.winRate.toStringAsFixed(1)}%'),
-                    _buildMinigameStat('⭐', l10n.statsRecord, '${record.highScore}'),
-                  ],
-                ),
-                if (record.bestTime != null && record.bestTime! > 0) ...[
-                  SizedBox(height: 8),
-                  Center(
-                    child: Text(
-                      l10n.statsBestTime(_formatTime(record.bestTime!)),
-                      style: TextStyle(color: Colors.amber, fontSize: 12),
-                    ),
-                  ),
-                ],
+                Text(t3('💪 Mais fortes', '💪 Strongest', '💪 Más fuertes'),
+                    style: TextStyle(color: p.success, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 6),
+                ...topics.take(3).map((t) => _topicRow(p, t.key, t.value, p.success)),
+                const SizedBox(height: 12),
+                Text(t3('📖 Para estudar mais', '📖 Worth studying', '📖 Para estudiar más'),
+                    style: TextStyle(color: p.danger, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 6),
+                ...topics.reversed.take(min(3, topics.length - 1)).map((t) => _topicRow(p, t.key, t.value, p.danger)),
               ],
             ),
-          );
-        }),
+          ),
+          const SizedBox(height: 18),
+        ],
+        if (_difficultyEntries(g).isNotEmpty) ...[
+          SectionLabel(t3('Precisão por dificuldade', 'Accuracy by difficulty', 'Precisión por dificultad')),
+          AppCard(
+            child: Column(
+              children: _difficultyEntries(g)
+                  .map((e) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _bar(p, e.$1, e.$2 / 100, e.$3, '${e.$2}%'),
+                      ))
+                  .toList(),
+            ),
+          ),
+        ],
       ],
     );
   }
 
-  Widget _buildHistoryTab() {
-    final l10n = AppLocalizations.of(context)!;
-    
-    if (_recentHistory.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('📜', style: TextStyle(fontSize: 64)),
-            SizedBox(height: 16),
-            Text(
-              l10n.statsNoHistory,
-              style: TextStyle(color: Colors.white70, fontSize: 16),
-            ),
-          ],
-        ),
-      );
+  /// Precisão por tema a partir do histórico (ordenado do melhor para o pior).
+  List<MapEntry<String, double>> _topicAccuracy() {
+    final right = <String, int>{}, total = <String, int>{};
+    for (final h in _history) {
+      final c = h.category;
+      if (c == null || h.totalQuestions == 0) continue;
+      right[c] = (right[c] ?? 0) + h.correctAnswers;
+      total[c] = (total[c] ?? 0) + h.totalQuestions;
     }
+    final list = [for (final c in total.keys) MapEntry(c, right[c]! / total[c]!)];
+    list.sort((a, b) => b.value.compareTo(a.value));
+    return list;
+  }
 
-    return ListView.builder(
-      padding: EdgeInsets.all(16),
-      itemCount: _recentHistory.length,
-      itemBuilder: (context, index) {
-        final quiz = _recentHistory[index];
-        final accuracy = (quiz.correctAnswers / quiz.totalQuestions) * 100;
-        
-        return Container(
-          margin: EdgeInsets.only(bottom: 12),
-          padding: EdgeInsets.all(16),
+  /// Entradas de dificuldade (ignora os contadores internos "*_count").
+  List<(String, int, Color)> _difficultyEntries(GlobalStats g) {
+    const order = ['fácil', 'médio', 'difícil'];
+    final out = <(String, int, Color)>[];
+    for (int i = 0; i < order.length; i++) {
+      final v = g.accuracyByDifficulty[order[i]];
+      if (v != null) out.add((_difficultyLabel(order[i]), v, difficultyColor(context, i + 1)));
+    }
+    return out;
+  }
+
+  Widget _topicRow(AppPalette p, String name, double acc, Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: _bar(p, name, acc, color, '${(acc * 100).round()}%'),
+    );
+  }
+
+  Widget _bar(AppPalette p, String label, double value, Color color, String trailing) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(children: [
+          Expanded(child: Text(label, style: TextStyle(color: p.text, fontWeight: FontWeight.w600))),
+          Text(trailing, style: TextStyle(color: color, fontWeight: FontWeight.w900)),
+        ]),
+        const SizedBox(height: 5),
+        Container(
+          height: 10,
           decoration: BoxDecoration(
-            color: Color(0xFF162447),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: accuracy >= 80 ? Colors.green : Colors.transparent,
-              width: 2,
+            color: p.surfaceAlt,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: p.border, width: 0.8),
+          ),
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: value.clamp(0.0, 1.0),
+            child: Container(decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(6))),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // MINIGAMES
+  // --------------------------------------------------------------------------
+
+  Map<String, String> get _gameNames => {
+        'memory': t3('🧠 Memória', '🧠 Memory', '🧠 Memoria'),
+        'jigsaw_puzzle': t3('🧩 Quebra-Cabeça', '🧩 Jigsaw', '🧩 Rompecabezas'),
+        'coloring': t3('🎨 Colorir', '🎨 Coloring', '🎨 Colorear'),
+        'hangman': t3('🎯 Forca', '🎯 Hangman', '🎯 Ahorcado'),
+        'word_search': t3('🔍 Caça-Palavras', '🔍 Word Search', '🔍 Sopa de Letras'),
+        'maze': t3('🌀 Labirinto', '🌀 Maze', '🌀 Laberinto'),
+        'sequence': t3('💎 Sequência Cristal', '💎 Crystal Sequence', '💎 Secuencia Cristal'),
+        'tictactoe': t3('⭕ Jogo da Velha', '⭕ Tic-Tac-Toe', '⭕ Tres en Raya'),
+      };
+
+  Widget _minigamesTab(AppPalette p) {
+    final records = _minigames?.records ?? {};
+    final known = records.entries.where((e) => _gameNames.containsKey(e.key) && e.value.gamesPlayed > 0).toList();
+    if (known.isEmpty) {
+      return _empty(p, '🎮', t3('Nenhum minigame ainda', 'No minigames yet', 'Aún no hay minijuegos'),
+          t3('Jogue um minigame para ver seus recordes.', 'Play a minigame to see your records.', 'Juega un minijuego para ver tus récords.'));
+    }
+    known.sort((a, b) => b.value.gamesPlayed.compareTo(a.value.gamesPlayed));
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: known.map((e) {
+        final r = e.value;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(_gameNames[e.key]!, style: TextStyle(color: p.text, fontSize: 17, fontWeight: FontWeight.w900)),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _mini(p, '🎮', '${r.gamesPlayed}', t3('Partidas', 'Games', 'Partidas')),
+                    _mini(p, '🏆', '${r.gamesWon}', t3('Vitórias', 'Wins', 'Victorias')),
+                    _mini(p, '⭐', '${r.highScore}', t3('Recorde', 'Best', 'Récord')),
+                    if (r.bestTime != null && r.bestTime! > 0)
+                      _mini(p, '⏱️', formatGameTime(r.bestTime!), t3('Melhor tempo', 'Best time', 'Mejor tiempo')),
+                  ],
+                ),
+              ],
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    _formatDate(quiz.playedAt),
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                    ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _mini(AppPalette p, String emoji, String value, String label) {
+    return Column(children: [
+      Text(emoji, style: const TextStyle(fontSize: 18)),
+      Text(value, style: TextStyle(color: p.text, fontSize: 16, fontWeight: FontWeight.w900)),
+      Text(label, style: TextStyle(color: p.textMuted, fontSize: 11)),
+    ]);
+  }
+
+  // --------------------------------------------------------------------------
+  // HISTÓRICO
+  // --------------------------------------------------------------------------
+
+  Widget _historyTab(AppPalette p) {
+    if (_history.isEmpty) {
+      return _empty(p, '📜', t3('Histórico vazio', 'No history yet', 'Historial vacío'),
+          t3('Seus últimos quizzes aparecem aqui.', 'Your latest quizzes will show up here.', 'Tus últimos quizzes aparecerán aquí.'));
+    }
+    final fmt = DateFormat.yMd(LanguageService().currentLocale.toString()).add_Hm();
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: min(_history.length, 30),
+      itemBuilder: (context, i) {
+        final q = _history[i];
+        final acc = q.totalQuestions == 0 ? 0.0 : q.correctAnswers / q.totalQuestions;
+        final good = acc >= 0.8;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: AppCard(
+            borderColor: good ? p.success : null,
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: (good ? p.success : p.accent).withValues(alpha: 0.15),
+                    border: Border.all(color: good ? p.success : p.accent, width: 2),
                   ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _getModeColor(quiz.mode),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      quiz.mode.toUpperCase(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                  child: Text('${(acc * 100).round()}%',
+                      style: TextStyle(color: good ? p.success : p.accent, fontWeight: FontWeight.w900, fontSize: 13)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('⭐ ${q.score}  ·  ${q.correctAnswers}/${q.totalQuestions}',
+                          style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 15)),
+                      const SizedBox(height: 2),
+                      Text(
+                        [
+                          _modeLabel(q.mode),
+                          if (q.difficulty != null) _difficultyLabel(q.difficulty!),
+                          if (q.category != null) q.category!,
+                        ].join(' · '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: p.textMuted, fontSize: 12),
                       ),
-                    ),
+                      Text(fmt.format(q.playedAt), style: TextStyle(color: p.textMuted, fontSize: 11)),
+                    ],
                   ),
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Text(
-                    '⭐ ${quiz.score}',
-                    style: TextStyle(
-                      color: Colors.amber,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Text(
-                    '${quiz.correctAnswers}/${quiz.totalQuestions}',
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontSize: 16,
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    '(${accuracy.toStringAsFixed(1)}%)',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-              if (quiz.category != null) ...[
-                SizedBox(height: 4),
-                Text(
-                  '📚 ${quiz.category}',
-                  style: TextStyle(color: Colors.white60, fontSize: 12),
                 ),
               ],
-              if (quiz.difficulty != null) ...[
-                SizedBox(height: 4),
-                Text(
-                  '🎯 ${_getDifficultyLabel(quiz.difficulty!)}',
-                  style: TextStyle(color: Colors.white60, fontSize: 12),
-                ),
-              ],
-            ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildMinigameStat(String emoji, String label, String value) {
-    return Column(
-      children: [
-        Text(emoji, style: TextStyle(fontSize: 20)),
-        SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(color: Colors.white60, fontSize: 10),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCategoryBar(String category, int score) {
-    final maxScore = _globalStats!.scoresByCategory.values.reduce((a, b) => a > b ? a : b);
-    final percentage = maxScore > 0 ? (score / maxScore) * 100 : 0.0;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              category,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-              ),
-            ),
-            Text(
-              '$score pts',
-              style: TextStyle(
-                color: Colors.amber,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: LinearProgressIndicator(
-            value: percentage / 100,
-            backgroundColor: Color(0xFF23395D),
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
-            minHeight: 8,
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _formatTime(int seconds) {
-    final minutes = seconds ~/ 60;
-    final secs = seconds % 60;
-    return '$minutes:${secs.toString().padLeft(2, '0')}';
-  }
-
-  String _formatDate(DateTime date) {
-    return DateFormat('dd/MM/yyyy HH:mm').format(date);
-  }
-
-  Color _getModeColor(String mode) {
-    switch (mode.toLowerCase()) {
-      case 'rapido':
-        return Colors.orange;
-      case 'personalizado':
-        return Colors.purple;
+  String _modeLabel(String mode) {
+    switch (mode) {
+      case 'quiz_estudo':
+        return t3('📚 Estudo', '📚 Study', '📚 Estudio');
+      case 'pie':
+        return t3('🥧 Torta', '🥧 Pie', '🥧 Pastel');
+      case 'multiplayer':
+        return t3('🌐 Online', '🌐 Online', '🌐 En línea');
       default:
-        return Colors.blue;
+        return t3('🧠 Clássico', '🧠 Classic', '🧠 Clásico');
     }
   }
 
-  String _getDifficultyLabel(String difficulty) {
-    switch (difficulty.toLowerCase()) {
+  String _difficultyLabel(String d) {
+    switch (stripAccents(d.toLowerCase())) {
       case 'facil':
-        return 'Fácil';
+        return t3('Fácil', 'Easy', 'Fácil');
       case 'medio':
-        return 'Médio';
+        return t3('Médio', 'Medium', 'Medio');
       case 'dificil':
-        return 'Difícil';
+        return t3('Difícil', 'Hard', 'Difícil');
       default:
-        return difficulty;
+        return d;
+    }
+  }
+}
+
+/// Gráfico de linha simples da precisão (0–100%) dos últimos quizzes.
+class _AccuracyChart extends CustomPainter {
+  final List<double> values;
+  final Color line, grid, label;
+  _AccuracyChart({required this.values, required this.line, required this.grid, required this.label});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const left = 34.0;
+    final w = size.width - left, h = size.height - 6;
+    final gridPaint = Paint()
+      ..color = grid
+      ..strokeWidth = 1;
+    final tp = TextPainter(textDirection: TextDirection.ltr);
+    for (final v in [0, 50, 100]) {
+      final y = h - h * v / 100 + 3;
+      canvas.drawLine(Offset(left, y), Offset(size.width, y), gridPaint);
+      tp.text = TextSpan(text: '$v%', style: TextStyle(color: label, fontSize: 10));
+      tp.layout();
+      tp.paint(canvas, Offset(0, y - tp.height / 2));
+    }
+    if (values.length < 2) return;
+    Offset pt(int i) => Offset(left + w * i / (values.length - 1), h - h * values[i] + 3);
+    final path = Path()..moveTo(pt(0).dx, pt(0).dy);
+    for (int i = 1; i < values.length; i++) {
+      final a = pt(i - 1), b = pt(i);
+      final mid = (a.dx + b.dx) / 2;
+      path.cubicTo(mid, a.dy, mid, b.dy, b.dx, b.dy);
+    }
+    final fill = Path.from(path)
+      ..lineTo(pt(values.length - 1).dx, h + 3)
+      ..lineTo(left, h + 3)
+      ..close();
+    canvas.drawPath(fill, Paint()..color = line.withValues(alpha: 0.15));
+    canvas.drawPath(
+        path,
+        Paint()
+          ..color = line
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3
+          ..strokeCap = StrokeCap.round);
+    for (int i = 0; i < values.length; i++) {
+      canvas.drawCircle(pt(i), 4, Paint()..color = line);
     }
   }
 
-  Color _getDifficultyColor(String difficulty) {
-    switch (difficulty.toLowerCase()) {
-      case 'facil':
-        return Colors.green;
-      case 'medio':
-        return Colors.orange;
-      case 'dificil':
-        return Colors.red;
-      default:
-        return Colors.blue;
-    }
-  }
+  @override
+  bool shouldRepaint(covariant _AccuracyChart old) => old.values != values || old.line != line;
 }

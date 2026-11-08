@@ -1,8 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../services/audio_service.dart';
 import 'game_text.dart';
+import '../../../theme/app_theme.dart';
 
 /// Paleta base dos minigames (mesma família de cores do app).
 class GameColors {
@@ -26,6 +26,9 @@ class GameScaffold extends StatelessWidget {
   final List<Color>? backgroundColors;
   final VoidCallback? onBack;
 
+  /// Jogos usam sempre o tema escuro internamente (contraste garantido).
+  final bool forceDarkTheme;
+
   const GameScaffold({
     super.key,
     required this.title,
@@ -34,10 +37,16 @@ class GameScaffold extends StatelessWidget {
     this.actions,
     this.backgroundColors,
     this.onBack,
+    this.forceDarkTheme = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final scaffold = _scaffold(context);
+    return forceDarkTheme ? GameDarkTheme(child: scaffold) : scaffold;
+  }
+
+  Widget _scaffold(BuildContext context) {
     return Scaffold(
       backgroundColor: GameColors.background,
       appBar: AppBar(
@@ -67,7 +76,8 @@ class GameScaffold extends StatelessWidget {
             colors: backgroundColors ?? const [GameColors.backgroundTop, GameColors.background],
           ),
         ),
-        child: SafeArea(top: false, child: body),
+        // Em telas largas (web/tablet) o jogo fica centralizado com largura máxima
+        child: SafeArea(top: false, child: MaxWidth(maxWidth: 720, child: body)),
       ),
     );
   }
@@ -195,7 +205,7 @@ class _PillButtonState extends State<PillButton> {
       onTapUp: enabled
           ? (_) {
               setState(() => _pressed = false);
-              HapticFeedback.selectionClick();
+              Haptics.selection();
               AudioService().playClick();
               widget.onTap!();
             }
@@ -242,7 +252,7 @@ class OptionPicker<T> extends StatelessWidget {
             return GestureDetector(
               onTap: () {
                 AudioService().playClick();
-                HapticFeedback.selectionClick();
+                Haptics.selection();
                 onChanged(o.value);
               },
               child: AnimatedContainer(
@@ -477,7 +487,7 @@ Future<void> showGameResult(
 }) {
   if (won) {
     AudioService().playVictory();
-    HapticFeedback.heavyImpact();
+    Haptics.heavy();
   } else {
     AudioService().playGameOver();
   }
@@ -629,7 +639,8 @@ class _ResultCard extends StatelessWidget {
 class StarRow extends StatefulWidget {
   final int stars;
   final double size;
-  const StarRow({super.key, required this.stars, this.size = 44});
+  final Color emptyColor; // estrela apagada (ajuste para fundos claros)
+  const StarRow({super.key, required this.stars, this.size = 44, this.emptyColor = Colors.white12});
 
   @override
   State<StarRow> createState() => _StarRowState();
@@ -675,7 +686,7 @@ class _StarRowState extends State<StarRow> with SingleTickerProviderStateMixin {
               child: Icon(
                 Icons.star_rounded,
                 size: i == 1 ? widget.size * 1.2 : widget.size,
-                color: on ? GameColors.gold : Colors.white12,
+                color: on ? GameColors.gold : widget.emptyColor,
                 shadows: on ? [const Shadow(color: Color(0x88FFC94A), blurRadius: 16)] : null,
               ),
             ),

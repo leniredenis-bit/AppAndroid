@@ -7,6 +7,8 @@ import '../../services/multiplayer/firebase_multiplayer_service.dart';
 import '../../models/quiz_service.dart';
 import '../../utils/timer_calculator.dart';
 import 'round_result_screen.dart';
+import '../../utils/i18n.dart';
+import '../../theme/app_theme.dart';
 
 /// Tela de gameplay multiplayer - perguntas com timer
 class MultiplayerQuizScreen extends StatefulWidget {
@@ -62,7 +64,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
       setState(() {
         _isLoading = false;
       });
-      _showError('Erro ao carregar perguntas: $e');
+      _showError(t3('Erro ao carregar perguntas: $e', 'Could not load questions: $e', 'No se pudieron cargar las preguntas: $e'));
     }
   }
 
@@ -100,7 +102,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
         }
       },
       onError: (error) {
-        _showError('Erro de conexão: $error');
+        _showError(t3('Erro de conexão: $error', 'Connection error: $error', 'Error de conexión: $error'));
       },
     );
   }
@@ -211,7 +213,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
         points: points,
       );
     } catch (e) {
-      _showError('Erro ao enviar resposta: $e');
+      _showError(t3('Erro ao enviar resposta: $e', 'Could not send your answer: $e', 'No se pudo enviar tu respuesta: $e'));
     }
   }
 
@@ -273,7 +275,10 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      GameDarkTheme(child: Builder(builder: _buildThemed));
+
+  Widget _buildThemed(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     if (_isLoading || _currentRoom == null || _currentQuestion == null) {
       return Scaffold(
@@ -480,7 +485,7 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
                       Icon(Icons.touch_app, color: Colors.white70, size: 20),
                       SizedBox(width: 8),
                       Text(
-                        'Selecione uma alternativa',
+                        t3('Selecione uma alternativa', 'Choose an answer', 'Elige una respuesta'),
                         style: TextStyle(color: Colors.white70),
                       ),
                     ] else if (!allAnswered) ...[
@@ -494,14 +499,14 @@ class _MultiplayerQuizScreenState extends State<MultiplayerQuizScreen> {
                       ),
                       SizedBox(width: 12),
                       Text(
-                        'Aguardando outros jogadores...',
+                        t3('Aguardando outros jogadores...', 'Waiting for other players...', 'Esperando a los demás jugadores...'),
                         style: TextStyle(color: Colors.white70),
                       ),
                     ] else ...[
                       Icon(Icons.check_circle, color: Colors.green, size: 20),
                       SizedBox(width: 8),
                       Text(
-                        'Todos responderam!',
+                        t3('Todos responderam!', 'Everyone answered!', '¡Todos respondieron!'),
                         style: TextStyle(color: Colors.green),
                       ),
                     ],

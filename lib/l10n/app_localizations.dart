@@ -2683,7 +2683,7 @@ abstract class AppLocalizations {
   /// No description provided for @multiplayerInfo1.
   ///
   /// In pt, this message translates to:
-  /// **'• Até 8 jogadores por sala'**
+  /// **'• Até 100 jogadores por sala'**
   String get multiplayerInfo1;
 
   /// No description provided for @multiplayerInfo2.

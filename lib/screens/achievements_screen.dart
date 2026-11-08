@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import '../models/achievement.dart';
 import '../models/achievement_texts.dart';
 import '../services/achievement_service.dart';
 import '../services/audio_service.dart';
-import '../l10n/app_localizations.dart';
+import '../services/language_service.dart';
+import '../theme/app_theme.dart';
+import '../utils/i18n.dart';
+import '../widgets/app_ui.dart';
 
 class AchievementsScreen extends StatefulWidget {
   const AchievementsScreen({super.key});
@@ -12,497 +16,262 @@ class AchievementsScreen extends StatefulWidget {
   State<AchievementsScreen> createState() => _AchievementsScreenState();
 }
 
-class _AchievementsScreenState extends State<AchievementsScreen> with SingleTickerProviderStateMixin {
-  final AchievementService _achievementService = AchievementService();
-  final AudioService _audioService = AudioService();
-  
-  List<Achievement> _achievements = [];
-  AchievementCategory? _selectedCategory;
-  bool _isLoading = true;
-  late TabController _tabController;
+class _AchievementsScreenState extends State<AchievementsScreen> {
+  final AchievementService _service = AchievementService();
+  List<Achievement> _all = [];
+  AchievementCategory? _category;
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
-    _loadAchievements();
+    _load();
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  Future<void> _load() async {
+    final list = await _service.getAchievements();
+    if (!mounted) return;
+    setState(() {
+      _all = list;
+      _loading = false;
+    });
   }
 
-  Future<void> _loadAchievements() async {
-    setState(() => _isLoading = true);
-    try {
-      final achievements = await _achievementService.getAchievements();
-      setState(() {
-        _achievements = achievements;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() => _isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${AppLocalizations.of(context)!.achievementsLoadError}: $e')),
-        );
-      }
+  String _categoryName(AchievementCategory? c) {
+    switch (c) {
+      case AchievementCategory.quiz:
+        return t3('Quiz', 'Quiz', 'Quiz');
+      case AchievementCategory.minigame:
+        return t3('Minigames', 'Minigames', 'Minijuegos');
+      case AchievementCategory.social:
+        return t3('Online', 'Online', 'En línea');
+      case AchievementCategory.master:
+        return t3('Mestre', 'Master', 'Maestro');
+      default:
+        return t3('Todas', 'All', 'Todos');
     }
   }
 
-  List<Achievement> get _filteredAchievements {
-    if (_selectedCategory == null) return _achievements;
-    return _achievements.where((a) => a.category == _selectedCategory).toList();
+  /// Conquistas bloqueadas mais perto de desbloquear.
+  List<Achievement> get _next {
+    final locked = _all.where((a) => !a.isUnlocked).toList()
+      ..sort((a, b) => b.progressPercentage.compareTo(a.progressPercentage));
+    return locked.take(2).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final stats = _achievementService.getStats();
-    final unlockedCount = stats['unlocked'] ?? 0;
-    final totalCount = stats['total'] ?? 0;
-    final percentage = stats['percentage'] ?? 0;
+    final p = context.palette;
+    final unlocked = _all.where((a) => a.isUnlocked).length;
+    final total = _all.length;
+    final pct = total == 0 ? 0.0 : unlocked / total;
+    final shown = _category == null ? _all : _all.where((a) => a.category == _category).toList();
 
-    return Scaffold(
-      backgroundColor: Color(0xFF101A2C),
-      appBar: AppBar(
-        title: Text(l10n.achievementsTitle2, style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF162447),
-        iconTheme: IconThemeData(color: Colors.white),
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            _audioService.playClick();
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator(color: Color(0xFF4A90E2)))
-          : Column(
-              children: [
-                // Header com estatísticas
-                _buildStatsHeader(unlockedCount, totalCount, percentage),
-
-                // Tabs de categorias
-                _buildCategoryTabs(),
-
-                // Grid de conquistas
-                Expanded(
-                  child: _filteredAchievements.isEmpty
-                      ? _buildEmptyState()
-                      : _buildAchievementGrid(),
+    return AppPage(
+      title: t3('🏆 Conquistas', '🏆 Achievements', '🏆 Logros'),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  sliver: SliverList.list(children: [
+                    AppCard(
+                      borderColor: p.goldText.withValues(alpha: 0.6),
+                      child: Column(children: [
+                        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                          const Text('🏆', style: TextStyle(fontSize: 30)),
+                          const SizedBox(width: 10),
+                          Text('$unlocked / $total', style: TextStyle(color: p.text, fontSize: 28, fontWeight: FontWeight.w900)),
+                        ]),
+                        Text(t3('conquistas desbloqueadas', 'achievements unlocked', 'logros desbloqueados'),
+                            style: TextStyle(color: p.textMuted)),
+                        const SizedBox(height: 12),
+                        _progress(p, pct, pct >= 1 ? p.gold : p.accent, height: 12),
+                        const SizedBox(height: 6),
+                        Text('${(pct * 100).round()}%', style: TextStyle(color: p.text, fontWeight: FontWeight.w800)),
+                      ]),
+                    ),
+                    if (_next.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      SectionLabel(t3('Quase lá', 'Almost there', 'Casi lo logras')),
+                      ..._next.map((a) => Padding(padding: const EdgeInsets.only(bottom: 8), child: _nextRow(p, a))),
+                    ],
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 42,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [null, ...AchievementCategory.values].map((c) {
+                          final sel = c == _category;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: GestureDetector(
+                              onTap: () {
+                                AudioService().playClick();
+                                setState(() => _category = c);
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 160),
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: sel ? p.primary : p.surface,
+                                  borderRadius: BorderRadius.circular(21),
+                                  border: Border.all(color: sel ? p.primary : p.border),
+                                ),
+                                child: Text(_categoryName(c),
+                                    style: TextStyle(color: sel ? Colors.white : p.text, fontWeight: FontWeight.w700)),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ]),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                  sliver: SliverGrid(
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 220,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 0.86,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, i) => TweenAnimationBuilder<double>(
+                        key: ValueKey('${_category?.name}-$i'),
+                        tween: Tween(begin: 0, end: 1),
+                        duration: Duration(milliseconds: 250 + i * 50),
+                        curve: Curves.easeOutBack,
+                        builder: (_, v, child) => Opacity(
+                          opacity: v.clamp(0.0, 1.0),
+                          child: Transform.scale(scale: 0.85 + 0.15 * v, child: child),
+                        ),
+                        child: _card(p, shown[i]),
+                      ),
+                      childCount: shown.length,
+                    ),
+                  ),
                 ),
               ],
             ),
     );
   }
 
-  Widget _buildStatsHeader(int unlocked, int total, int percentage) {
+  Widget _progress(AppPalette p, double value, Color color, {double height = 8}) {
     return Container(
-      padding: EdgeInsets.all(20),
-      margin: EdgeInsets.all(16),
+      width: double.infinity,
+      height: height,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF1E2A3A), Color(0xFF2A3F5F)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        color: p.surfaceAlt,
+        borderRadius: BorderRadius.circular(height),
+        border: Border.all(color: p.border, width: 0.8),
+      ),
+      child: FractionallySizedBox(
+        alignment: Alignment.centerLeft,
+        widthFactor: value.clamp(0.0, 1.0),
+        child: Container(decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(height))),
+      ),
+    );
+  }
+
+  Widget _nextRow(AppPalette p, Achievement a) {
+    return AppCard(
+      padding: const EdgeInsets.all(12),
+      onTap: () => _details(a),
+      child: Row(children: [
+        Text(a.emoji, style: const TextStyle(fontSize: 30)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(achievementName(a.nameKey), style: TextStyle(color: p.text, fontWeight: FontWeight.w800)),
+            Text(achievementDescription(a.nameKey),
+                maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: p.textMuted, fontSize: 12)),
+            const SizedBox(height: 6),
+            _progress(p, a.progressPercentage / 100, p.accent),
+          ]),
         ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.emoji_events, color: Color(0xFFFFD700), size: 32),
-              SizedBox(width: 12),
-              Text(
-                '$unlocked / $total',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Conquistas Desbloqueadas',
-            style: TextStyle(color: Colors.white70, fontSize: 14),
-          ),
-          SizedBox(height: 16),
-          // Progress bar
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: percentage / 100,
-              minHeight: 12,
-              backgroundColor: Colors.white.withValues(alpha: 0.2),
-              valueColor: AlwaysStoppedAnimation<Color>(
-                percentage == 100 ? Color(0xFFFFD700) : Color(0xFF4A90E2),
-              ),
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            '$percentage% Completo',
-            style: TextStyle(
-              color: percentage == 100 ? Color(0xFFFFD700) : Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+        const SizedBox(width: 10),
+        Text('${a.currentProgress}/${a.requiredValue}', style: TextStyle(color: p.accent, fontWeight: FontWeight.w900)),
+      ]),
     );
   }
 
-  Widget _buildCategoryTabs() {
-    final l10n = AppLocalizations.of(context)!;
-    return Container(
-      color: Color(0xFF1E2A3A),
-      child: TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        indicatorColor: Color(0xFF4A90E2),
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.white60,
-        onTap: (index) {
-          _audioService.playClick();
-          setState(() {
-            if (index == 0) {
-              _selectedCategory = null; // Todas
-            } else {
-              _selectedCategory = AchievementCategory.values[index - 1];
-            }
-          });
-        },
-        tabs: [
-          Tab(
-            child: Row(
-              children: [
-                Icon(Icons.grid_view, size: 20),
-                SizedBox(width: 8),
-                Text(l10n.achievementsAll),
-              ],
-            ),
-          ),
-          Tab(
-            child: Row(
-              children: [
-                Icon(Icons.quiz, size: 20),
-                SizedBox(width: 8),
-                Text(l10n.achievementsCategoryQuiz),
-              ],
-            ),
-          ),
-          Tab(
-            child: Row(
-              children: [
-                Icon(Icons.games, size: 20),
-                SizedBox(width: 8),
-                Text(l10n.achievementsCategoryMinigames),
-              ],
-            ),
-          ),
-          Tab(
-            child: Row(
-              children: [
-                Icon(Icons.people, size: 20),
-                SizedBox(width: 8),
-                Text(l10n.achievementsCategorySocial),
-              ],
-            ),
-          ),
-          Tab(
-            child: Row(
-              children: [
-                Icon(Icons.star, size: 20),
-                SizedBox(width: 8),
-                Text(l10n.achievementsCategoryMaster),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAchievementGrid() {
-    return GridView.builder(
-      padding: EdgeInsets.all(16),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.85,
-      ),
-      itemCount: _filteredAchievements.length,
-      itemBuilder: (context, index) {
-        return _buildAchievementCard(_filteredAchievements[index]);
-      },
-    );
-  }
-
-  Widget _buildAchievementCard(Achievement achievement) {
-    final isUnlocked = achievement.isUnlocked;
-    final progress = achievement.progressPercentage;
-
-    return GestureDetector(
-      onTap: () {
-        _audioService.playClick();
-        _showAchievementDetails(achievement);
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isUnlocked
-                ? [
-                    Color(0xFFFFD700).withValues(alpha: 0.3),
-                    Color(0xFFFFA500).withValues(alpha: 0.2),
-                  ]
-                : [
-                    Color(0xFF2A3F5F),
-                    Color(0xFF1E2A3A),
-                  ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isUnlocked ? Color(0xFFFFD700) : Colors.white.withValues(alpha: 0.2),
-            width: isUnlocked ? 2 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isUnlocked
-                  ? Color(0xFFFFD700).withValues(alpha: 0.3)
-                  : Colors.black.withValues(alpha: 0.3),
-              blurRadius: 10,
-              offset: Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Emoji grande
-              Text(
-                achievement.emoji,
-                style: TextStyle(
-                  fontSize: 56,
-                  color: isUnlocked ? null : Colors.white.withValues(alpha: 0.3),
-                ),
-              ),
-              SizedBox(height: 12),
-
-              // Nome (temporário - será substituído por i18n)
-              Text(
-                achievementName(achievement.nameKey),
-                style: TextStyle(
-                  color: isUnlocked ? Colors.white : Colors.white60,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
+  Widget _card(AppPalette p, Achievement a) {
+    final on = a.isUnlocked;
+    return AppCard(
+      onTap: () => _details(a),
+      padding: const EdgeInsets.all(12),
+      color: on ? p.gold.withValues(alpha: p.isDark ? 0.16 : 0.22) : p.surface,
+      borderColor: on ? p.goldText : p.border,
+      borderWidth: on ? 2 : 1.2,
+      child: LayoutBuilder(builder: (context, c) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Opacity(opacity: on ? 1 : 0.4, child: Text(a.emoji, style: TextStyle(fontSize: c.maxWidth * 0.32))),
+            const SizedBox(height: 8),
+            Text(achievementName(a.nameKey),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-              ),
-
-              SizedBox(height: 8),
-
-              // Progress ou data de desbloqueio
-              if (isUnlocked)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.check_circle, color: Color(0xFFFFD700), size: 16),
-                    SizedBox(width: 4),
-                    Text(
-                      'Desbloqueada',
-                      style: TextStyle(color: Color(0xFFFFD700), fontSize: 12),
-                    ),
-                  ],
-                )
-              else ...[
-                // Progress bar
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: progress / 100,
-                    minHeight: 6,
-                    backgroundColor: Colors.white.withValues(alpha: 0.2),
-                    valueColor: AlwaysStoppedAnimation<Color>(achievement.getCategoryColor()),
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  '${achievement.currentProgress}/${achievement.requiredValue}',
-                  style: TextStyle(color: Colors.white60, fontSize: 11),
-                ),
-              ],
+                style: TextStyle(color: p.text, fontWeight: FontWeight.w800, fontSize: 14)),
+            const SizedBox(height: 8),
+            if (on)
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(Icons.check_circle_rounded, color: p.goldText, size: 16),
+                const SizedBox(width: 4),
+                Text(t3('Desbloqueada', 'Unlocked', 'Desbloqueado'),
+                    style: TextStyle(color: p.goldText, fontSize: 12, fontWeight: FontWeight.w700)),
+              ])
+            else ...[
+              _progress(p, a.progressPercentage / 100, p.accent, height: 7),
+              const SizedBox(height: 4),
+              Text('${a.currentProgress}/${a.requiredValue}', style: TextStyle(color: p.textMuted, fontSize: 11)),
             ],
-          ),
-        ),
-      ),
+          ],
+        );
+      }),
     );
   }
 
-  void _showAchievementDetails(Achievement achievement) {
-    final l10n = AppLocalizations.of(context)!;
+  void _details(Achievement a) {
+    final p = context.palette;
+    final date = a.unlockedAt == null
+        ? ''
+        : DateFormat.yMMMd(LanguageService().currentLocale.toString()).format(a.unlockedAt!);
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Color(0xFF162447),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Emoji grande
-              Text(achievement.emoji, style: TextStyle(fontSize: 72)),
-              SizedBox(height: 16),
-
-              // Nome
-              Text(
-                achievementName(achievement.nameKey),
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              SizedBox(height: 12),
-
-              // Descrição (temporária)
-              Text(
-                achievementDescription(achievement.nameKey),
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-                textAlign: TextAlign.center,
-              ),
-
-              SizedBox(height: 20),
-
-              // Categoria
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: achievement.getCategoryColor().withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: achievement.getCategoryColor()),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(achievement.getCategoryIcon(), color: achievement.getCategoryColor(), size: 16),
-                    SizedBox(width: 6),
-                    Text(
-                      achievement.category.toString().split('.').last.toUpperCase(),
-                      style: TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 20),
-
-              // Status
-              if (achievement.isUnlocked)
-                Column(
-                  children: [
-                    Icon(Icons.check_circle, color: Color(0xFFFFD700), size: 32),
-                    SizedBox(height: 8),
-                    Text(
-                      'Desbloqueada em',
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
-                    ),
-                    Text(
-                      _formatDate(achievement.unlockedAt!),
-                      style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                )
-              else
-                Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: LinearProgressIndicator(
-                        value: achievement.progressPercentage / 100,
-                        minHeight: 12,
-                        backgroundColor: Colors.white.withValues(alpha: 0.2),
-                        valueColor: AlwaysStoppedAnimation<Color>(achievement.getCategoryColor()),
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Progresso: ${achievement.currentProgress}/${achievement.requiredValue}',
-                      style: TextStyle(color: Colors.white, fontSize: 14),
-                    ),
-                  ],
-                ),
-
-              SizedBox(height: 20),
-
-              // Botão fechar
-              ElevatedButton(
-                onPressed: () {
-                  _audioService.playClick();
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF4A90E2),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
-                child: Text(l10n.close, style: TextStyle(fontSize: 16)),
-              ),
+      builder: (ctx) => AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(a.emoji, style: const TextStyle(fontSize: 68)),
+            const SizedBox(height: 10),
+            Text(achievementName(a.nameKey),
+                textAlign: TextAlign.center, style: TextStyle(color: p.text, fontSize: 20, fontWeight: FontWeight.w900)),
+            const SizedBox(height: 8),
+            Text(achievementDescription(a.nameKey), textAlign: TextAlign.center, style: TextStyle(color: p.textMuted)),
+            const SizedBox(height: 14),
+            AppChip(label: _categoryName(a.category), color: p.accent),
+            const SizedBox(height: 14),
+            if (a.isUnlocked)
+              Text('✅ ${t3('Desbloqueada em', 'Unlocked on', 'Desbloqueado el')} $date',
+                  style: TextStyle(color: p.goldText, fontWeight: FontWeight.w800))
+            else ...[
+              _progress(p, a.progressPercentage / 100, p.accent, height: 10),
+              const SizedBox(height: 6),
+              Text('${a.currentProgress}/${a.requiredValue}', style: TextStyle(color: p.text, fontWeight: FontWeight.w800)),
             ],
-          ),
+          ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.emoji_events_outlined,
-            size: 80,
-            color: Colors.white30,
-          ),
-          SizedBox(height: 16),
-          Text(
-            'Nenhuma conquista nesta categoria',
-            style: TextStyle(color: Colors.white60, fontSize: 16),
-          ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t3('Fechar', 'Close', 'Cerrar'))),
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    final months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 }

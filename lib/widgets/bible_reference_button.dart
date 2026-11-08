@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_custom_tabs/flutter_custom_tabs.dart' as custom_tabs;
+import '../theme/app_theme.dart';
+import '../utils/in_app_browser.dart';
 import '../services/language_service.dart';
 
 /// Widget que exibe uma referência bíblica clicável que abre no JW Library app
@@ -40,80 +40,8 @@ class BibleReferenceButton extends StatelessWidget {
     }
   }
 
-  /// Abre o link com preview usando Custom Tabs (melhor experiência)
-  /// 
-  /// Custom Tabs oferece:
-  /// - Preview da página dentro do app
-  /// - Animação de entrada/saída suave
-  /// - Botão X para fechar rapidamente
-  /// - Melhor performance que WebView
-  Future<void> _openReferenceWithPreview(BuildContext context) async {
-    final url = _buildJWUrl();
-    
-    try {
-      // Tenta abrir com Custom Tabs (preview dentro do app)
-      await custom_tabs.launchUrl(
-        Uri.parse(url),
-        customTabsOptions: custom_tabs.CustomTabsOptions(
-          colorSchemes: custom_tabs.CustomTabsColorSchemes.defaults(
-            toolbarColor: const Color(0xFF23395D), // Cor do toolbar
-          ),
-          shareState: custom_tabs.CustomTabsShareState.on,
-          urlBarHidingEnabled: true,
-          showTitle: true,
-          closeButton: custom_tabs.CustomTabsCloseButton(
-            icon: custom_tabs.CustomTabsCloseButtonIcons.back,
-          ),
-        ),
-        safariVCOptions: custom_tabs.SafariViewControllerOptions(
-          preferredBarTintColor: const Color(0xFF23395D),
-          preferredControlTintColor: Colors.white,
-          barCollapsingEnabled: true,
-          dismissButtonStyle: custom_tabs.SafariViewControllerDismissButtonStyle.close,
-        ),
-      );
-    } catch (e) {
-      // Fallback: se Custom Tabs falhar, usa método padrão
-      if (context.mounted) {
-        await _openReferenceFallback(context);
-      }
-    }
-  }
-
-  /// Fallback: abre com url_launcher padrão (sem preview)
-  Future<void> _openReferenceFallback(BuildContext context) async {
-    final url = _buildJWUrl();
-    final uri = Uri.parse(url);
-    final lang = LanguageService().currentLanguageCode;
-    
-    // Mensagens de erro por idioma
-    final errorMessages = {
-      'pt': 'Não foi possível abrir a referência.',
-      'en': 'Could not open the reference.',
-      'es': 'No se pudo abrir la referencia.',
-    };
-    
-    try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else if (context.mounted) {
-        _showError(context, errorMessages[lang] ?? errorMessages['pt']!);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        _showError(context, 'Erro ao abrir: ${e.toString()}');
-      }
-    }
-  }
-
-  void _showError(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red.shade700,
-      ),
-    );
-  }
+  /// Abre a referência em meia tela, por cima do jogo (ver [openInAppBrowser]).
+  Future<void> _openReferenceWithPreview(BuildContext context) => openInAppBrowser(context, _buildJWUrl());
 
   @override
   Widget build(BuildContext context) {
@@ -126,25 +54,23 @@ class BibleReferenceButton extends StatelessWidget {
       'es': 'Toca para leer el texto completo',
     };
     
+    final p = context.palette;
     return InkWell(
       onTap: () => _openReferenceWithPreview(context),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF23395D),
+          color: p.surfaceAlt,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.blue.shade700.withValues(alpha: 0.3),
-            width: 1,
-          ),
+          border: Border.all(color: p.accent.withValues(alpha: 0.6), width: 1.2),
         ),
         child: Row(
           children: [
             Icon(
               Icons.menu_book_rounded,
-              color: Colors.blue.shade300,
-              size: 20,
+              color: p.accent,
+              size: 22,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -155,7 +81,7 @@ class BibleReferenceButton extends StatelessWidget {
                   Text(
                     reference,
                     style: TextStyle(
-                      color: Colors.blue.shade200,
+                      color: p.accent,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -164,7 +90,7 @@ class BibleReferenceButton extends StatelessWidget {
                   Text(
                     readTextMessages[lang] ?? readTextMessages['pt']!,
                     style: TextStyle(
-                      color: Colors.white60,
+                      color: p.textMuted,
                       fontSize: 12,
                     ),
                   ),
@@ -178,95 +104,6 @@ class BibleReferenceButton extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Variante compacta do botão (apenas referência clicável, sem caixa)
-class BibleReferenceLink extends StatelessWidget {
-  final String reference;
-  
-  const BibleReferenceLink({
-    super.key,
-    required this.reference,
-  });
-
-  String _buildJWUrl() {
-    final cleanRef = reference.trim();
-    final query = Uri.encodeComponent(cleanRef).replaceAll('%20', '+');
-    final lang = LanguageService().currentLanguageCode;
-    
-    switch (lang) {
-      case 'en':
-        return 'https://www.jw.org/en/search/?q=$query&link=%2Fresults%2FE%2Fbible%3Fq%3D';
-      case 'es':
-        return 'https://www.jw.org/es/búsquedas/?q=$query&link=%2Fresults%2FS%2Fall%3Fsort%3Drel%26q%3D';
-      default: // 'pt'
-        return 'https://www.jw.org/pt/busca/?q=$query&link=%2Fresults%2FT%2Fbible%3Fq%3D';
-    }
-  }
-
-  Future<void> _openReference(BuildContext context) async {
-    final url = _buildJWUrl();
-    final uri = Uri.parse(url);
-    final lang = LanguageService().currentLanguageCode;
-    
-    // Mensagens de erro por idioma
-    final errorMessages = {
-      'pt': 'Não foi possível abrir a referência.',
-      'en': 'Could not open the reference.',
-      'es': 'No se pudo abrir la referencia.',
-    };
-    
-    try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessages[lang] ?? errorMessages['pt']!),
-            backgroundColor: Colors.red.shade700,
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro: ${e.toString()}'),
-            backgroundColor: Colors.red.shade700,
-          ),
-        );
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => _openReference(context),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.book, color: Colors.white70, size: 18),
-          const SizedBox(width: 8),
-          Text(
-            reference,
-            style: TextStyle(
-              color: Colors.blue.shade300,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Icon(
-            Icons.open_in_new,
-            color: Colors.white54,
-            size: 14,
-          ),
-        ],
       ),
     );
   }

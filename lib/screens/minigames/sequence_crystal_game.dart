@@ -1,11 +1,11 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/audio_service.dart';
 import 'common/game_results.dart';
 import 'common/game_text.dart';
 import 'common/game_ui.dart';
+import '../../theme/app_theme.dart';
 
 const Color _accent = Color(0xFFA78BFA);
 const int _maxLevel = 30;
@@ -144,7 +144,7 @@ class _SequenceCrystalGameState extends State<SequenceCrystalGame> with TickerPr
 
   Future<void> _tapCrystal(int i) async {
     if (!_playerTurn) return;
-    HapticFeedback.lightImpact();
+    Haptics.light();
     _audio.playNote(i);
     setState(() => _lit = i);
     final token = _token;
@@ -181,7 +181,7 @@ class _SequenceCrystalGameState extends State<SequenceCrystalGame> with TickerPr
 
   Future<void> _mistake(int wrong) async {
     _token++;
-    HapticFeedback.heavyImpact();
+    Haptics.heavy();
     _audio.playWrongAnswer();
     setState(() {
       _playerTurn = false;

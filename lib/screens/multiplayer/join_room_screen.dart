@@ -4,6 +4,8 @@ import '../../services/multiplayer/firebase_multiplayer_service.dart';
 import '../../services/multiplayer/profanity_filter.dart';
 import '../../l10n/app_localizations.dart';
 import 'lobby_screen.dart';
+import '../../utils/i18n.dart';
+import '../../theme/app_theme.dart';
 
 /// Tela para jogador entrar em uma sala existente
 class JoinRoomScreen extends StatefulWidget {
@@ -89,19 +91,19 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: Color(0xFF162447),
         title: Text(
-          '⚠️ Apelido não permitido',
+          t3('⚠️ Apelido não permitido', '⚠️ Nickname not allowed', '⚠️ Apodo no permitido'),
           style: TextStyle(color: Colors.white),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Este apelido contém palavras não permitidas.',
+              t3('Este apelido contém palavras não permitidas.', 'This nickname contains words that are not allowed.', 'Este apodo contiene palabras no permitidas.'),
               style: TextStyle(color: Colors.white70),
             ),
             SizedBox(height: 16),
             Text(
-              'Que tal usar:',
+              t3('Que tal usar:', 'How about:', '¿Qué tal usar:'),
               style: TextStyle(color: Colors.white70, fontSize: 12),
             ),
             SizedBox(height: 8),
@@ -157,22 +159,22 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '1️⃣ Peça o código da sala para o anfitrião',
+              t3('1️⃣ Peça o código da sala para o anfitrião', '1️⃣ Ask the host for the room code', '1️⃣ Pide el código de la sala al anfitrión'),
               style: TextStyle(color: Colors.white70),
             ),
             SizedBox(height: 12),
             Text(
-              '2️⃣ Digite o código de 6 dígitos',
+              t3('2️⃣ Digite o código de 6 dígitos', '2️⃣ Type the 6-digit code', '2️⃣ Escribe el código de 6 dígitos'),
               style: TextStyle(color: Colors.white70),
             ),
             SizedBox(height: 12),
             Text(
-              '3️⃣ Escolha seu apelido',
+              t3('3️⃣ Escolha seu apelido', '3️⃣ Choose your nickname', '3️⃣ Elige tu apodo'),
               style: TextStyle(color: Colors.white70),
             ),
             SizedBox(height: 12),
             Text(
-              '4️⃣ Aguarde no lobby até o anfitrião iniciar!',
+              t3('4️⃣ Aguarde no lobby até o anfitrião iniciar!', '4️⃣ Wait in the lobby until the host starts!', '4️⃣ ¡Espera en el lobby hasta que el anfitrión empiece!'),
               style: TextStyle(color: Colors.white70),
             ),
           ],
@@ -188,7 +190,10 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      GameDarkTheme(child: Builder(builder: _buildThemed));
+
+  Widget _buildThemed(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
@@ -216,7 +221,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
               Icon(Icons.meeting_room, size: 80, color: Color(0xFF3A5A8C)),
               SizedBox(height: 16),
               Text(
-                'Entre na partida',
+                t3('Entre na partida', 'Join the match', 'Únete a la partida'),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -226,7 +231,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
               ),
               SizedBox(height: 8),
               Text(
-                'Informe o código fornecido pelo anfitrião',
+                t3('Informe o código fornecido pelo anfitrião', 'Enter the code from the host', 'Ingresa el código del anfitrión'),
                 style: TextStyle(color: Colors.white70, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
@@ -234,7 +239,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
 
               // Campo de código da sala
               Text(
-                'Código da sala',
+                t3('Código da sala', 'Room code', 'Código de la sala'),
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
@@ -265,10 +270,10 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                 ],
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Digite o código da sala';
+                    return t3('Digite o código da sala', 'Type the room code', 'Escribe el código de la sala');
                   }
                   if (value.trim().length != 6) {
-                    return 'O código deve ter 6 dígitos';
+                    return t3('O código deve ter 6 dígitos', 'The code must have 6 digits', 'El código debe tener 6 dígitos');
                   }
                   return null;
                 },
@@ -277,7 +282,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
 
               // Campo de apelido
               Text(
-                'Seu apelido',
+                t3('Seu apelido', 'Your nickname', 'Tu apodo'),
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
@@ -285,7 +290,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                 controller: _nicknameController,
                 style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: 'Digite seu apelido',
+                  hintText: t3('Digite seu apelido', 'Type your nickname', 'Escribe tu apodo'),
                   hintStyle: TextStyle(color: Colors.white38),
                   filled: true,
                   fillColor: Color(0xFF23395D),
@@ -298,10 +303,10 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                 maxLength: 20,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Digite um apelido';
+                    return t3('Digite um apelido', 'Type a nickname', 'Escribe un apodo');
                   }
                   if (value.trim().length < 3) {
-                    return 'Mínimo 3 caracteres';
+                    return t3('Mínimo 3 caracteres', 'At least 3 characters', 'Mínimo 3 caracteres');
                   }
                   return null;
                 },
@@ -358,7 +363,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                           Icon(Icons.login, size: 24),
                           SizedBox(width: 8),
                           Text(
-                            'Entrar na Sala',
+                            t3('Entrar na Sala', 'Join Room', 'Entrar a la Sala'),
                             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                         ],

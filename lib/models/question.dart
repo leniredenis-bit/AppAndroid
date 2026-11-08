@@ -1,3 +1,5 @@
+import '../utils/i18n.dart';
+
 class Question {
   final String id;
   final String pergunta;
@@ -66,13 +68,11 @@ class Question {
   String getDificuldadeTexto() {
     switch (dificuldade) {
       case 1:
-        return 'Fácil';
-      case 2:
-        return 'Médio';
+        return t3('Fácil', 'Easy', 'Fácil');
       case 3:
-        return 'Difícil';
+        return t3('Difícil', 'Hard', 'Difícil');
       default:
-        return 'Médio';
+        return t3('Médio', 'Medium', 'Medio');
     }
   }
 }

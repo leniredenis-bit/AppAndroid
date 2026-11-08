@@ -3,6 +3,8 @@ import '../../services/multiplayer/firebase_multiplayer_service.dart';
 import '../../services/multiplayer/profanity_filter.dart';
 import '../../l10n/app_localizations.dart';
 import 'lobby_screen.dart';
+import '../../utils/i18n.dart';
+import '../../theme/app_theme.dart';
 
 /// Tela para o anfitrião criar uma nova sala multiplayer
 class CreateRoomScreen extends StatefulWidget {
@@ -80,7 +82,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
       );
     } catch (e) {
       setState(() {
-        _errorMessage = 'Erro ao criar sala: $e';
+        _errorMessage = t3('Erro ao criar sala: $e', 'Could not create the room: $e', 'No se pudo crear la sala: $e');
         _isCreating = false;
       });
     }
@@ -92,19 +94,19 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: Color(0xFF162447),
         title: Text(
-          '⚠️ Apelido não permitido',
+          t3('⚠️ Apelido não permitido', '⚠️ Nickname not allowed', '⚠️ Apodo no permitido'),
           style: TextStyle(color: Colors.white),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Este apelido contém palavras não permitidas.',
+              t3('Este apelido contém palavras não permitidas.', 'This nickname contains words that are not allowed.', 'Este apodo contiene palabras no permitidas.'),
               style: TextStyle(color: Colors.white70),
             ),
             SizedBox(height: 16),
             Text(
-              'Que tal usar:',
+              t3('Que tal usar:', 'How about:', '¿Qué tal usar:'),
               style: TextStyle(color: Colors.white70, fontSize: 12),
             ),
             SizedBox(height: 8),
@@ -143,7 +145,10 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      GameDarkTheme(child: Builder(builder: _buildThemed));
+
+  Widget _buildThemed(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
@@ -164,7 +169,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
               Icon(Icons.add_circle_outline, size: 80, color: Color(0xFF3A5A8C)),
               SizedBox(height: 16),
               Text(
-                'Configure sua sala',
+                t3('Configure sua sala', 'Set up your room', 'Configura tu sala'),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -174,7 +179,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
               ),
               SizedBox(height: 8),
               Text(
-                'Você será o anfitrião da partida',
+                t3('Você será o anfitrião da partida', 'You will host the match', 'Serás el anfitrión de la partida'),
                 style: TextStyle(color: Colors.white70, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
@@ -182,7 +187,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
 
               // Campo de apelido
               Text(
-                'Seu apelido',
+                t3('Seu apelido', 'Your nickname', 'Tu apodo'),
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
@@ -190,7 +195,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                 controller: _nicknameController,
                 style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: 'Digite seu apelido',
+                  hintText: t3('Digite seu apelido', 'Type your nickname', 'Escribe tu apodo'),
                   hintStyle: TextStyle(color: Colors.white38),
                   filled: true,
                   fillColor: Color(0xFF23395D),
@@ -203,10 +208,10 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                 maxLength: 20,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Digite um apelido';
+                    return t3('Digite um apelido', 'Type a nickname', 'Escribe un apodo');
                   }
                   if (value.trim().length < 3) {
-                    return 'Mínimo 3 caracteres';
+                    return t3('Mínimo 3 caracteres', 'At least 3 characters', 'Mínimo 3 caracteres');
                   }
                   return null;
                 },
@@ -215,7 +220,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
 
               // Número de perguntas
               Text(
-                'Número de perguntas',
+                t3('Número de perguntas', 'Number of questions', 'Número de preguntas'),
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
@@ -236,12 +241,13 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                         }
                       },
                     ),
-                    Text(
-                      '$_totalQuestions perguntas',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          t3('$_totalQuestions perguntas', '$_totalQuestions questions', '$_totalQuestions preguntas'),
+                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                     IconButton(
@@ -259,7 +265,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
 
               // Capacidade da sala
               Text(
-                'Capacidade da sala',
+                t3('Capacidade da sala', 'Room capacity', 'Capacidad de la sala'),
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
@@ -280,12 +286,13 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                         }
                       },
                     ),
-                    Text(
-                      '$_maxPlayers jogadores',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          t3('$_maxPlayers jogadores', '$_maxPlayers players', '$_maxPlayers jugadores'),
+                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                     IconButton(
@@ -315,7 +322,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'O tempo de cada pergunta é calculado automaticamente baseado no tamanho do texto',
+                        t3('O tempo de cada pergunta é calculado automaticamente baseado no tamanho do texto', 'Each question timer is calculated from the length of the text', 'El tiempo de cada pregunta se calcula según la longitud del texto'),
                         style: TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                     ),

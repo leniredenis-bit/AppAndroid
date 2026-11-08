@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:math';
 import '../models/achievement.dart';
 import '../models/achievement_texts.dart';
 import '../services/audio_service.dart';
+import '../theme/app_theme.dart';
 
 /// Dialog animado para mostrar quando uma conquista é desbloqueada
 class AchievementUnlockDialog extends StatefulWidget {
@@ -20,7 +20,7 @@ class AchievementUnlockDialog extends StatefulWidget {
   /// Mostrar dialog com animação
   static Future<void> show(BuildContext context, Achievement achievement) async {
     // Haptic feedback
-    HapticFeedback.mediumImpact();
+    Haptics.medium();
     
     // Som de vitória
     AudioService().playVictory();

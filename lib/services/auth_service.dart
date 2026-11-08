@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'firebase_service.dart';
+import '../utils/i18n.dart';
 
 /// Identidade do jogador para o multiplayer.
 ///
@@ -40,7 +41,7 @@ class AuthService {
     } on FirebaseAuthException catch (e) {
       debugPrint('AuthService: falha no login anônimo: ${e.code}');
       throw Exception(
-        'Não foi possível conectar ao modo online. Verifique sua internet e tente novamente.',
+        t3('Não foi possível conectar ao modo online. Verifique sua internet e tente novamente.', 'Could not connect to online mode. Check your internet and try again.', 'No se pudo conectar al modo en línea. Revisa tu internet e inténtalo de nuevo.'),
       );
     }
   }

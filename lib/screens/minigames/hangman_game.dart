@@ -6,6 +6,7 @@ import 'common/game_results.dart';
 import 'common/game_text.dart';
 import 'common/game_ui.dart';
 import 'hangman_words.dart';
+import '../../theme/app_theme.dart';
 
 const Color _accent = Color(0xFFFF8A65);
 const int _maxErrors = 6;
@@ -79,7 +80,7 @@ class _HangmanGameState extends State<HangmanGame> with SingleTickerProviderStat
     if (_over || _right.contains(letter) || _wrong.contains(letter)) return;
     if (_plain.contains(letter)) {
       setState(() => _right.add(letter));
-      HapticFeedback.selectionClick();
+      Haptics.selection();
       if (_won) {
         _finish(true);
       } else {
@@ -90,7 +91,7 @@ class _HangmanGameState extends State<HangmanGame> with SingleTickerProviderStat
         _wrong.add(letter);
         _shake++;
       });
-      HapticFeedback.mediumImpact();
+      Haptics.medium();
       if (_lost) {
         _finish(false);
       } else {

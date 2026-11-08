@@ -1,10 +1,10 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../services/audio_service.dart';
 import 'common/game_results.dart';
 import 'common/game_text.dart';
 import 'common/game_ui.dart';
+import '../../theme/app_theme.dart';
 
 // --- Constantes de Design ---
 const Color kNeonBlue = Color(0xFF00F0FF);
@@ -102,7 +102,7 @@ class _TicTacToeGameState extends State<TicTacToeGame> with TickerProviderStateM
 
   void _makeMove(int index, Player p) {
     AudioService().playSfx('pop', volume: 0.8);
-    HapticFeedback.selectionClick();
+    Haptics.selection();
     setState(() {
       board[index] = p;
       _cellControllers[index].forward();
@@ -129,7 +129,7 @@ class _TicTacToeGameState extends State<TicTacToeGame> with TickerProviderStateM
       xWins++;
       if (vsAi) streak++;
       AudioService().playVictory();
-      HapticFeedback.heavyImpact();
+      Haptics.heavy();
     } else if (winner == Player.O) {
       oWins++;
       if (vsAi) {

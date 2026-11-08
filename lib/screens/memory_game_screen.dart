@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../models/stats_service.dart';
 import '../services/audio_service.dart';
 import '../services/minigame_content_service.dart';
@@ -9,6 +8,8 @@ import '../widgets/emoji_text.dart';
 import 'minigames/common/game_results.dart';
 import 'minigames/common/game_text.dart';
 import 'minigames/common/game_ui.dart';
+import '../theme/app_theme.dart';
+import '../services/app_lifecycle.dart';
 
 const Color _accent = Color(0xFFFF6B6B);
 const List<Color> _playerColors = [Color(0xFF60A5FA), Color(0xFFF472B6), Color(0xFF4ADE80), Color(0xFFFBBF24)];
@@ -29,7 +30,8 @@ class MemoryCard {
   int shake = 0;
   int matchedBy = -1;
 
-  MemoryCard({required this.id, required this.emoji, required this.name, this.isFlipped = false, this.isMatched = false});
+  MemoryCard(
+      {required this.id, required this.emoji, required this.name, this.isFlipped = false, this.isMatched = false});
 }
 
 /// Temas do jogo da memória com nomes traduzidos.
@@ -37,7 +39,15 @@ class MemoryThemes {
   static final MinigameContentService _contentService = MinigameContentService();
 
   static const List<String> keys = [
-    'animais', 'frutas', 'aves', 'vida_marinha', 'natureza', 'transportes', 'objetos', 'numeros', 'todos',
+    'animais',
+    'frutas',
+    'aves',
+    'vida_marinha',
+    'natureza',
+    'transportes',
+    'objetos',
+    'numeros',
+    'todos',
   ];
 
   static Map<String, List<Map<String, String>>> get themes => _contentService.memoryThemes;
@@ -56,22 +66,40 @@ class MemoryThemes {
     return List<Map<String, String>>.from(themes[theme] ?? themes['animais']!);
   }
 
-  static String emoji(String theme) => const {
-        'animais': '🐶', 'frutas': '🍎', 'transportes': '🚗', 'vida_marinha': '🐠', 'aves': '🦜',
-        'numeros': '🔢', 'objetos': '💡', 'natureza': '🌸', 'todos': '🎲',
-      }[theme] ?? '🎴';
+  static String emoji(String theme) =>
+      const {
+        'animais': '🐶',
+        'frutas': '🍎',
+        'transportes': '🚗',
+        'vida_marinha': '🐠',
+        'aves': '🦜',
+        'numeros': '🔢',
+        'objetos': '💡',
+        'natureza': '🌸',
+        'todos': '🎲',
+      }[theme] ??
+      '🎴';
 
   static String name(String theme) {
     switch (theme) {
-      case 'animais': return t3('Animais', 'Animals', 'Animales');
-      case 'frutas': return t3('Frutas', 'Fruits', 'Frutas');
-      case 'transportes': return t3('Transportes', 'Transport', 'Transportes');
-      case 'vida_marinha': return t3('Vida Marinha', 'Sea Life', 'Vida Marina');
-      case 'aves': return t3('Aves', 'Birds', 'Aves');
-      case 'numeros': return t3('Números', 'Numbers', 'Números');
-      case 'objetos': return t3('Objetos', 'Objects', 'Objetos');
-      case 'natureza': return t3('Natureza', 'Nature', 'Naturaleza');
-      default: return t3('Todos', 'All', 'Todos');
+      case 'animais':
+        return t3('Animais', 'Animals', 'Animales');
+      case 'frutas':
+        return t3('Frutas', 'Fruits', 'Frutas');
+      case 'transportes':
+        return t3('Transportes', 'Transport', 'Transportes');
+      case 'vida_marinha':
+        return t3('Vida Marinha', 'Sea Life', 'Vida Marina');
+      case 'aves':
+        return t3('Aves', 'Birds', 'Aves');
+      case 'numeros':
+        return t3('Números', 'Numbers', 'Números');
+      case 'objetos':
+        return t3('Objetos', 'Objects', 'Objetos');
+      case 'natureza':
+        return t3('Natureza', 'Nature', 'Naturaleza');
+      default:
+        return t3('Todos', 'All', 'Todos');
     }
   }
 }
@@ -160,6 +188,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
       });
       _timer?.cancel();
       _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (!AppLifecycle.foreground.value) return; // pausado em segundo plano
         if (mounted) setState(() => _seconds++);
       });
     });
@@ -178,7 +207,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     if (_busy || card.isFlipped || card.isMatched || _open.length >= 2) return;
 
     AudioService().playCardFlip();
-    HapticFeedback.selectionClick();
+    Haptics.selection();
     setState(() {
       card.isFlipped = true;
       _open.add(index);
@@ -206,7 +235,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
         _open.clear();
         _busy = false;
       });
-      HapticFeedback.mediumImpact();
+      Haptics.medium();
       if (_combo >= 2) {
         AudioService().playSfx('combo');
         _showToast('🔥 Combo x$_combo!');
@@ -218,7 +247,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     } else {
       _combo = 0;
       AudioService().playMismatch();
-      HapticFeedback.lightImpact();
+      Haptics.light();
       setState(() {
         a.shake++;
         b.shake++;
@@ -254,14 +283,19 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     String? subtitle;
     if (_players > 1) {
       final best = _scores.reduce(max);
-      final winners = [for (int i = 0; i < _players; i++) if (_scores[i] == best) i];
+      final winners = [
+        for (int i = 0; i < _players; i++)
+          if (_scores[i] == best) i
+      ];
       title = winners.length == 1
           ? t3('Jogador ${winners.first + 1} venceu!', 'Player ${winners.first + 1} wins!',
               '¡Jugador ${winners.first + 1} ganó!')
           : t3('Empate!', "It's a tie!", '¡Empate!');
-      subtitle = List.generate(_players, (i) => 'J${i + 1}: ${_scores[i]}').join('   ·   ');
+      subtitle = List.generate(_players, (i) => '${t3('J', 'P', 'J')}${i + 1}: ${_scores[i]}').join('   ·   ');
     } else {
-      title = perfect ? t3('Memória perfeita!', 'Perfect memory!', '¡Memoria perfecta!') : t3('Parabéns!', 'Well done!', '¡Felicidades!');
+      title = perfect
+          ? t3('Memória perfeita!', 'Perfect memory!', '¡Memoria perfecta!')
+          : t3('Parabéns!', 'Well done!', '¡Felicidades!');
     }
 
     await showGameResult(
@@ -321,7 +355,8 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(t3('TEMA', 'THEME', 'TEMA'),
-                  style: const TextStyle(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
+                  style: const TextStyle(
+                      color: Colors.white60, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
               const SizedBox(height: 10),
               GridView.count(
                 crossAxisCount: 3,
@@ -428,7 +463,8 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
           child: IgnorePointer(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 250),
-              transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: FadeTransition(opacity: anim, child: child)),
+              transitionBuilder: (child, anim) =>
+                  ScaleTransition(scale: anim, child: FadeTransition(opacity: anim, child: child)),
               child: _toast == null
                   ? const SizedBox.shrink()
                   : Center(
@@ -440,7 +476,8 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(color: GameColors.gold.withValues(alpha: 0.6)),
                         ),
-                        child: Text(_toast!, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
+                        child: Text(_toast!,
+                            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
                       ),
                     ),
             ),
@@ -489,9 +526,10 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
             ),
             child: Column(
               children: [
-                Text('${active ? '▶ ' : ''}J${i + 1}',
+                Text('${active ? '▶ ' : ''}${t3('J', 'P', 'J')}${i + 1}',
                     style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 13)),
-                Text('${_scores[i]}', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
+                Text('${_scores[i]}',
+                    style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
               ],
             ),
           ),
@@ -660,8 +698,8 @@ class _MemoryCardView extends StatelessWidget {
 class _CardBackPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final inner = RRect.fromRectAndRadius(
-        Rect.fromLTWH(5, 5, size.width - 10, size.height - 10), const Radius.circular(10));
+    final inner =
+        RRect.fromRectAndRadius(Rect.fromLTWH(5, 5, size.width - 10, size.height - 10), const Radius.circular(10));
     canvas.drawRRect(
         inner,
         Paint()

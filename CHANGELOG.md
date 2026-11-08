@@ -5,6 +5,18 @@ Formato: versão (`pubspec.yaml`) · data · mudanças. Use as linhas "Para a lo
 ## 1.0.0+2 · preparação para as lojas (21/10/2026)
 **Para a loja:** Primeira versão! Quiz bíblico, 8 minigames (incluindo o novo Colorir) e multiplayer online.
 
+### App (docs/dev/PLANO_MELHORIAS_APP.md)
+- Tema claro e escuro de verdade, com contraste revisado; texto maior; liga/desliga de vibração; zerar progresso
+- Nova tela inicial com Pergunta do Dia (programável por data, link para o texto diário), destaque do Quiz e atalhos
+- Quiz: barra de tempo animada, letras A–D, sequência de acertos com bônus, modo estudo, tempo esgotado conta nas
+  estatísticas, confirmação ao sair, tela final com estrelas e revisão dos erros, "Jogar de novo"
+- Janela "Personalizar" (dificuldade, tema, quantidade) para o Clássico e o Torta na Cara
+- Torta na Cara: nomes dos jogadores, torta voando em quem erra, tela de campeão e revanche
+- Estatísticas (gráfico de evolução, temas fortes e fracos), Conquistas ("quase lá"), Configurações, Sobre e Termos redesenhados
+- Música e cronômetros pausam com o app em segundo plano; volumes salvos valem desde a abertura
+- Boas-vindas só na primeira vez (com escolha de idioma); textos restantes traduzidos (PT/EN/ES)
+- Ícones e textos proporcionais ao tamanho dos cartões; largura máxima em telas grandes
+
 ### Minigames (revisão completa: docs/dev/REVISAO_MINIGAMES.md)
 - 🆕 Colorir: importe qualquer desenho de contorno (as áreas são detectadas automaticamente), 7 desenhos + tela livre, balde, pincel, borracha, brilho, tons, desfazer, zoom, progresso salvo e "virar quebra-cabeça"
 - Quebra-Cabeça reescrito (encaixe correto, toque preciso, bandeja, 9–36 peças)

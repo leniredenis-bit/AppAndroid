@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import 'create_room_screen.dart';
 import 'join_room_screen.dart';
+import '../../theme/app_theme.dart';
 
 /// Menu de seleção: Criar Sala ou Entrar em Sala
 class MultiplayerMenuScreen extends StatelessWidget {
   const MultiplayerMenuScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      GameDarkTheme(child: Builder(builder: _buildThemed));
+
+  Widget _buildThemed(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Color(0xFF101A2C),
@@ -19,7 +23,8 @@ class MultiplayerMenuScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: SafeArea(
-        child: Padding(
+        // Rolável: em celulares pequenos o conteúdo não cabe na altura
+        child: SingleChildScrollView(
           padding: EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -98,8 +103,8 @@ class MultiplayerMenuScreen extends StatelessWidget {
                 },
               ),
               
-              Spacer(),
-              
+              SizedBox(height: 32),
+
               // Informações
               Container(
                 padding: EdgeInsets.all(16),

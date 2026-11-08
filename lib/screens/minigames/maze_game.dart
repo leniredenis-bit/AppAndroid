@@ -10,6 +10,8 @@ import '../../services/audio_service.dart';
 import 'common/game_results.dart';
 import 'common/game_text.dart';
 import 'common/game_ui.dart';
+import '../../theme/app_theme.dart';
+import '../../services/app_lifecycle.dart';
 
 const Color _accent = Color(0xFFFFA94D);
 const int _levelCount = 30;
@@ -206,6 +208,7 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
     _reveal();
     _clock?.cancel();
     _clock = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!AppLifecycle.foreground.value) return; // pausado em segundo plano
       if (mounted && !_won) setState(() => _seconds++);
     });
     if (!_ticker.isActive) _ticker.start();
@@ -237,7 +240,7 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
     var dir = d;
     if (!m.open(pos.x + dir.x, pos.y + dir.y)) {
       _audio.playSfx('bump', volume: 0.5);
-      HapticFeedback.lightImpact();
+      Haptics.light();
       return;
     }
     int guard = 0;
@@ -279,7 +282,7 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
     _holdTimer = Timer.periodic(const Duration(milliseconds: 95), (_) {
       if (_holdDir != null) _step(_holdDir!);
     });
-    HapticFeedback.selectionClick();
+    Haptics.selection();
   }
 
   void _endHold() {
@@ -320,7 +323,7 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
     if (_moves % 2 == 0) _audio.playSfx('step', volume: 0.35);
     if (m.gems.contains(p) && _gemsTaken.add(p)) {
       _audio.playSfx('gem');
-      HapticFeedback.mediumImpact();
+      Haptics.medium();
     }
     if (p == m.exit) _win();
   }
@@ -354,7 +357,8 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
       accent: _accent,
       title: t3('Nível $_level concluído!', 'Level $_level complete!', '¡Nivel $_level completado!'),
       subtitle: _gemsTaken.length < 3
-          ? t3('Pegue as 3 gemas para 3 estrelas', 'Collect all 3 gems for 3 stars', 'Recoge las 3 gemas para 3 estrellas')
+          ? t3('Pegue as 3 gemas para 3 estrelas', 'Collect all 3 gems for 3 stars',
+              'Recoge las 3 gemas para 3 estrellas')
           : null,
       stars: stars,
       newRecord: saved.newRecord,
@@ -363,7 +367,9 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
         ResultStat('💎', t3('Gemas', 'Gems', 'Gemas'), '${_gemsTaken.length}/3'),
         ResultStat('👣', t3('Passos', 'Steps', 'Pasos'), '$_moves'),
       ],
-      primaryLabel: last ? t3('Jogar de novo', 'Play again', 'Jugar de nuevo') : t3('Próximo nível', 'Next level', 'Siguiente nivel'),
+      primaryLabel: last
+          ? t3('Jogar de novo', 'Play again', 'Jugar de nuevo')
+          : t3('Próximo nível', 'Next level', 'Siguiente nivel'),
       onPrimary: () => _startLevel(last ? _level : _level + 1),
       secondaryLabel: t3('Escolher nível', 'Choose level', 'Elegir nivel'),
       onSecondary: _toMenu,
@@ -380,10 +386,14 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
   KeyEventResult _onKey(FocusNode node, KeyEvent e) {
     if (!_playing || e is! KeyDownEvent) return KeyEventResult.ignored;
     final map = <LogicalKeyboardKey, Point<int>>{
-      LogicalKeyboardKey.arrowUp: Point(-1, 0), LogicalKeyboardKey.keyW: Point(-1, 0),
-      LogicalKeyboardKey.arrowDown: Point(1, 0), LogicalKeyboardKey.keyS: Point(1, 0),
-      LogicalKeyboardKey.arrowLeft: Point(0, -1), LogicalKeyboardKey.keyA: Point(0, -1),
-      LogicalKeyboardKey.arrowRight: Point(0, 1), LogicalKeyboardKey.keyD: Point(0, 1),
+      LogicalKeyboardKey.arrowUp: Point(-1, 0),
+      LogicalKeyboardKey.keyW: Point(-1, 0),
+      LogicalKeyboardKey.arrowDown: Point(1, 0),
+      LogicalKeyboardKey.keyS: Point(1, 0),
+      LogicalKeyboardKey.arrowLeft: Point(0, -1),
+      LogicalKeyboardKey.keyA: Point(0, -1),
+      LogicalKeyboardKey.arrowRight: Point(0, 1),
+      LogicalKeyboardKey.keyD: Point(0, 1),
     };
     final d = map[e.logicalKey];
     if (d == null) return KeyEventResult.ignored;
@@ -418,7 +428,8 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
         GameHero(
           emoji: '🔦',
           title: t3('Cavernas do Labirinto', 'Maze Caverns', 'Cavernas del Laberinto'),
-          subtitle: t3('Deslize para correr pelos corredores, pegue as 3 gemas e encontre a saída',
+          subtitle: t3(
+              'Deslize para correr pelos corredores, pegue as 3 gemas e encontre a saída',
               'Swipe to run through corridors, grab the 3 gems and find the exit',
               'Desliza para correr por los pasillos, toma las 3 gemas y encuentra la salida'),
           accent: _accent,
@@ -454,7 +465,8 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
                 decoration: BoxDecoration(
                   color: locked ? Colors.black26 : (dark ? const Color(0xFF2A2140) : const Color(0xFF4A3220)),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: level == _unlocked ? _accent : Colors.white12, width: level == _unlocked ? 2 : 1),
+                  border: Border.all(
+                      color: level == _unlocked ? _accent : Colors.white12, width: level == _unlocked ? 2 : 1),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -462,7 +474,8 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
                     if (locked)
                       const Icon(Icons.lock_rounded, color: Colors.white30, size: 20)
                     else
-                      Text('$level', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
+                      Text('$level',
+                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
                     const SizedBox(height: 3),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -628,7 +641,8 @@ class _MazeGameState extends State<MazeGame> with SingleTickerProviderStateMixin
         }
         canvas.drawRect(rect, wallBase);
         canvas.drawRRect(
-            RRect.fromRectAndRadius(Rect.fromLTWH(rect.left + 1, rect.top + 1, t - 2, t * 0.72), Radius.circular(t * 0.18)),
+            RRect.fromRectAndRadius(
+                Rect.fromLTWH(rect.left + 1, rect.top + 1, t - 2, t * 0.72), Radius.circular(t * 0.18)),
             wallTop);
       }
     }
@@ -650,8 +664,16 @@ class _MazePainter extends CustomPainter {
   final double t;
 
   _MazePainter({
-    required this.maze, required this.picture, required this.tile, required this.view, required this.player,
-    required this.facing, required this.gemsTaken, required this.trail, required this.seen, required this.dark,
+    required this.maze,
+    required this.picture,
+    required this.tile,
+    required this.view,
+    required this.player,
+    required this.facing,
+    required this.gemsTaken,
+    required this.trail,
+    required this.seen,
+    required this.dark,
     required this.t,
   });
 
@@ -686,15 +708,24 @@ class _MazePainter extends CustomPainter {
             ..strokeWidth = tile * 0.06
             ..color = const Color(0xFFFFE066).withValues(alpha: 1 - ph));
     }
-    canvas.drawCircle(ex, tile * 0.34,
-        Paint()..shader = ui.Gradient.radial(ex, tile * 0.34, [Colors.white, const Color(0xFFFFC94A), const Color(0x00FFC94A)], [0, 0.4, 1]));
+    canvas.drawCircle(
+        ex,
+        tile * 0.34,
+        Paint()
+          ..shader = ui.Gradient.radial(
+              ex, tile * 0.34, [Colors.white, const Color(0xFFFFC94A), const Color(0x00FFC94A)], [0, 0.4, 1]));
 
     // Gemas
     for (final g in maze.gems) {
       if (gemsTaken.contains(g)) continue;
       final c = Offset((g.y + 0.5) * tile, (g.x + 0.5) * tile + sin(t * 3 + g.x) * tile * 0.06);
       final s = tile * 0.28;
-      canvas.drawCircle(c, s * 1.4, Paint()..color = const Color(0x4467E8F9)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6));
+      canvas.drawCircle(
+          c,
+          s * 1.4,
+          Paint()
+            ..color = const Color(0x4467E8F9)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6));
       final gem = Path()
         ..moveTo(c.dx, c.dy - s)
         ..lineTo(c.dx + s * 0.8, c.dy - s * 0.2)
@@ -709,7 +740,12 @@ class _MazePainter extends CustomPainter {
             ..lineTo(c.dx, c.dy - s * 0.05)
             ..close(),
           Paint()..color = const Color(0xFFA5F3FC));
-      canvas.drawPath(gem, Paint()..style = PaintingStyle.stroke..strokeWidth = 1..color = Colors.white70);
+      canvas.drawPath(
+          gem,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1
+            ..color = Colors.white70);
     }
 
     _drawPlayer(canvas, pp);
@@ -732,7 +768,8 @@ class _MazePainter extends CustomPainter {
           light,
           Paint()
             ..blendMode = BlendMode.dstOut
-            ..shader = ui.Gradient.radial(pp, light, [Colors.black, Colors.black, Colors.black.withValues(alpha: 0)], [0, 0.55, 1]));
+            ..shader = ui.Gradient.radial(
+                pp, light, [Colors.black, Colors.black, Colors.black.withValues(alpha: 0)], [0, 0.55, 1]));
       canvas.restore();
     }
     canvas.restore();
@@ -757,8 +794,12 @@ class _MazePainter extends CustomPainter {
     canvas.drawArc(Rect.fromCenter(center: body - Offset(0, s * 0.06), width: s * 0.5, height: s * 0.42), pi, pi, true,
         Paint()..color = const Color(0xFFFBBF24));
     canvas.drawCircle(body - Offset(0, s * 0.22), s * 0.06, Paint()..color = Colors.white);
-    canvas.drawCircle(body - Offset(0, s * 0.22), s * 0.14,
-        Paint()..color = const Color(0x55FFF7AE)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
+    canvas.drawCircle(
+        body - Offset(0, s * 0.22),
+        s * 0.14,
+        Paint()
+          ..color = const Color(0x55FFF7AE)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
   }
 
   @override

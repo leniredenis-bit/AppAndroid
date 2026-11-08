@@ -1,18 +1,21 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-import '../models/quiz_service.dart';
-import '../models/question.dart';
-import 'quiz_screen.dart';
-import 'pie_quiz_screen.dart';
-
-import 'stats_screen.dart';
-import 'multiplayer/multiplayer_menu_screen.dart';
-import '../widgets/emoji_text.dart';
-import '../services/audio_service.dart';
-import '../services/language_service.dart';
-import 'minigames_menu_screen.dart';
-
-import '../widgets/settings_dialog.dart';
 import '../l10n/app_localizations.dart';
+import '../models/stats_data.dart';
+import '../services/audio_service.dart';
+import '../services/storage_service.dart';
+import '../theme/app_theme.dart';
+import '../utils/i18n.dart';
+import '../widgets/app_ui.dart';
+import '../widgets/daily_question_card.dart';
+import '../widgets/quiz_setup_sheet.dart';
+import '../widgets/settings_dialog.dart';
+import 'achievements_screen.dart';
+import 'minigames_menu_screen.dart';
+import 'multiplayer/multiplayer_menu_screen.dart';
+import 'pie_quiz_screen.dart';
+import 'quiz_screen.dart';
+import 'stats_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,384 +25,259 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<String> allTags = [];
-  List<String> displayedTags = [];
-  bool isLoadingTags = true;
-  bool showAllTags = false;
-  final int initialTagsCount = 7;
-
-  int? selectedDifficultyIndex; // Usa índice ao invés de string
-  String? selectedTag;
-  
-  // Retorna as dificuldades traduzidas
-  List<String> _getDifficulties(AppLocalizations l10n) {
-    return [l10n.easy, l10n.medium, l10n.hard];
-  }
-  
-  // Retorna os modos de jogo traduzidos
-  List<Map<String, String>> _getModes(AppLocalizations l10n) {
-    return [
-      {'emoji': '🧠', 'title': l10n.homeQuizClassic, 'desc': l10n.homeQuizClassicDesc},
-      {'emoji': '🥧', 'title': l10n.homeQuizPie, 'desc': l10n.homeQuizPieDesc},
-      {'emoji': '🌐', 'title': l10n.homeOnlineMatch, 'desc': l10n.homeOnlineMatchDesc},
-      {'emoji': '🎮', 'title': l10n.homeMinigames, 'desc': l10n.homeMinigamesDesc},
-      {'emoji': '📊', 'title': l10n.homeStats, 'desc': l10n.homeStatsDesc},
-    ];
-  }
+  GlobalStats? _stats;
+  int _dailyStreak = 0;
+  Key _dailyKey = UniqueKey();
 
   @override
   void initState() {
     super.initState();
-    loadTags();
-    // Escuta mudanças de idioma para recarregar tags
-    LanguageService().addListener(_onLanguageChanged);
-    // Inicia música de fundo da home
     AudioService().playBackgroundMusic('home');
+    _loadStats();
   }
 
   @override
   void dispose() {
-    // Remove listener de idioma
-    LanguageService().removeListener(_onLanguageChanged);
-    // Para música ao sair da tela
     AudioService().stopBackgroundMusic();
     super.dispose();
   }
-  
-  void _onLanguageChanged() {
-    // Recarrega tags quando idioma muda
-    loadTags();
+
+  Future<void> _loadStats() async {
+    final s = await StorageService().getGlobalStats();
+    if (mounted) setState(() => _stats = s);
   }
 
-  Future<void> loadTags() async {
-    try {
-      final popularTags = await QuizService.getPopularTags();
-      setState(() {
-        allTags = popularTags.map((entry) => entry.key).toList();
-        displayedTags = allTags.take(initialTagsCount).toList();
-        isLoadingTags = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoadingTags = false;
-      });
-      if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.homeLoadingCategoriesError(e.toString()))),
-        );
-      }
+  /// Abre uma tela e, ao voltar, retoma a música e atualiza os números.
+  Future<void> _open(Widget screen) async {
+    AudioService().playClick();
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+    if (!mounted) return;
+    AudioService().playBackgroundMusic('home');
+    _loadStats();
+    setState(() => _dailyKey = UniqueKey()); // a data pode ter virado
+  }
+
+  Future<void> _startClassic() async {
+    final l10n = AppLocalizations.of(context)!;
+    final cfg = await showQuizSetup(context, title: '🧠 ${l10n.homeQuizClassic}');
+    if (cfg == null || !mounted) return;
+    final questions = await cfg.build();
+    if (!mounted) return;
+    if (questions.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.homeNoQuestionsFound)));
+      return;
     }
+    _open(QuizScreen(questions: questions, studyMode: cfg.studyMode, replay: cfg.build));
   }
 
-  void toggleShowAllTags() {
-    setState(() {
-      showAllTags = !showAllTags;
-      displayedTags = showAllTags ? allTags : allTags.take(initialTagsCount).toList();
-    });
-  }
-
-  void startQuiz() async {
-    try {
-      List<Question> questions = await QuizService.loadQuestions();
-      
-      // Aplicar filtros
-      if (selectedDifficultyIndex != null) {
-        // Converter índice para nível de dificuldade (1=Fácil, 2=Médio, 3=Difícil)
-        int difficultyLevel = selectedDifficultyIndex! + 1;
-        questions = QuizService.filterByDifficulty(questions, difficultyLevel);
-      }
-      
-      if (selectedTag != null) {
-        questions = QuizService.filterByTag(questions, selectedTag!);
-      }
-      
-      // Pegar 10 perguntas aleatórias
-      questions = QuizService.getRandomQuestions(questions, 10);
-      
-      if (questions.isEmpty) {
-        if (!mounted) return;
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.homeNoQuestionsFound)),
-        );
-        return;
-      }
-      
-      if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => QuizScreen(questions: questions),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.homeLoadingError(e.toString()))),
-      );
+  Future<void> _startPie() async {
+    final l10n = AppLocalizations.of(context)!;
+    final cfg = await showQuizSetup(context, title: '🥧 ${l10n.homeQuizPie}', allowStudyMode: false);
+    if (cfg == null || !mounted) return;
+    final questions = await cfg.build();
+    if (!mounted) return;
+    if (questions.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.homeNoQuestionsFound)));
+      return;
     }
+    _open(PieQuizScreen(questions: questions, replay: cfg.build));
   }
 
+  void _openSettings() {
+    AudioService().playClick();
+    showDialog(context: context, builder: (_) => SettingsDialog(onThemeChanged: (_) {}));
+  }
+
+  String get _greeting {
+    final h = DateTime.now().hour;
+    if (h < 12) return t3('Bom dia! ☀️', 'Good morning! ☀️', '¡Buenos días! ☀️');
+    if (h < 18) return t3('Boa tarde! 🌤️', 'Good afternoon! 🌤️', '¡Buenas tardes! 🌤️');
+    return t3('Boa noite! 🌙', 'Good evening! 🌙', '¡Buenas noches! 🌙');
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final difficulties = _getDifficulties(l10n);
-    final modes = _getModes(l10n);
-    
-    return Scaffold(
-      backgroundColor: Color(0xFF101A2C),
-      appBar: AppBar(
-        title: Text(l10n.appTitle, style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF162447),
-        iconTheme: IconThemeData(color: Colors.white),
-        elevation: 0,
+    final p = context.palette;
+    return AppPage(
+      title: 'JW Splash Games',
+      leading: const SizedBox.shrink(),
+      actions: [
+        IconButton(
+          tooltip: t3('Configurações', 'Settings', 'Configuración'),
+          icon: const Icon(Icons.settings_rounded),
+          onPressed: _openSettings,
+        ),
+      ],
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+        children: [
+          _header(p),
+          const SizedBox(height: 16),
+          DailyQuestionCard(key: _dailyKey, onStreak: (s) => setState(() => _dailyStreak = s)),
+          const SizedBox(height: 16),
+          _classicCard(l10n),
+          const SizedBox(height: 16),
+          LayoutBuilder(builder: (context, c) {
+            final cols = max(2, (c.maxWidth / 200).floor());
+            final w = (c.maxWidth - (cols - 1) * 12) / cols;
+            final modes = [
+              _Mode('🥧', l10n.homeQuizPie, l10n.homeQuizPieDesc, const [Color(0xFFC2410C), Color(0xFF9A3412)], _startPie),
+              _Mode('🌐', l10n.homeOnlineMatch, l10n.homeOnlineMatchDesc, const [Color(0xFF0F766E), Color(0xFF134E4A)],
+                  () => _open(const MultiplayerMenuScreen())),
+              _Mode('🎮', l10n.homeMinigames, l10n.homeMinigamesDesc, const [Color(0xFF7C3AED), Color(0xFF5B21B6)],
+                  () => _open(const MinigamesMenuScreen())),
+              _Mode('📊', l10n.homeStats, t3('Seu desempenho', 'Your performance', 'Tu desempeño'),
+                  const [Color(0xFF2563EB), Color(0xFF1E40AF)], () => _open(const StatsScreen())),
+              _Mode('🏆', t3('Conquistas', 'Achievements', 'Logros'), t3('15 para desbloquear', '15 to unlock', '15 por desbloquear'),
+                  const [Color(0xFFB45309), Color(0xFF92400E)], () => _open(const AchievementsScreen())),
+            ];
+            // Se sobrar um cartão sozinho na última linha, ele ocupa a largura toda
+            final leftover = modes.length % cols;
+            return Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                for (int i = 0; i < modes.length; i++)
+                  leftover == 1 && i == modes.length - 1
+                      ? SizedBox(width: c.maxWidth, height: w * 0.62, child: _ModeCard(mode: modes[i]))
+                      : SizedBox(width: w, height: w * 0.78, child: _ModeCard(mode: modes[i])),
+              ],
+            );
+          }),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+
+  Widget _header(AppPalette p) {
+    final s = _stats;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(_greeting, style: TextStyle(color: p.text, fontSize: 26, fontWeight: FontWeight.w900)),
+        const SizedBox(height: 2),
+        Text(t3('Pronto para aprender brincando?', 'Ready to learn while you play?', '¿Listo para aprender jugando?'),
+            style: TextStyle(color: p.textMuted, fontSize: 15)),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
           children: [
-            // Botões compactos de modo de jogo (MOVIDOS PARA CIMA)
-            ...modes.asMap().entries.map((entry) {
-              final index = entry.key;
-              final mode = entry.value;
-              
-              VoidCallback? onPressed;
-              if (index == 0) {
-                onPressed = () {
-                  AudioService().playClick();
-                  startQuiz();
-                };
-              } else if (index == 1) {
-                // Quiz Torta na Cara - Duelo 1v1
-                onPressed = () async {
-                  AudioService().playClick();
-                  try {
-                    List<Question> questions = await QuizService.loadQuestions();
-                    
-                    // Aplicar filtros se houver
-                    if (selectedDifficultyIndex != null) {
-                      int difficultyLevel = selectedDifficultyIndex! + 1;
-                      questions = QuizService.filterByDifficulty(questions, difficultyLevel);
-                    }
-                    
-                    if (selectedTag != null) {
-                      questions = QuizService.filterByTag(questions, selectedTag!);
-                    }
-                    
-                    // Pegar 10 perguntas aleatórias
-                    questions = QuizService.getRandomQuestions(questions, 10);
-                    
-                    if (questions.isEmpty) {
-                      if (!context.mounted) return;
-                      final l10n = AppLocalizations.of(context)!;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.homeNoQuestionsFound)),
-                      );
-                      return;
-                    }
-                    
-                    if (!context.mounted) return;
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PieQuizScreen(
-                          questions: questions,
-                          playerName: 'Apresentador',
-                        ),
-                      ),
-                    );
-                  } catch (e) {
-                    if (!context.mounted) return;
-                    final l10n = AppLocalizations.of(context)!;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.homeLoadingError(e.toString()))),
-                    );
-                  }
-                };
-              } else if (index == 2) {
-                onPressed = () {
-                  AudioService().playClick();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MultiplayerMenuScreen()),
-                  );
-                };
-              } else if (index == 3) {
-                // Minigames
-                onPressed = () {
-                  AudioService().playClick();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MinigamesMenuScreen()),
-                  );
-                };
-              } else if (index == 4) {
-                // Estatísticas
-                onPressed = () {
-                  AudioService().playClick();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => StatsScreen()),
-                  );
-                };
-              }
-              
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF23395D),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                    elevation: 2,
-                  ),
-                  onPressed: onPressed,
-                  child: Row(
-                    children: [
-                      EmojiText(mode['emoji']!, size: 28),
-                      SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              mode['title']!, 
-                              style: TextStyle(
-                                color: Colors.white, 
-                                fontWeight: FontWeight.bold, 
-                                fontSize: 16,
-                              ),
-                            ),
-                            Text(
-                              mode['desc']!, 
-                              style: TextStyle(
-                                color: Colors.white70, 
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-            
-            SizedBox(height: 24),
-            Divider(color: Colors.white24),
-            SizedBox(height: 16),
-            
-            // Filtros de dificuldade (MOVIDOS PARA BAIXO)
-            Text(l10n.homeDifficulty, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-            SizedBox(height: 8),
-            Row(
-              children: difficulties.asMap().entries.map((entry) {
-                final index = entry.key;
-                final dif = entry.value;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(dif),
-                    selected: selectedDifficultyIndex == index,
-                    backgroundColor: Color(0xFF23395D),
-                    selectedColor: Color(0xFF3A5A8C),
-                    labelStyle: TextStyle(color: Colors.white),
-                    onSelected: (selected) {
-                      setState(() {
-                        selectedDifficultyIndex = selected ? index : null;
-                      });
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 16),
-            // Tags de categorias
-            Text(l10n.homeCategories, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-            SizedBox(height: 8),
-            isLoadingTags 
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: CircularProgressIndicator(color: Color(0xFF3A5A8C)),
-                  ),
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      constraints: BoxConstraints(
-                        maxHeight: showAllTags ? 300 : double.infinity,
-                      ),
-                      child: SingleChildScrollView(
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: displayedTags.map((tag) => FilterChip(
-                            label: Text(tag),
-                            selected: selectedTag == tag,
-                            backgroundColor: Color(0xFF23395D),
-                            selectedColor: Color(0xFF3A5A8C),
-                            labelStyle: TextStyle(color: Colors.white),
-                            onSelected: (selected) {
-                              setState(() {
-                                selectedTag = selected ? tag : null;
-                              });
-                            },
-                          )).toList(),
-                        ),
-                      ),
-                    ),
-                    if (allTags.length > initialTagsCount)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: TextButton.icon(
-                          onPressed: toggleShowAllTags,
-                          icon: Icon(
-                            showAllTags ? Icons.expand_less : Icons.expand_more,
-                            color: Color(0xFF3A5A8C),
-                          ),
-                          label: Text(
-                            showAllTags ? l10n.homeShowLess : l10n.homeShowMore(allTags.length - initialTagsCount),
-                            style: TextStyle(color: Color(0xFF3A5A8C)),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-            SizedBox(height: 16),
+            _statPill(p, '🔥', '$_dailyStreak', t3('dias seguidos', 'day streak', 'días seguidos')),
+            _statPill(p, '⭐', '${s?.highScore ?? 0}', t3('recorde', 'best score', 'récord')),
+            _statPill(p, '🧠', '${s?.totalQuizzes ?? 0}', t3('quizzes', 'quizzes', 'quizzes')),
           ],
         ),
+      ],
+    );
+  }
+
+  Widget _statPill(AppPalette p, String emoji, String value, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: p.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: p.border),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          AudioService().playClick();
-          final l10n = AppLocalizations.of(context)!;
-          showDialog(
-            context: context,
-            builder: (context) => SettingsDialog(
-              onThemeChanged: (isDark) {
-                final theme = isDark ? l10n.homeThemeDark : l10n.homeThemeLight;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.homeThemeActivated(theme)),
-                    duration: Duration(seconds: 1),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Text(emoji, style: const TextStyle(fontSize: 15)),
+        const SizedBox(width: 6),
+        Text(value, style: TextStyle(color: p.text, fontWeight: FontWeight.w900)),
+        const SizedBox(width: 4),
+        Text(label, style: TextStyle(color: p.textMuted, fontSize: 12)),
+      ]),
+    );
+  }
+
+  Widget _classicCard(AppLocalizations l10n) {
+    return AppCard(
+      onTap: _startClassic,
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF2563EB), Color(0xFF6D28D9)],
+      ),
+      borderColor: Colors.white.withValues(alpha: 0.25),
+      padding: const EdgeInsets.all(18),
+      child: LayoutBuilder(builder: (context, c) {
+        final emoji = (c.maxWidth * 0.17).clamp(52.0, 96.0);
+        return Row(
+          children: [
+            Text('🧠', style: TextStyle(fontSize: emoji)),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.homeQuizClassic,
+                      style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
+                  const SizedBox(height: 2),
+                  Text(t3('1.180 perguntas · escolha tema e dificuldade', '1,180 questions · pick topic and difficulty',
+                          '1.180 preguntas · elige tema y dificultad'),
+                      style: const TextStyle(color: Colors.white, fontSize: 13)),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(Icons.play_arrow_rounded, color: Color(0xFF1E40AF)),
+                      const SizedBox(width: 4),
+                      Text(t3('Jogar', 'Play', 'Jugar'),
+                          style: const TextStyle(color: Color(0xFF1E40AF), fontWeight: FontWeight.w900, fontSize: 15)),
+                    ]),
                   ),
-                );
-              },
+                ],
+              ),
             ),
-          );
-        },
-        backgroundColor: Color(0xFF4A90E2),
-        child: Icon(Icons.settings, color: Colors.white),
-      ),
+          ],
+        );
+      }),
+    );
+  }
+}
+
+class _Mode {
+  final String emoji, title, desc;
+  final List<Color> colors;
+  final VoidCallback onTap;
+  _Mode(this.emoji, this.title, this.desc, this.colors, this.onTap);
+}
+
+class _ModeCard extends StatelessWidget {
+  final _Mode mode;
+  const _ModeCard({required this.mode});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      onTap: mode.onTap,
+      padding: EdgeInsets.zero,
+      gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: mode.colors),
+      borderColor: Colors.white.withValues(alpha: 0.22),
+      child: LayoutBuilder(builder: (context, c) {
+        // Emoji e texto proporcionais ao cartão (web/tablet não ficam com ícone minúsculo)
+        final k = (c.maxWidth / 170).clamp(0.85, 1.6);
+        return Padding(
+          padding: EdgeInsets.all(12 * k),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(mode.emoji, style: TextStyle(fontSize: c.maxWidth * 0.22)),
+              const Spacer(),
+              Text(mode.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 15 * k)),
+              Text(mode.desc,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.white, fontSize: 11.5 * k, height: 1.2)),
+            ],
+          ),
+        );
+      }),
     );
   }
 }

@@ -12,6 +12,7 @@ import 'common/game_results.dart';
 import 'common/game_text.dart';
 import 'common/game_ui.dart';
 import 'jigsaw_puzzle_game.dart';
+import '../../theme/app_theme.dart';
 
 const Color _accent = Color(0xFFF472B6);
 
@@ -636,7 +637,7 @@ class _ColoringEditorState extends State<_ColoringEditor> with SingleTickerProvi
     final prev = _fills[r];
     if (prev != null && prev.color == next.color && prev.shine == next.shine) return;
     _pushUndo();
-    HapticFeedback.selectionClick();
+    Haptics.selection();
     AudioService().playSfx('paint', volume: 0.7);
     setState(() {
       _splashRegion = r;
@@ -1016,7 +1017,7 @@ class _ColoringEditorState extends State<_ColoringEditor> with SingleTickerProvi
             final sel = c == _base;
             return GestureDetector(
               onTap: () {
-                HapticFeedback.selectionClick();
+                Haptics.selection();
                 AudioService().playSfx('pop', volume: 0.35);
                 setState(() {
                   _base = c;
@@ -1057,7 +1058,7 @@ class _ColoringEditorState extends State<_ColoringEditor> with SingleTickerProvi
             return Expanded(
               child: GestureDetector(
                 onTap: () {
-                  HapticFeedback.selectionClick();
+                  Haptics.selection();
                   setState(() => _color = c);
                 },
                 child: AnimatedContainer(

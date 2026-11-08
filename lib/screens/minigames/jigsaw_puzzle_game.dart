@@ -9,6 +9,8 @@ import '../../services/audio_service.dart';
 import 'common/game_results.dart';
 import 'common/game_text.dart';
 import 'common/game_ui.dart';
+import '../../theme/app_theme.dart';
+import '../../services/app_lifecycle.dart';
 
 const Color _accent = Color(0xFF2DD4BF);
 
@@ -116,8 +118,8 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerPr
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(t3('Não foi possível abrir a galeria.', 'Could not open the gallery.',
-            'No se pudo abrir la galería.')),
+        content: Text(
+            t3('Não foi possível abrir a galeria.', 'Could not open the gallery.', 'No se pudo abrir la galería.')),
       ));
     }
   }
@@ -153,6 +155,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerPr
     });
     _clock?.cancel();
     _clock = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!AppLifecycle.foreground.value) return; // pausado em segundo plano
       if (mounted && !_won) setState(() => _seconds++);
     });
     if (!_ticker.isActive) _ticker.start();
@@ -303,7 +306,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerPr
           ..removeAt(i)
           ..add(p);
         _audio.playSfx('pickup', volume: 0.6);
-        HapticFeedback.selectionClick();
+        Haptics.selection();
         setState(() {});
         return;
       }
@@ -332,7 +335,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerPr
       p.targetScale = 1;
       p.flash = 1;
       _audio.playSfx('snap');
-      HapticFeedback.mediumImpact();
+      Haptics.medium();
       // Peças travadas ficam por baixo das soltas
       _pieces
         ..remove(p)
@@ -466,8 +469,8 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerPr
         GameHero(
           emoji: '🧩',
           title: t3('Quebra-Cabeça', 'Jigsaw Puzzle', 'Rompecabezas'),
-          subtitle: t3('Escolha uma imagem e monte peça por peça',
-              'Choose an image and build it piece by piece', 'Elige una imagen y ármala pieza por pieza'),
+          subtitle: t3('Escolha uma imagem e monte peça por peça', 'Choose an image and build it piece by piece',
+              'Elige una imagen y ármala pieza por pieza'),
           accent: _accent,
         ),
         const SizedBox(height: 22),
@@ -490,7 +493,8 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerPr
                 onChanged: (v) => setState(() => _showSilhouette = v),
                 title: Text(t3('Mostrar imagem de fundo', 'Show background image', 'Mostrar imagen de fondo'),
                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                subtitle: Text(t3('Uma sombra da imagem ajuda a montar', 'A faint image helps you build',
+                subtitle: Text(
+                    t3('Uma sombra da imagem ajuda a montar', 'A faint image helps you build',
                         'Una sombra de la imagen te ayuda'),
                     style: const TextStyle(color: Colors.white54, fontSize: 12)),
               ),
@@ -499,7 +503,8 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerPr
         ),
         const SizedBox(height: 20),
         Text(t3('ESCOLHA A IMAGEM', 'CHOOSE THE IMAGE', 'ELIGE LA IMAGEN'),
-            style: const TextStyle(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
+            style:
+                const TextStyle(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
         const SizedBox(height: 10),
         GridView.count(
           crossAxisCount: 2,
@@ -621,7 +626,7 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerPr
   Widget _iconButton(IconData icon, String tooltip, VoidCallback onTap) {
     return GestureDetector(
       onTap: () {
-        HapticFeedback.selectionClick();
+        Haptics.selection();
         onTap();
       },
       child: _iconBox(icon, tooltip),
@@ -697,9 +702,18 @@ class _JigsawPainter extends CustomPainter {
   final Offset Function(_Piece) centerOf;
 
   _JigsawPainter({
-    required this.image, required this.pieces, required this.grid, required this.board,
-    required this.tray, required this.s, required this.silhouette, required this.peek,
-    required this.dragging, required this.won, required this.winShine, required this.centerOf,
+    required this.image,
+    required this.pieces,
+    required this.grid,
+    required this.board,
+    required this.tray,
+    required this.s,
+    required this.silhouette,
+    required this.peek,
+    required this.dragging,
+    required this.won,
+    required this.winShine,
+    required this.centerOf,
   });
 
   Rect get _src {

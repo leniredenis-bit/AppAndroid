@@ -1,4 +1,5 @@
 import 'dart:math';
+import '../../utils/i18n.dart';
 
 /// Serviço para validar apelidos e filtrar palavras ofensivas
 class ProfanityFilter {
@@ -70,7 +71,7 @@ class ProfanityFilter {
     if (nickname.trim().isEmpty) {
       return ValidationResult(
         isValid: false,
-        message: 'O apelido não pode estar vazio',
+        message: t3('O apelido não pode estar vazio', 'The nickname cannot be empty', 'El apodo no puede estar vacío'),
         suggestedNickname: generateAlternativeNickname(),
       );
     }
@@ -78,7 +79,7 @@ class ProfanityFilter {
     if (nickname.trim().length < 3) {
       return ValidationResult(
         isValid: false,
-        message: 'O apelido deve ter pelo menos 3 caracteres',
+        message: t3('O apelido deve ter pelo menos 3 caracteres', 'The nickname must have at least 3 characters', 'El apodo debe tener al menos 3 caracteres'),
         suggestedNickname: null,
       );
     }
@@ -86,7 +87,7 @@ class ProfanityFilter {
     if (nickname.trim().length > 20) {
       return ValidationResult(
         isValid: false,
-        message: 'O apelido deve ter no máximo 20 caracteres',
+        message: t3('O apelido deve ter no máximo 20 caracteres', 'The nickname must have at most 20 characters', 'El apodo debe tener como máximo 20 caracteres'),
         suggestedNickname: null,
       );
     }
@@ -95,7 +96,7 @@ class ProfanityFilter {
     if (containsProfanity(nickname)) {
       return ValidationResult(
         isValid: false,
-        message: 'Este apelido contém palavras não permitidas',
+        message: t3('Este apelido contém palavras não permitidas', 'This nickname contains words that are not allowed', 'Este apodo contiene palabras no permitidas'),
         suggestedNickname: generateAlternativeNickname(),
       );
     }
@@ -103,7 +104,7 @@ class ProfanityFilter {
     // Apelido válido
     return ValidationResult(
       isValid: true,
-      message: 'Apelido válido!',
+      message: t3('Apelido válido!', 'Valid nickname!', '¡Apodo válido!'),
       suggestedNickname: null,
     );
   }

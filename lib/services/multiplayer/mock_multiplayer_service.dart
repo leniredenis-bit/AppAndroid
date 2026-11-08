@@ -3,6 +3,7 @@ import 'dart:math';
 import '../../models/multiplayer/room.dart';
 import '../../models/multiplayer/player.dart';
 import '../../models/quiz_service.dart';
+import '../../utils/i18n.dart';
 
 /// Serviço MOCK para simular backend multiplayer
 /// Permite testar o fluxo completo sem Firebase
@@ -97,19 +98,19 @@ class MockMultiplayerService {
 
     final room = _rooms[roomCode];
     if (room == null) {
-      throw Exception('Sala não encontrada. Verifique o código.');
+      throw Exception(t3('Sala não encontrada. Verifique o código.', 'Room not found. Check the code.', 'Sala no encontrada. Revisa el código.'));
     }
 
     if (room.status != RoomStatus.waiting) {
-      throw Exception('Esta sala já está em andamento.');
+      throw Exception(t3('Esta sala já está em andamento.', 'This room has already started.', 'Esta sala ya está en curso.'));
     }
 
     if (room.isFull) {
-      throw Exception('Esta sala está cheia.');
+      throw Exception(t3('Esta sala está cheia.', 'This room is full.', 'Esta sala está llena.'));
     }
 
     if (room.players.containsKey(playerId)) {
-      throw Exception('Você já está nesta sala.');
+      throw Exception(t3('Você já está nesta sala.', 'You are already in this room.', 'Ya estás en esta sala.'));
     }
 
     // Selecionar avatar aleatório
@@ -166,10 +167,10 @@ class MockMultiplayerService {
     await Future.delayed(Duration(milliseconds: 500));
 
     final room = _rooms[roomCode];
-    if (room == null) throw Exception('Sala não encontrada');
+    if (room == null) throw Exception(t3('Sala não encontrada', 'Room not found', 'Sala no encontrada'));
 
     if (room.players.length < 2) {
-      throw Exception('É necessário pelo menos 2 jogadores para iniciar');
+      throw Exception(t3('É necessário pelo menos 2 jogadores para iniciar', 'At least 2 players are needed to start', 'Se necesitan al menos 2 jugadores para empezar'));
     }
 
     final updatedRoom = room.copyWith(
@@ -204,10 +205,10 @@ class MockMultiplayerService {
     await Future.delayed(Duration(milliseconds: 150));
 
     final room = _rooms[roomCode];
-    if (room == null) throw Exception('Sala não encontrada');
+    if (room == null) throw Exception(t3('Sala não encontrada', 'Room not found', 'Sala no encontrada'));
 
     final player = room.players[playerId];
-    if (player == null) throw Exception('Jogador não encontrado');
+    if (player == null) throw Exception(t3('Jogador não encontrado', 'Player not found', 'Jugador no encontrado'));
 
     final updatedPlayer = player.copyWith(
       hasAnswered: true,
@@ -240,7 +241,7 @@ class MockMultiplayerService {
     await Future.delayed(Duration(milliseconds: 300));
 
     final room = _rooms[roomCode];
-    if (room == null) throw Exception('Sala não encontrada');
+    if (room == null) throw Exception(t3('Sala não encontrada', 'Room not found', 'Sala no encontrada'));
 
     final nextIndex = room.currentQuestionIndex + 1;
 
@@ -273,7 +274,7 @@ class MockMultiplayerService {
     await Future.delayed(Duration(milliseconds: 500));
 
     final room = _rooms[roomCode];
-    if (room == null) throw Exception('Sala não encontrada');
+    if (room == null) throw Exception(t3('Sala não encontrada', 'Room not found', 'Sala no encontrada'));
 
     // Selecionar novas perguntas
     final allQuestions = await QuizService.loadQuestions();

@@ -3,7 +3,7 @@
 > **Documento central do projeto.** Substitui `NEXT_STEPS`, `PROJECT_STATUS`, `PUBLICATION_CHECKLIST`,
 > `EXECUTIVE_SUMMARY`, `PENDENCIAS`, `MELHORIAS_EM_ANDAMENTO` e `ajustesapp` (arquivados em `docs/archive/`).
 >
-> Atualizado em **21/10/2026** · Versão do app: **1.0.0+2**
+> Atualizado em **22/10/2026** · Versão do app: **1.0.0+2**
 > Legenda: 👤 = ação sua (contas, consoles, arte, testes) · 🤖 = posso fazer no código
 
 ---
@@ -18,7 +18,8 @@
 | Multiplayer online | ✅ Firebase real restaurado (estava em modo simulado). Falta ativar login anônimo + publicar regras |
 | Privacidade | ✅ Política pública em `web/privacidade.html` e texto do app corrigido (antes dizia que nada saía do aparelho) |
 | Minigames | ✅ Revisão completa + novo jogo **Colorir** ([detalhes](docs/dev/REVISAO_MINIGAMES.md)) |
-| Ícone / splash | ⏳ Configurados; **falta a arte** (ainda é o ícone padrão do Flutter) |
+| App geral | ✅ Tema claro/escuro, Quiz, Home com Pergunta do Dia, telas redesenhadas ([detalhes](docs/dev/PLANO_MELHORIAS_APP.md)) |
+| Ícone / splash | ✅ Arte original de livro aberto com brilho, sem cruz; recursos nativos gerados |
 | Lojas | ⏳ Contas, fichas, screenshots |
 
 ### Feito em 21/10/2026

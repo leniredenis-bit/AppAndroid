@@ -1,0 +1,4 @@
+{
+  "_como_usar": "Programe a pergunta de uma data: \"AAAA-MM-DD\": \"id_da_pergunta\" (ids de assets/data/perguntas_*.json). Datas sem programação recebem um sorteio fixo pela data. Chaves que começam com _ são ignoradas.",
+  "_exemplo": "2026-12-25: 10001"
+}

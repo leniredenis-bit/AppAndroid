@@ -20,6 +20,9 @@ Comece pelo **[PLANO_LANCAMENTO.md](../PLANO_LANCAMENTO.md)**: status atual, pen
 ## Técnico
 | Documento | Conteúdo |
 |---|---|
+| [dev/PLANO_MELHORIAS_APP.md](dev/PLANO_MELHORIAS_APP.md) | Plano e resultado das melhorias do app (tema, quiz, home…) |
+| [dev/REVISAO_MINIGAMES.md](dev/REVISAO_MINIGAMES.md) | Revisão completa dos minigames |
+| [AJUSTES_PENDENTES.md](AJUSTES_PENDENTES.md) | Lista única de coisas para ajustar depois |
 | [dev/MULTIPLAYER.md](dev/MULTIPLAYER.md) | Arquitetura do multiplayer online |
 | [dev/SISTEMA_AUDIO.md](dev/SISTEMA_AUDIO.md) | Músicas e efeitos sonoros |
 | [dev/TIMER_SYSTEM.md](dev/TIMER_SYSTEM.md) | Cálculo do tempo por pergunta |

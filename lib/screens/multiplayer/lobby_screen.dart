@@ -5,6 +5,8 @@ import '../../models/multiplayer/room.dart';
 import '../../services/multiplayer/firebase_multiplayer_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'multiplayer_quiz_screen.dart';
+import '../../utils/i18n.dart';
+import '../../theme/app_theme.dart';
 
 /// Tela do Lobby - Sala de espera antes de iniciar o jogo
 class LobbyScreen extends StatefulWidget {
@@ -58,7 +60,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
         }
       },
       onError: (error) {
-        _showErrorDialog('Erro de conexão: $error');
+        _showErrorDialog(t3('Erro de conexão: $error', 'Connection error: $error', 'Error de conexión: $error'));
       },
     );
   }
@@ -87,7 +89,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
   Future<void> _startGame() async {
     if (_currentRoom == null) return;
     if (_currentRoom!.players.length < 2) {
-      _showErrorDialog('É necessário pelo menos 2 jogadores para iniciar');
+      _showErrorDialog(t3('É necessário pelo menos 2 jogadores para iniciar', 'At least 2 players are needed to start', 'Se necesitan al menos 2 jugadores para empezar'));
       return;
     }
 
@@ -98,7 +100,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
       // A navegação acontecerá automaticamente via stream
     } catch (e) {
       setState(() => _isStarting = false);
-      _showErrorDialog('Erro ao iniciar: $e');
+      _showErrorDialog(t3('Erro ao iniciar: $e', 'Could not start: $e', 'No se pudo iniciar: $e'));
     }
   }
 
@@ -110,7 +112,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
         backgroundColor: Color(0xFF162447),
         title: Text(l10n.multiplayerRemovePlayer, style: TextStyle(color: Colors.white)),
         content: Text(
-          'Tem certeza que deseja remover este jogador da sala?',
+          t3('Tem certeza que deseja remover este jogador da sala?', 'Remove this player from the room?', '¿Quitar a este jugador de la sala?'),
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
@@ -147,8 +149,8 @@ class _LobbyScreenState extends State<LobbyScreen> {
         title: Text(l10n.multiplayerLeaveRoom, style: TextStyle(color: Colors.white)),
         content: Text(
           _isHost
-              ? 'Você é o anfitrião. Ao sair, a sala será encerrada para todos.'
-              : 'Tem certeza que deseja sair?',
+              ? t3('Você é o anfitrião. Ao sair, a sala será encerrada para todos.', 'You are the host. If you leave, the room closes for everyone.', 'Eres el anfitrión. Si sales, la sala se cerrará para todos.')
+              : t3('Tem certeza que deseja sair?', 'Are you sure you want to leave?', '¿Seguro que quieres salir?'),
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
@@ -186,7 +188,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
         backgroundColor: Color(0xFF162447),
         title: Text('📢 ${l10n.multiplayerEndRoom}', style: TextStyle(color: Colors.white)),
         content: Text(
-          'Isso irá expulsar todos os jogadores e fechar a sala permanentemente.',
+          t3('Isso irá expulsar todos os jogadores e fechar a sala permanentemente.', 'This will remove all players and close the room for good.', 'Esto expulsará a todos y cerrará la sala definitivamente.'),
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
@@ -297,7 +299,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      GameDarkTheme(child: Builder(builder: _buildThemed));
+
+  Widget _buildThemed(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     if (_currentRoom == null) {
       return Scaffold(
@@ -460,7 +465,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
-                                        'ANFITRIÃO',
+                                        t3('ANFITRIÃO', 'HOST', 'ANFITRIÓN'),
                                         style: TextStyle(
                                           color: Colors.black,
                                           fontSize: 10,
@@ -478,7 +483,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
-                                        'VOCÊ',
+                                        t3('VOCÊ', 'YOU', 'TÚ'),
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 10,
@@ -491,7 +496,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
                               ),
                               SizedBox(height: 4),
                               Text(
-                                'Pronto para jogar ✓',
+                                t3('Pronto para jogar ✓', 'Ready to play ✓', 'Listo para jugar ✓'),
                                 style: TextStyle(color: Colors.green.shade300, fontSize: 12),
                               ),
                             ],
@@ -501,7 +506,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
                           IconButton(
                             icon: Icon(Icons.person_remove, color: Colors.red.shade300),
                             onPressed: () => _removePlayer(player.id),
-                            tooltip: 'Remover jogador',
+                            tooltip: t3('Remover jogador', 'Remove player', 'Quitar jugador'),
                           ),
                       ],
                     ),
@@ -545,7 +550,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
                           ),
                           SizedBox(width: 12),
                           Text(
-                            'Aguardando o anfitrião iniciar...',
+                            t3('Aguardando o anfitrião iniciar...', 'Waiting for the host to start...', 'Esperando a que el anfitrión empiece...'),
                             style: TextStyle(color: Colors.white, fontSize: 16),
                           ),
                         ],
@@ -566,7 +571,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
                         onPressed: (isStarting || _isStarting) ? null : _startGame,
                         child: isStarting
                             ? Text(
-                                'Iniciando em 3... 2... 1...',
+                                t3('Iniciando em 3... 2... 1...', 'Starting in 3... 2... 1...', 'Empezando en 3... 2... 1...'),
                                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               )
                             : Row(

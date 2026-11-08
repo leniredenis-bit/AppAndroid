@@ -6,12 +6,13 @@ class TimerCalculator {
   static const double _wordsPerSecond = 2.0;
   
   /// Calcula tempo de leitura para o Quiz normal (single player)
-  /// Fórmula: (palavras / 2) + 10 segundos base
+  /// Fórmula: (palavras / 2) + 10 segundos base (+5 nas perguntas difíceis)
   static int calculateQuizTime(Question question) {
     final totalWords = _countWords(question);
     final readingTime = (totalWords / _wordsPerSecond).ceil();
-    final timeWithBuffer = readingTime + 10;
-    
+    final hardBonus = question.dificuldade == 3 ? 5 : 0;
+    final timeWithBuffer = readingTime + 10 + hardBonus;
+
     // Mínimo de 10 segundos, máximo de 60
     return timeWithBuffer.clamp(10, 60);
   }

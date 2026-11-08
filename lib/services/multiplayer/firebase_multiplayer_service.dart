@@ -8,6 +8,7 @@ import '../../models/quiz_service.dart';
 import '../auth_service.dart';
 import '../firebase_service.dart';
 import 'mock_multiplayer_service.dart';
+import '../../utils/i18n.dart';
 
 /// Serviço multiplayer online (Firebase Realtime Database).
 ///
@@ -48,7 +49,7 @@ class FirebaseMultiplayerService {
 
   Future<Room> _readRoom(String roomCode) async {
     final snapshot = await _roomRef(roomCode).get();
-    if (!snapshot.exists) throw Exception('Sala não encontrada. Verifique o código.');
+    if (!snapshot.exists) throw Exception(t3('Sala não encontrada. Verifique o código.', 'Room not found. Check the code.', 'Sala no encontrada. Revisa el código.'));
     return _roomFromSnapshot(snapshot);
   }
 
@@ -59,7 +60,7 @@ class FirebaseMultiplayerService {
       final exists = (await _roomRef(code).get()).exists;
       if (!exists) return code;
     }
-    throw Exception('Não foi possível gerar um código de sala. Tente novamente.');
+    throw Exception(t3('Não foi possível gerar um código de sala. Tente novamente.', 'Could not create a room code. Try again.', 'No se pudo generar un código de sala. Inténtalo de nuevo.'));
   }
 
   Future<List<String>> _pickQuestionIds(int total) async {
@@ -123,8 +124,8 @@ class FirebaseMultiplayerService {
     }
 
     final room = await _readRoom(roomCode);
-    if (room.status != RoomStatus.waiting) throw Exception('Esta sala já está em andamento.');
-    if (room.isFull) throw Exception('Esta sala está cheia.');
+    if (room.status != RoomStatus.waiting) throw Exception(t3('Esta sala já está em andamento.', 'This room has already started.', 'Esta sala ya está en curso.'));
+    if (room.isFull) throw Exception(t3('Esta sala está cheia.', 'This room is full.', 'Esta sala está llena.'));
     if (room.players.containsKey(playerId)) return room;
 
     const avatars = ['😊', '🙂', '😄', '🤗', '😇', '🤓', '😎', '🥳'];
@@ -152,7 +153,7 @@ class FirebaseMultiplayerService {
 
     final room = await _readRoom(roomCode);
     if (room.players.length < 2) {
-      throw Exception('É necessário pelo menos 2 jogadores para iniciar');
+      throw Exception(t3('É necessário pelo menos 2 jogadores para iniciar', 'At least 2 players are needed to start', 'Se necesitan al menos 2 jugadores para empezar'));
     }
 
     final ref = _roomRef(roomCode);

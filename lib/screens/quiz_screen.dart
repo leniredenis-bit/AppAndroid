@@ -1,786 +1,337 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:math';
+import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/question.dart';
-import '../models/stats_service.dart';
 import '../models/stats_data.dart';
-import '../utils/timer_calculator.dart';
+import '../models/stats_service.dart';
+import '../services/achievement_service.dart';
+import '../services/app_lifecycle.dart';
 import '../services/audio_service.dart';
 import '../services/storage_service.dart';
-import '../services/achievement_service.dart';
+import '../theme/app_theme.dart';
+import '../utils/i18n.dart';
+import '../utils/timer_calculator.dart';
 import '../widgets/achievement_unlock_dialog.dart';
+import '../widgets/app_ui.dart';
 import '../widgets/bible_reference_button.dart';
-import '../l10n/app_localizations.dart';
+import 'quiz_result_screen.dart';
+
+/// Resultado de cada pergunta, usado na revisão final.
+class AnsweredQuestion {
+  final Question question;
+  final int? chosen; // null = tempo esgotado
+  final int points;
+  AnsweredQuestion(this.question, this.chosen, this.points);
+  bool get correct => chosen == question.respostaCorreta;
+}
 
 class QuizScreen extends StatefulWidget {
   final List<Question> questions;
 
-  const QuizScreen({
-    super.key,
-    required this.questions});
+  /// Sem cronômetro (para estudar com calma).
+  final bool studyMode;
+
+  /// Gera um novo conjunto de perguntas com os mesmos filtros ("Jogar de novo").
+  final Future<List<Question>> Function()? replay;
+
+  const QuizScreen({super.key, required this.questions, this.studyMode = false, this.replay});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
-class _QuizScreenState extends State<QuizScreen> {
-  int currentQuestionIndex = 0;
-  int score = 0;
-  int correctAnswersCount = 0;
-  int? selectedAnswer;
-  bool showResult = false;
-  Timer? _timer;
-  Timer? _nextQuestionTimer;
-  int timeRemaining = 30;
-  int autoAdvanceTime = 10;
-  bool showExplanation = false;
-  
-  // Rastreamento para persistência
-  List<QuestionResult> questionResults = [];
-  DateTime? quizStartTime;
-  int totalTimeSpent = 0;
+class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
+  static const int _autoAdvanceSeconds = 12;
+
+  int _index = 0;
+  int _score = 0;
+  int _streak = 0;
+  int _bestStreak = 0;
+  int? _chosen; // alternativa escolhida (-1 = tempo esgotado)
+  int _lastPoints = 0;
+  int _questionTime = 30;
+  int _autoAdvance = _autoAdvanceSeconds;
+  Timer? _advanceTimer;
+  late final AnimationController _clock;
+  late final AnimationController _pulse;
+  final List<AnsweredQuestion> _answers = [];
+  final List<QuestionResult> _results = [];
+  final DateTime _startedAt = DateTime.now();
+  bool _finishing = false;
+
+  Question get _q => widget.questions[_index];
+  bool get _answered => _chosen != null;
 
   @override
   void initState() {
     super.initState();
-    quizStartTime = DateTime.now();
-    // Inicia música de fundo do quiz
+    _clock = AnimationController(vsync: this)..addStatusListener(_onClockStatus);
+    _pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 520));
+    _clock.addListener(_onClockTick);
+    AppLifecycle.foreground.addListener(_onForegroundChanged);
     AudioService().playBackgroundMusic('quiz');
-    startTimer();
+    _startQuestion();
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
-    _nextQuestionTimer?.cancel();
+    AppLifecycle.foreground.removeListener(_onForegroundChanged);
+    _advanceTimer?.cancel();
+    _clock.dispose();
+    _pulse.dispose();
     AudioService().stopBackgroundMusic();
     super.dispose();
   }
 
-  void startTimer() {
-    // Calcular tempo dinamicamente baseado na pergunta atual
-    final currentQuestion = widget.questions[currentQuestionIndex];
-    timeRemaining = TimerCalculator.calculateQuizTime(currentQuestion);
-    
-    _timer?.cancel();
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (timeRemaining > 0 && !showExplanation) {
-        setState(() {
-          timeRemaining--;
-        });
-      } else if (timeRemaining <= 0 && !showExplanation && selectedAnswer == null) {
-        // Tempo esgotado sem resposta - marcar a resposta certa
-        setState(() {
-          selectedAnswer = widget.questions[currentQuestionIndex].respostaCorreta;
-          showResult = true;
-        });
-        _timer?.cancel();
-        startAutoAdvanceTimer();
-      }
-    });
+  // ==========================================================================
+  // TEMPO
+  // ==========================================================================
+
+  void _startQuestion() {
+    _questionTime = TimerCalculator.calculateQuizTime(_q);
+    _chosen = null;
+    _lastPoints = 0;
+    _advanceTimer?.cancel();
+    _pulse.stop();
+    _pulse.value = 0;
+    if (!widget.studyMode) {
+      _clock.duration = Duration(seconds: _questionTime);
+      _clock.forward(from: 0);
+    }
   }
 
-  void startAutoAdvanceTimer() {
-    autoAdvanceTime = 10;
-    _nextQuestionTimer?.cancel();
-    _nextQuestionTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (!showExplanation && autoAdvanceTime > 0) {
-        setState(() {
-          autoAdvanceTime--;
-        });
-      } else if (autoAdvanceTime <= 0) {
-        nextQuestion();
-      }
-    });
+  int get _secondsLeft => max(0, (_questionTime * (1 - _clock.value)).ceil());
+
+  void _onClockTick() {
+    // Pulsa nos últimos 25% do tempo
+    if (_clock.value > 0.75 && !_pulse.isAnimating && !_answered) {
+      _pulse.repeat(reverse: true);
+    }
   }
 
-  void selectAnswer(int index) {
-    if (selectedAnswer != null) return;
+  void _onClockStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed && !_answered) _timeUp();
+  }
 
-    final question = widget.questions[currentQuestionIndex];
-    final isCorrect = index == question.respostaCorreta;
-    final questionStartTime = TimerCalculator.calculateQuizTime(question);
-    final timeToAnswer = questionStartTime - timeRemaining;
-    
-    // Verifica se tem explicação (referência bíblica)
-    final hasExplanation = (question.textoBiblico != null && question.textoBiblico!.isNotEmpty);
-
-    setState(() {
-      selectedAnswer = index;
-      showResult = true;
-      // Abre modal automaticamente se houver explicação (referência bíblica)
-      if (hasExplanation) {
-        showExplanation = true;
-      }
-    });
-
-    // Registrar resultado da pergunta
-    questionResults.add(QuestionResult(
-      questionId: question.id,
-      wasCorrect: isCorrect,
-      timeToAnswer: timeToAnswer,
-    ));
-
-    _timer?.cancel();
-
-    if (isCorrect) {
-      // Som de acerto!
-      AudioService().playCorrectAnswer();
-      setState(() {
-        score += calculatePoints();
-        correctAnswersCount++;
-      });
+  /// Pausa o cronômetro com o app em segundo plano (ligação, troca de app).
+  void _onForegroundChanged() {
+    if (AppLifecycle.foreground.value) {
+      if (!_answered && !widget.studyMode && _clock.value < 1) _clock.forward();
     } else {
-      // Som de erro (buzina)
+      _clock.stop();
+    }
+  }
+
+  // ==========================================================================
+  // RESPOSTAS
+  // ==========================================================================
+
+  int _pointsFor(Question q) {
+    final base = q.dificuldade == 3 ? 20 : (q.dificuldade == 2 ? 15 : 10);
+    final timeBonus = widget.studyMode ? 0 : (_secondsLeft * 0.5).round();
+    final streakBonus = min(_streak, 5) * 2; // sequência em andamento
+    return base + timeBonus + streakBonus;
+  }
+
+  void _select(int index) {
+    if (_answered) return;
+    _clock.stop();
+    _pulse.stop();
+    final q = _q;
+    final correct = index == q.respostaCorreta;
+    final elapsed = (_questionTime * _clock.value).round();
+    int points = 0;
+    if (correct) {
+      points = _pointsFor(q);
+      _streak++;
+      _bestStreak = max(_bestStreak, _streak);
+      _score += points;
+      Haptics.medium();
+      AudioService().playSfx(_streak >= 3 ? 'combo' : 'correct');
+    } else {
+      _streak = 0;
+      Haptics.heavy();
       AudioService().playWrongAnswer();
     }
-
-    // Inicia timer de auto-avanço (10s)
-    startAutoAdvanceTimer();
-  }
-
-  int calculatePoints() {
-    // Pontuação baseada no tempo restante e dificuldade
-    final question = widget.questions[currentQuestionIndex];
-    int basePoints = 10;
-    
-    if (question.dificuldade == 3) { // Difícil
-      basePoints = 20;
-    } else if (question.dificuldade == 2) { // Médio
-      basePoints = 15;
-    }
-    
-    int timeBonus = (timeRemaining * 0.5).round();
-    return basePoints + timeBonus;
-  }
-
-  void nextQuestion() {
-    _nextQuestionTimer?.cancel();
-    
-    if (currentQuestionIndex < widget.questions.length - 1) {
-      setState(() {
-        currentQuestionIndex++;
-        selectedAnswer = null;
-        showResult = false;
-        showExplanation = false;
-      });
-      startTimer();
-    } else {
-      // Quiz finalizado
-      _timer?.cancel();
-      showQuizResult();
-    }
-  }
-
-  void toggleExplanation() {
+    _results.add(QuestionResult(questionId: q.id, wasCorrect: correct, timeToAnswer: elapsed));
+    _answers.add(AnsweredQuestion(q, index, points));
     setState(() {
-      showExplanation = !showExplanation;
+      _chosen = index;
+      _lastPoints = points;
+    });
+    _startAutoAdvance();
+  }
+
+  /// Tempo esgotado: conta como erro, mostra a resposta certa e a explicação.
+  void _timeUp() {
+    if (_answered) return;
+    final q = _q;
+    _streak = 0;
+    _pulse.stop();
+    AudioService().playWrongAnswer();
+    Haptics.heavy();
+    _results.add(QuestionResult(questionId: q.id, wasCorrect: false, timeToAnswer: _questionTime));
+    _answers.add(AnsweredQuestion(q, null, 0));
+    setState(() => _chosen = -1);
+    _startAutoAdvance();
+  }
+
+  void _startAutoAdvance() {
+    _autoAdvance = _autoAdvanceSeconds;
+    _advanceTimer?.cancel();
+    _advanceTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted || !AppLifecycle.foreground.value) return;
+      if (_autoAdvance <= 1) {
+        _next();
+      } else {
+        setState(() => _autoAdvance--);
+      }
     });
   }
 
-  void showQuizResult() async {
-    // Calcular tempo total gasto
-    if (quizStartTime != null) {
-      totalTimeSpent = DateTime.now().difference(quizStartTime!).inSeconds;
+  void _next() {
+    _advanceTimer?.cancel();
+    if (_index < widget.questions.length - 1) {
+      setState(() => _index++);
+      _startQuestion();
+    } else {
+      _finish();
     }
+  }
 
-    // Salvar estatísticas antigas (StatsService)
-    await StatsService.saveQuizStats(
-      score: score,
-      questionsAnswered: widget.questions.length,
-      correctAnswers: correctAnswersCount,
-    );
+  Future<void> _finish() async {
+    if (_finishing) return;
+    _finishing = true;
+    final total = widget.questions.length;
+    final correct = _answers.where((a) => a.correct).length;
+    final seconds = DateTime.now().difference(_startedAt).inSeconds;
 
-    // Salvar no novo sistema de persistência
+    await StatsService.saveQuizStats(score: _score, questionsAnswered: total, correctAnswers: correct);
     final storage = StorageService();
     await storage.saveQuizResult(
-      mode: 'quiz_normal', // TODO: passar o modo real (rápido, estudo, etc)
-      score: score,
-      correctAnswers: correctAnswersCount,
-      totalQuestions: widget.questions.length,
-      timeSpent: totalTimeSpent,
-      difficulty: _getMostCommonDifficulty(),
-      category: _getMostCommonCategory(),
-      questionResults: questionResults,
+      mode: widget.studyMode ? 'quiz_estudo' : 'quiz_normal',
+      score: _score,
+      correctAnswers: correct,
+      totalQuestions: total,
+      timeSpent: seconds,
+      difficulty: _mostCommonDifficulty(),
+      category: _mostCommonCategory(),
+      questionResults: _results,
     );
-
-    // Verificar conquistas
-    final achievementService = AchievementService();
-    final globalStats = await storage.getGlobalStats();
-    final unlockedAchievements = await achievementService.checkQuizAchievements(
-      totalQuizzes: globalStats.totalQuizzes,
-      correctAnswers: correctAnswersCount,
-      totalQuestions: widget.questions.length,
-      timeInSeconds: totalTimeSpent,
-      streak: globalStats.currentStreak,
+    final global = await storage.getGlobalStats();
+    final unlocked = await AchievementService().checkQuizAchievements(
+      totalQuizzes: global.totalQuizzes,
+      correctAnswers: correct,
+      totalQuestions: total,
+      timeInSeconds: widget.studyMode ? 9999 : seconds,
+      streak: global.currentStreak,
     );
-
-    // Mostrar diálogos de conquistas desbloqueadas
-    if (mounted && unlockedAchievements.isNotEmpty) {
-      for (final achievement in unlockedAchievements) {
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AchievementUnlockDialog(achievement: achievement),
-        );
-      }
-    }
-    
     if (!mounted) return;
-    
-    // Calcular porcentagem de acertos
-    final percentage = (correctAnswersCount / widget.questions.length * 100).round();
-    
-    // Escolher emoji e mensagem baseado no desempenho
-    String emoji;
-    String message;
-    Color celebrationColor;
-    
-    if (percentage >= 90) {
-      emoji = '🏆';
-      message = 'Excelente!';
-      celebrationColor = Colors.amber;
-    } else if (percentage >= 70) {
-      emoji = '🎉';
-      message = 'Muito Bem!';
-      celebrationColor = Colors.green;
-    } else if (percentage >= 50) {
-      emoji = '👏';
-      message = 'Bom Trabalho!';
-      celebrationColor = Colors.blue;
-    } else {
-      emoji = '💪';
-      message = 'Continue Praticando!';
-      celebrationColor = Colors.orange;
+    for (final a in unlocked) {
+      if (!mounted) return;
+      await AchievementUnlockDialog.show(context, a);
     }
-    
-    showDialog(
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (_) => QuizResultScreen(
+        answers: _answers,
+        score: _score,
+        seconds: seconds,
+        bestStreak: _bestStreak,
+        studyMode: widget.studyMode,
+        replay: widget.replay,
+      ),
+    ));
+  }
+
+  String? _mostCommonDifficulty() {
+    final counts = <int, int>{};
+    for (final q in widget.questions) {
+      counts[q.dificuldade] = (counts[q.dificuldade] ?? 0) + 1;
+    }
+    if (counts.isEmpty) return null;
+    final d = counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+    return d == 1 ? 'fácil' : (d == 2 ? 'médio' : 'difícil');
+  }
+
+  String? _mostCommonCategory() {
+    final counts = <String, int>{};
+    for (final q in widget.questions) {
+      if (q.tags.isNotEmpty) counts[q.tags.first] = (counts[q.tags.first] ?? 0) + 1;
+    }
+    if (counts.isEmpty) return null;
+    return counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+  }
+
+  Future<bool> _confirmExit() async {
+    _clock.stop();
+    final leave = await showDialog<bool>(
       context: context,
-      barrierDismissible: false,
-      builder: (context) => _AnimatedResultDialog(
-        emoji: emoji,
-        message: message,
-        score: score,
-        correctAnswers: correctAnswersCount,
-        totalQuestions: widget.questions.length,
-        celebrationColor: celebrationColor,
+      builder: (ctx) => AlertDialog(
+        title: Text(t3('Sair do quiz?', 'Leave the quiz?', '¿Salir del quiz?')),
+        content: Text(t3('Seu progresso nesta partida será perdido.', 'Your progress in this round will be lost.',
+            'Perderás el progreso de esta partida.')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t3('Continuar', 'Keep playing', 'Seguir'))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(t3('Sair', 'Leave', 'Salir'), style: TextStyle(color: context.palette.danger)),
+          ),
+        ],
       ),
     );
+    if (leave != true && !_answered && !widget.studyMode) _clock.forward();
+    return leave == true;
   }
 
-  String? _getMostCommonDifficulty() {
-    if (widget.questions.isEmpty) return null;
-    final difficulties = widget.questions.map((q) => q.dificuldade).toList();
-    final mostCommon = difficulties.reduce((a, b) =>
-      difficulties.where((d) => d == a).length > difficulties.where((d) => d == b).length ? a : b);
-    return mostCommon == 1 ? 'fácil' : mostCommon == 2 ? 'médio' : 'difícil';
-  }
-
-  String? _getMostCommonCategory() {
-    if (widget.questions.isEmpty) return null;
-    // Usar a primeira tag como categoria
-    final categories = widget.questions
-        .where((q) => q.tags.isNotEmpty)
-        .map((q) => q.tags.first)
-        .toList();
-    if (categories.isEmpty) return null;
-    return categories.reduce((a, b) =>
-      categories.where((c) => c == a).length > categories.where((c) => c == b).length ? a : b);
-  }
+  // ==========================================================================
+  // UI
+  // ==========================================================================
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final question = widget.questions[currentQuestionIndex];
-    // Verifica se tem referência bíblica (agora em textoBiblico após inversão)
-    final hasExplanation = (question.textoBiblico != null && question.textoBiblico!.isNotEmpty);
-
-    return Scaffold(
-      backgroundColor: Color(0xFF101A2C),
-      appBar: AppBar(
-        title: Text(l10n.quizTitle(currentQuestionIndex + 1, widget.questions.length), style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF23395D), // Cor mais clara para legibilidade
-        iconTheme: IconThemeData(color: Colors.white),
-        elevation: 0,
+    final p = context.palette;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        if (await _confirmExit() && context.mounted) Navigator.of(context).pop();
+      },
+      child: AppPage(
+        title: l10n.quizTitle(_index + 1, widget.questions.length),
         actions: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(right: 14),
             child: Center(
-              child: Text(
-                '⭐ $score',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              child: TweenAnimationBuilder<int>(
+                tween: IntTween(end: _score),
+                duration: const Duration(milliseconds: 500),
+                builder: (_, v, __) => Text('⭐ $v',
+                    style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w800)),
               ),
             ),
           ),
         ],
-      ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: 8),
-                
-                // Balão da Pergunta com Timer no canto superior direito
-                Container(
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Color(0xFF162447),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Linha com ID, Dificuldade e Timer
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // ID e Dificuldade
-                          Row(
-                            children: [
-                              Text(
-                                'Pergunta #${question.id}',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w300,
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                question.getDificuldadeTexto(),
-                                style: TextStyle(
-                                  color: Colors.amber,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          // Timer (só aparece se não está no modo estudo)
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Color(0xFF23395D),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              '⏱️ ${timeRemaining}s',
-                              style: TextStyle(
-                                color: timeRemaining <= 10 ? Colors.redAccent : Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12),
-                      Text(
-                        question.pergunta,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 24),
-            
-            // Alternativas
-            Expanded(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: question.opcoes.length,
-                      itemBuilder: (context, index) {
-                        final isSelected = selectedAnswer == index;
-                        final isCorrect = index == question.respostaCorreta;
-                        
-                        Color buttonColor = Color(0xFF23395D);
-                        if (showResult) {
-                          if (isCorrect) {
-                            buttonColor = Colors.green.shade700;
-                          } else if (isSelected && !isCorrect) {
-                            buttonColor = Colors.red.shade700;
-                          }
-                        }
-
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: buttonColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              padding: EdgeInsets.all(16),
-                              elevation: isSelected ? 4 : 2,
-                            ),
-                            onPressed: () => selectAnswer(index),
-                            child: Text(
-                              question.opcoes[index],
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  
-                  // Caixinha de Explicação (inline, abaixo das alternativas)
-                  if (showExplanation && hasExplanation)
-                    Container(
-                      margin: EdgeInsets.only(top: 8, bottom: 8),
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF162447),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white24, width: 2),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '📖 Explicação',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.close, color: Colors.white, size: 20),
-                                onPressed: toggleExplanation,
-                                padding: EdgeInsets.zero,
-                                constraints: BoxConstraints(),
-                              ),
-                            ],
-                          ),
-                          Divider(color: Colors.white24),
-                          SizedBox(height: 8),
-                          if (question.textoBiblico != null && question.textoBiblico!.isNotEmpty)
-                            BibleReferenceButton(reference: question.textoBiblico!),
-                          SizedBox(height: 12),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green.shade700,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              ),
-                              onPressed: () {
-                                toggleExplanation();
-                                nextQuestion();
-                              },
-                              child: Text(
-                                l10n.quizNext,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            
-            // Botão Próxima (aparece após responder, apenas se NÃO tiver explicação aberta)
-            if (showResult && !showExplanation)
-              Padding(
-                padding: const EdgeInsets.only(top: 16, bottom: 8),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green.shade700,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  onPressed: nextQuestion,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        l10n.quizNext,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            
-            // Timer de auto-avanço
-            if (showResult && !showExplanation)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Center(
-                  child: Text(
-                    l10n.quizNextIn(autoAdvanceTime),
-                    style: TextStyle(
-                      color: Colors.white60,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    ],
-  ),
-    );
-  }
-}
-
-// Widget de diálogo animado para resultados
-class _AnimatedResultDialog extends StatefulWidget {
-  final String emoji;
-  final String message;
-  final int score;
-  final int correctAnswers;
-  final int totalQuestions;
-  final Color celebrationColor;
-
-  const _AnimatedResultDialog({
-    required this.emoji,
-    required this.message,
-    required this.score,
-    required this.correctAnswers,
-    required this.totalQuestions,
-    required this.celebrationColor,
-  });
-
-  @override
-  State<_AnimatedResultDialog> createState() => _AnimatedResultDialogState();
-}
-
-class _AnimatedResultDialogState extends State<_AnimatedResultDialog>
-    with TickerProviderStateMixin {
-  late AnimationController _scaleController;
-  late AnimationController _rotateController;
-  late AnimationController _slideController;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _rotateAnimation;
-  late Animation<Offset> _slideAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Animação de escala (emoji pulando)
-    _scaleController = AnimationController(
-      duration: Duration(milliseconds: 800),
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
-    );
-
-    // Animação de rotação (emoji girando)
-    _rotateController = AnimationController(
-      duration: Duration(milliseconds: 600),
-      vsync: this,
-    );
-    _rotateAnimation = Tween<double>(begin: 0.0, end: 0.1).animate(
-      CurvedAnimation(parent: _rotateController, curve: Curves.easeInOut),
-    );
-
-    // Animação de slide (conteúdo deslizando)
-    _slideController = AnimationController(
-      duration: Duration(milliseconds: 600),
-      vsync: this,
-    );
-    _slideAnimation = Tween<Offset>(
-      begin: Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOut));
-
-    // Iniciar animações
-    _scaleController.forward();
-    Future.delayed(Duration(milliseconds: 200), () {
-      if (mounted) _rotateController.forward();
-    });
-    Future.delayed(Duration(milliseconds: 400), () {
-      if (mounted) _slideController.forward();
-    });
-
-    // Loop de rotação sutil
-    _rotateController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _rotateController.reverse();
-      } else if (status == AnimationStatus.dismissed) {
-        _rotateController.forward();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _scaleController.dispose();
-    _rotateController.dispose();
-    _slideController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final percentage = (widget.correctAnswers / widget.totalQuestions * 100).round();
-
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: Container(
-        padding: EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Color(0xFF162447),
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: widget.celebrationColor.withValues(alpha: 0.3),
-              blurRadius: 20,
-              spreadRadius: 5,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        body: Column(
           children: [
-            // Emoji animado
-            ScaleTransition(
-              scale: _scaleAnimation,
-              child: RotationTransition(
-                turns: _rotateAnimation,
-                child: Text(
-                  widget.emoji,
-                  style: TextStyle(fontSize: 80),
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-
-            // Conteúdo deslizante
-            SlideTransition(
-              position: _slideAnimation,
-              child: Column(
+            _progressSegments(p),
+            if (!widget.studyMode) _timerBar(p),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
                 children: [
-                  // Mensagem
-                  Text(
-                    widget.message,
-                    style: TextStyle(
-                      color: widget.celebrationColor,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    l10n.quizFinished,
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                    ),
-                  ),
-                  SizedBox(height: 24),
-
-                  // Pontuação
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF23395D),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          l10n.quizScore,
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        TweenAnimationBuilder<int>(
-                          tween: IntTween(begin: 0, end: widget.score),
-                          duration: Duration(milliseconds: 1500),
-                          builder: (context, value, child) {
-                            return Text(
-                              '$value',
-                              style: TextStyle(
-                                color: widget.celebrationColor,
-                                fontSize: 56,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 16),
-
-                  // Estatísticas
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildStat(l10n.statsCorrectAnswers, '${widget.correctAnswers}/${widget.totalQuestions}', Colors.green),
-                      _buildStat(l10n.quizAccuracy, '$percentage%', widget.celebrationColor),
-                    ],
-                  ),
-                  SizedBox(height: 24),
-
-                  // Botão
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: widget.celebrationColor,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        l10n.quizBackToMenu,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
+                  _questionCard(p),
+                  const SizedBox(height: 14),
+                  ...List.generate(_q.opcoes.length, (i) => _option(i, p)),
                 ],
               ),
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              child: _answered ? _feedbackPanel(p, l10n) : const SizedBox(width: double.infinity),
             ),
           ],
         ),
@@ -788,27 +339,274 @@ class _AnimatedResultDialogState extends State<_AnimatedResultDialog>
     );
   }
 
-  Widget _buildStat(String label, String value, Color color) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            color: color,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+  /// Uma barrinha por pergunta: verde acertou, vermelha errou, destaque na atual.
+  Widget _progressSegments(AppPalette p) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: Row(
+        children: List.generate(widget.questions.length, (i) {
+          Color c = p.surfaceAlt;
+          if (i < _answers.length) c = _answers[i].correct ? p.success : p.danger;
+          final current = i == _index && !_answered;
+          return Expanded(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: current ? 8 : 6,
+              margin: const EdgeInsets.symmetric(horizontal: 2),
+              decoration: BoxDecoration(
+                color: current ? p.accent : c,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: p.border, width: 0.5),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _timerBar(AppPalette p) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+      child: AnimatedBuilder(
+        animation: Listenable.merge([_clock, _pulse]),
+        builder: (_, __) {
+          final left = 1 - _clock.value;
+          final color = left > 0.5
+              ? p.success
+              : (left > 0.25 ? (p.isDark ? const Color(0xFFFBBF24) : const Color(0xFFB45309)) : p.danger);
+          final grow = _pulse.value * 3;
+          return Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 12 + grow,
+                  decoration: BoxDecoration(
+                    color: p.surfaceAlt,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: p.border),
+                  ),
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: _answered ? left.clamp(0.0, 1.0) : left.clamp(0.0, 1.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [BoxShadow(color: color.withValues(alpha: 0.5), blurRadius: 6 + grow * 2)],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                width: 44,
+                child: Text('${_secondsLeft}s',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(color: left > 0.25 ? p.text : p.danger, fontWeight: FontWeight.w900, fontSize: 16)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _questionCard(AppPalette p) {
+    final q = _q;
+    final len = q.pergunta.length;
+    final size = len < 70 ? 21.0 : (len < 130 ? 19.0 : 17.0);
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 350),
+      transitionBuilder: (child, a) => FadeTransition(
+        opacity: a,
+        child: SlideTransition(position: Tween(begin: const Offset(0.08, 0), end: Offset.zero).animate(a), child: child),
+      ),
+      child: AppCard(
+        key: ValueKey(_index),
+        padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                AppChip(label: q.getDificuldadeTexto(), color: difficultyColor(context, q.dificuldade)),
+                if (q.tags.isNotEmpty) ...[
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text('#${q.tags.last}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: p.textMuted, fontSize: 12, fontWeight: FontWeight.w600)),
+                  ),
+                ],
+                const Spacer(),
+                if (widget.studyMode)
+                  AppChip(label: t3('📚 Estudo', '📚 Study', '📚 Estudio'), color: p.accent)
+                else if (_streak >= 2)
+                  TweenAnimationBuilder<double>(
+                    key: ValueKey(_streak),
+                    tween: Tween(begin: 0.6, end: 1),
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.elasticOut,
+                    builder: (_, v, child) => Transform.scale(scale: v, child: child),
+                    child: AppChip(label: '🔥 x$_streak', color: p.goldText),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Text(q.pergunta,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: p.text, fontSize: size, fontWeight: FontWeight.w600, height: 1.3)),
+          ],
         ),
-        SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white70,
-            fontSize: 12,
+      ),
+    );
+  }
+
+  Widget _option(int i, AppPalette p) {
+    final q = _q;
+    final isCorrect = i == q.respostaCorreta;
+    final isChosen = _chosen == i;
+    Color bg = p.surface;
+    Color border = p.border;
+    Color letterBg = p.surfaceAlt;
+    Color fg = p.text;
+    double opacity = 1;
+    if (_answered) {
+      if (isCorrect) {
+        bg = p.success.withValues(alpha: p.isDark ? 0.25 : 0.14);
+        border = p.success;
+        letterBg = p.success;
+      } else if (isChosen) {
+        bg = p.danger.withValues(alpha: p.isDark ? 0.25 : 0.12);
+        border = p.danger;
+        letterBg = p.danger;
+      } else {
+        opacity = 0.55;
+      }
+    }
+    final letter = String.fromCharCode(65 + i);
+    final letterFg = _answered && (isCorrect || isChosen) ? Colors.white : p.text;
+
+    Widget tile = AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: border, width: _answered && (isCorrect || isChosen) ? 2.2 : 1.2),
+      ),
+      child: Row(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            width: 34,
+            height: 34,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(color: letterBg, shape: BoxShape.circle, border: Border.all(color: border)),
+            child: _answered && isCorrect
+                ? const Icon(Icons.check_rounded, color: Colors.white, size: 20)
+                : (_answered && isChosen
+                    ? const Icon(Icons.close_rounded, color: Colors.white, size: 20)
+                    : Text(letter, style: TextStyle(color: letterFg, fontWeight: FontWeight.w900))),
           ),
-        ),
-      ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(q.opcoes[i], style: TextStyle(color: fg, fontSize: 16, fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+
+    // Certa "pula", errada treme
+    if (_answered && isCorrect) {
+      tile = TweenAnimationBuilder<double>(
+        key: ValueKey('ok$_index'),
+        tween: Tween(begin: 0.94, end: 1),
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.elasticOut,
+        builder: (_, v, child) => Transform.scale(scale: v, child: child),
+        child: tile,
+      );
+    } else if (_answered && isChosen) {
+      tile = TweenAnimationBuilder<double>(
+        key: ValueKey('bad$_index'),
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 420),
+        builder: (_, v, child) => Transform.translate(offset: Offset(sin(v * pi * 6) * 8 * (1 - v), 0), child: child),
+        child: tile,
+      );
+    }
+
+    // Entrada escalonada a cada pergunta
+    return TweenAnimationBuilder<double>(
+      key: ValueKey('in$_index-$i'),
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 260 + i * 80),
+      curve: Curves.easeOutCubic,
+      builder: (_, v, child) => Opacity(
+        opacity: v * opacity,
+        child: Transform.translate(offset: Offset(0, (1 - v) * 18), child: child),
+      ),
+      child: GestureDetector(onTap: () => _select(i), child: tile),
+    );
+  }
+
+  Widget _feedbackPanel(AppPalette p, AppLocalizations l10n) {
+    final q = _q;
+    final timedOut = _chosen == -1;
+    final correct = _chosen == q.respostaCorreta;
+    final color = correct ? p.success : p.danger;
+    final title = correct
+        ? t3('Você acertou! +$_lastPoints', 'Correct! +$_lastPoints', '¡Correcto! +$_lastPoints')
+        : (timedOut ? t3('Tempo esgotado!', "Time's up!", '¡Se acabó el tiempo!') : t3('Não foi dessa vez', 'Not quite', 'Casi'));
+    final answerLine =
+        '${t3('Resposta certa', 'Correct answer', 'Respuesta correcta')}: ${String.fromCharCode(65 + q.respostaCorreta)}) ${q.opcoes[q.respostaCorreta]}';
+    final ref = q.textoBiblico;
+    final last = _index == widget.questions.length - 1;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: BoxDecoration(
+        color: p.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border(top: BorderSide(color: color, width: 3)),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 16, offset: const Offset(0, -4))],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(correct ? Icons.check_circle_rounded : (timedOut ? Icons.timer_off_rounded : Icons.cancel_rounded),
+                  color: color, size: 26),
+              const SizedBox(width: 8),
+              Expanded(child: Text(title, style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.w900))),
+            ],
+          ),
+          if (!correct) ...[
+            const SizedBox(height: 6),
+            Text(answerLine, style: TextStyle(color: p.text, fontSize: 14, fontWeight: FontWeight.w600)),
+          ],
+          if (ref != null && ref.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            BibleReferenceButton(reference: ref),
+          ],
+          const SizedBox(height: 12),
+          AppButton(
+            label: last
+                ? t3('Ver resultado ($_autoAdvance)', 'See results ($_autoAdvance)', 'Ver resultado ($_autoAdvance)')
+                : '${l10n.quizNext} ($_autoAdvance)',
+            icon: last ? Icons.emoji_events_rounded : Icons.arrow_forward_rounded,
+            color: correct ? p.success : p.primary,
+            onTap: _next,
+          ),
+        ],
+      ),
     );
   }
 }
-

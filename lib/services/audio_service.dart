@@ -1,5 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 
 /// Serviço centralizado para gerenciar música de fundo e efeitos sonoros
@@ -36,9 +37,14 @@ class AudioService {
   Future<void> initialize() async {
     if (_isInitialized) return;
     
+    // Volumes salvos nas Configurações (padrão: música mais baixa que os efeitos)
+    final prefs = await SharedPreferences.getInstance();
+    final musicVolume = prefs.getDouble('musicVolume') ?? 0.4;
+    _sfxVolume = prefs.getDouble('sfxVolume') ?? 0.7;
+
     // Configura o player de música para loop
     await _musicPlayer.setReleaseMode(ReleaseMode.loop);
-    await _musicPlayer.setVolume(0.4); // Volume mais baixo para música de fundo
+    await _musicPlayer.setVolume(musicVolume);
     
     // Configura o pool de efeitos sonoros
     for (final player in _sfxPool) {
@@ -88,7 +94,7 @@ class AudioService {
 
   /// Retoma a música de fundo
   Future<void> resumeBackgroundMusic() async {
-    if (!_isMusicEnabled) return;
+    if (!_isMusicEnabled || _currentMusic == null) return;
     await _musicPlayer.resume();
   }
 

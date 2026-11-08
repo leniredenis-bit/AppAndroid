@@ -1400,7 +1400,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get multiplayerEnterCode => 'Enter the room code';
 
   @override
-  String get multiplayerInfo1 => '• Up to 8 players per room';
+  String get multiplayerInfo1 => '• Up to 100 players per room';
 
   @override
   String get multiplayerInfo2 => '• Simultaneous questions';

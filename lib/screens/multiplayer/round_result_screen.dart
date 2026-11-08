@@ -5,6 +5,7 @@ import '../../models/multiplayer/room.dart';
 import '../../services/multiplayer/firebase_multiplayer_service.dart';
 import 'multiplayer_quiz_screen.dart';
 import 'final_result_screen.dart';
+import '../../theme/app_theme.dart';
 
 /// Tela de resultados parciais após cada rodada
 class RoundResultScreen extends StatefulWidget {
@@ -135,7 +136,10 @@ class _RoundResultScreenState extends State<RoundResultScreen> with SingleTicker
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      GameDarkTheme(child: Builder(builder: _buildThemed));
+
+  Widget _buildThemed(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     if (_currentRoom == null) {
       return Scaffold(
