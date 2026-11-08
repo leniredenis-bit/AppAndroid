@@ -5,6 +5,7 @@ Comece pelo **[PLANO_LANCAMENTO.md](../PLANO_LANCAMENTO.md)**: status atual, pen
 ## Guias (como fazer)
 | Guia | Conteúdo |
 |---|---|
+| [guias/PUBLICAR_ANDROID_PASSO_A_PASSO.md](guias/PUBLICAR_ANDROID_PASSO_A_PASSO.md) | Passo a passo completo: abrir o projeto, preparar o SDK, assinar, gerar o AAB e enviar à Play Console |
 | [guias/BUILD_ANDROID.md](guias/BUILD_ANDROID.md) | Gerar APK/AAB, chave de assinatura, Google Play Console passo a passo |
 | [guias/BUILD_IOS.md](guias/BUILD_IOS.md) | iOS sem Mac (Codemagic), App Store Connect, TestFlight, revisão |
 | [guias/FIREBASE.md](guias/FIREBASE.md) | Analytics, Crashlytics, login anônimo, regras do banco, chat Crisp |

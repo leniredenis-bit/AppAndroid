@@ -21,6 +21,39 @@ Saídas:
 
 Instalar APK no celular: cabo USB + `flutter install`, ou mandar o arquivo (Drive/WhatsApp) e permitir "fontes desconhecidas".
 
+## 📦 O que é o AAB e onde encontrá-lo
+
+`.aab` significa **Android App Bundle**: é o pacote de publicação que se envia
+à Play Console. Não é o projeto nem um instalador para o celular (para instalar
+manualmente, use um APK).
+
+Antes do primeiro build nesta máquina, aceite as licenças do Android SDK:
+
+```powershell
+flutter doctor --android-licenses
+```
+
+Confirme as solicitações e, na raiz do projeto, gere o bundle:
+
+```powershell
+flutter build appbundle --release
+```
+
+O arquivo será criado em:
+
+```text
+build\app\outputs\bundle\release\app-release.aab
+```
+
+Para anexá-lo nesta conversa, abra essa pasta no Explorador de Arquivos e
+arraste `app-release.aab` para o chat (ou use o botão de anexar). Para publicar,
+envie o mesmo arquivo na faixa de teste da Play Console.
+
+**Importante:** o AAB só pode ser enviado à Play Console se estiver assinado com
+a chave de upload válida deste app. Sem `android\key.properties`, o projeto usa
+a assinatura debug, que serve apenas para validar o build e será recusada pela
+Play Store. Configure a chave de upload antes de enviar o bundle.
+
 ## 🔐 Assinatura de release (uma vez só)
 
 ```powershell
@@ -66,7 +99,7 @@ Sem `key.properties`, o release é assinado com a chave debug: funciona para tes
 - [x] Sem `READ_MEDIA_IMAGES`/`CAMERA` (o seletor de fotos do sistema não exige permissão; o Google Play restringe READ_MEDIA_IMAGES)
 - [x] `AD_ID` removido (app sem anúncios)
 - [x] App Bundle (.aab)
-- [ ] Ícone próprio (arte pendente: `assets/icon/LEIA-ME.md`)
+- [x] Ícone próprio e splash (arte e recursos nativos gerados: `assets/icon/`)
 
 ## 🐛 Problemas comuns
 | Erro | Solução |
