@@ -63,36 +63,59 @@ cd C:\Users\Denis\Documents\GitHub\AppAndroid
 
 ## 3. Prepare o Android SDK e aceite as licenças
 
-O erro que apareceu no seu build informa que a licença do NDK
-`28.2.13676358` não foi aceita. Faça esta etapa antes de tentar gerar o AAB:
+O erro do build indica que o NDK `28.2.13676358` não está instalado/licenciado.
+Além disso, o `flutter doctor` detectou que o SDK atual está em
+`C:\Program Files (x86)\Android\android-sdk` e avisou que o espaço em
+`Program Files (x86)` pode causar problemas com o NDK. **Não basta marcar o NDK
+na lista: é necessário instalá-lo; neste computador, primeiro mova o SDK para
+um caminho sem espaços.**
 
 1. No Android Studio, abra **Tools → SDK Manager**.
-2. Em **Android SDK Location**, confirme o caminho indicado no erro:
-   `C:\Program Files (x86)\Android\android-sdk`
-3. Abra a aba **SDK Tools**.
-4. Marque **Show Package Details**.
-5. Expanda **NDK (Side by side)** e localize a versão exata
-   `28.2.13676358`.
-6. Se ela não estiver instalada, marque-a para instalação. Clique em **Apply**
-   e confirme os termos/licenças apresentados.
-7. Volte ao terminal do Android Studio, na raiz do projeto, e execute:
+2. No campo **Android SDK Location**, clique em **Edit** e altere o local para
+   `C:\Android\Sdk` (um caminho novo, sem espaços). Se a pasta não existir,
+   selecione/crie `C:\Android\Sdk` no seletor de pastas. Não escolha novamente
+   `C:\Program Files (x86)\Android\android-sdk`.
+3. Confirme a alteração e deixe o Android Studio preparar o SDK nesse local.
+   Se necessário, aceite a cópia ou instalação dos componentes. Caso a cópia
+   falhe, mantenha o novo local e instale os componentes listados abaixo pelo
+   SDK Manager.
+4. No terminal do Android Studio, atualize o caminho que o Flutter usa:
+
+   ```powershell
+   flutter config --android-sdk "C:\Android\Sdk"
+   ```
+
+5. Abra **Tools → SDK Manager** novamente e confira que **Android SDK
+   Location** mostra `C:\Android\Sdk`.
+6. Na aba **SDK Platforms**, instale **Android API 36** (Android 16), se ainda
+   não estiver instalada.
+7. Na aba **SDK Tools**, marque **Show Package Details** e instale:
+   - **Android SDK Build-Tools 36.0.0**
+   - **Android SDK Platform-Tools**
+   - **NDK (Side by side) 28.2.13676358**
+
+   Clique em **Apply** e aceite os termos apresentados. Aguarde até os
+   componentes mostrarem **Installed**; a caixa marcada, sozinha, não confirma
+   que o NDK foi instalado.
+8. No terminal do Android Studio, na raiz do projeto, execute:
 
    ```powershell
    flutter doctor --android-licenses
    ```
 
-8. Leia e aceite as licenças apresentadas. No fim, execute:
+9. Leia e aceite as licenças apresentadas. No fim, execute:
 
    ```powershell
    flutter doctor
    ```
 
-   Confira que a seção **Android toolchain** não mostra erro de licença.
+   Confira que o Android SDK aparece em `C:\Android\Sdk` e que a seção
+   **Android toolchain** não mostra erros de caminho, NDK ou licenças.
 
 Se `flutter doctor --android-licenses` não abrir ou disser que não encontra o
-SDK Manager, não tente instalar uma versão diferente do NDK às cegas. Confira
-se o Android Studio e o Flutter estão usando o mesmo caminho de SDK e resolva
-primeiro qualquer erro indicado pelo `flutter doctor`.
+SDK Manager, confira se o Android Studio e o Flutter estão usando o mesmo SDK
+(`C:\Android\Sdk`). Não edite `android\local.properties` manualmente; o Flutter
+e o Gradle atualizam essa configuração local ao preparar o projeto.
 
 ## 4. Revise e teste o app antes da publicação
 
