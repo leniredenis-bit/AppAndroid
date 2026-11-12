@@ -49,5 +49,5 @@ app.*.map.json
 *.jks
 *.keystore
 
-# Arquivos tempor·rios
+# Arquivos tempor√°rios
 *.bak
