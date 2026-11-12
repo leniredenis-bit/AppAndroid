@@ -4,6 +4,7 @@ import '../models/achievement.dart';
 import '../models/achievement_texts.dart';
 import '../services/audio_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/i18n.dart';
 
 /// Dialog animado para mostrar quando uma conquista é desbloqueada
 class AchievementUnlockDialog extends StatefulWidget {
@@ -15,13 +16,15 @@ class AchievementUnlockDialog extends StatefulWidget {
   });
 
   @override
-  State<AchievementUnlockDialog> createState() => _AchievementUnlockDialogState();
+  State<AchievementUnlockDialog> createState() =>
+      _AchievementUnlockDialogState();
 
   /// Mostrar dialog com animação
-  static Future<void> show(BuildContext context, Achievement achievement) async {
+  static Future<void> show(
+      BuildContext context, Achievement achievement) async {
     // Haptic feedback
     Haptics.medium();
-    
+
     // Som de vitória
     AudioService().playVictory();
 
@@ -131,189 +134,207 @@ class _AchievementUnlockDialogState extends State<AchievementUnlockDialog>
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      child: Stack(
-        children: [
-          // Confete animado
-          AnimatedBuilder(
-            animation: _confettiController,
-            builder: (context, child) {
-              return CustomPaint(
-                painter: ConfettiPainter(
-                  particles: _confettiParticles,
-                  progress: _confettiController.value,
-                ),
-                size: MediaQuery.of(context).size,
-              );
-            },
-          ),
-
-          // Card principal
-          Center(
-            child: ScaleTransition(
-              scale: _scaleAnimation,
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 32),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFF1E2A3A),
-                      Color(0xFF2A3F5F),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: Color(0xFFFFD700),
-                    width: 3,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0xFFFFD700).withValues(alpha: 0.5),
-                      blurRadius: 20,
-                      spreadRadius: 5,
+      child: LayoutBuilder(
+        builder: (context, constraints) => Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _confettiController,
+                builder: (context, child) {
+                  return CustomPaint(
+                    painter: ConfettiPainter(
+                      particles: _confettiParticles,
+                      progress: _confettiController.value,
                     ),
-                  ],
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Título "CONQUISTA DESBLOQUEADA"
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Color(0xFFFFD700),
-                          borderRadius: BorderRadius.circular(20),
+                  );
+                },
+              ),
+            ),
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: constraints.maxHeight),
+                child: SingleChildScrollView(
+                  child: ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 32),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFF1E2A3A),
+                            Color(0xFF2A3F5F),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        child: Row(
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Color(0xFFFFD700),
+                          width: 3,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0xFFFFD700).withValues(alpha: 0.5),
+                            blurRadius: 20,
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.emoji_events, color: Colors.white, size: 20),
-                            SizedBox(width: 8),
+                            // Título "CONQUISTA DESBLOQUEADA"
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFFFD700),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.emoji_events,
+                                      color: Colors.white, size: 20),
+                                  SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      t3('CONQUISTA DESBLOQUEADA', 'ACHIEVEMENT UNLOCKED', 'LOGRO DESBLOQUEADO'),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.2,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            SizedBox(height: 24),
+
+                            // Emoji grande com rotação
+                            AnimatedBuilder(
+                              animation: _rotationAnimation,
+                              builder: (context, child) {
+                                return Transform.rotate(
+                                  angle: _rotationAnimation.value,
+                                  child: Text(
+                                    widget.achievement.emoji,
+                                    style: TextStyle(fontSize: 100),
+                                  ),
+                                );
+                              },
+                            ),
+
+                            SizedBox(height: 24),
+
+                            // Nome da conquista
                             Text(
-                              'CONQUISTA DESBLOQUEADA',
+                              achievementName(widget.achievement.nameKey),
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Color(0xFFFFD700),
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+
+                            SizedBox(height: 12),
+
+                            // Descrição
+                            Text(
+                              achievementDescription(
+                                  widget.achievement.nameKey),
+                              style: TextStyle(
+                                color: Colors.white70,
                                 fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+
+                            SizedBox(height: 24),
+
+                            // Categoria badge
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: widget.achievement
+                                    .getCategoryColor()
+                                    .withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: widget.achievement.getCategoryColor(),
+                                  width: 2,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    widget.achievement.getCategoryIcon(),
+                                    color:
+                                        widget.achievement.getCategoryColor(),
+                                    size: 16,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    widget.achievement.category
+                                        .toString()
+                                        .split('.')
+                                        .last
+                                        .toUpperCase(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            SizedBox(height: 24),
+
+                            // Botão Fechar
+                            ElevatedButton(
+                              onPressed: () {
+                                AudioService().playClick();
+                                Navigator.of(context).pop();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF4A90E2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 32, vertical: 12),
+                              ),
+                              child: Text(
+                                t3('CONTINUAR', 'CONTINUE', 'CONTINUAR'),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
-
-                      SizedBox(height: 24),
-
-                      // Emoji grande com rotação
-                      AnimatedBuilder(
-                        animation: _rotationAnimation,
-                        builder: (context, child) {
-                          return Transform.rotate(
-                            angle: _rotationAnimation.value,
-                            child: Text(
-                              widget.achievement.emoji,
-                              style: TextStyle(fontSize: 100),
-                            ),
-                          );
-                        },
-                      ),
-
-                      SizedBox(height: 24),
-
-                      // Nome da conquista
-                      Text(
-                        achievementName(widget.achievement.nameKey),
-                        style: TextStyle(
-                          color: Color(0xFFFFD700),
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-
-                      SizedBox(height: 12),
-
-                      // Descrição
-                      Text(
-                        achievementDescription(widget.achievement.nameKey),
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-
-                      SizedBox(height: 24),
-
-                      // Categoria badge
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: widget.achievement.getCategoryColor().withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: widget.achievement.getCategoryColor(),
-                            width: 2,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              widget.achievement.getCategoryIcon(),
-                              color: widget.achievement.getCategoryColor(),
-                              size: 16,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              widget.achievement.category
-                                  .toString()
-                                  .split('.')
-                                  .last
-                                  .toUpperCase(),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      SizedBox(height: 24),
-
-                      // Botão Fechar
-                      ElevatedButton(
-                        onPressed: () {
-                          AudioService().playClick();
-                          Navigator.of(context).pop();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF4A90E2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                        ),
-                        child: Text(
-                          'CONTINUAR',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -354,12 +375,15 @@ class ConfettiPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (var particle in particles) {
       final opacity = 1.0 - progress * 0.5;
-      final paint = Paint()
-        ..color = particle.color.withValues(alpha: opacity);
+      final paint = Paint()..color = particle.color.withValues(alpha: opacity);
 
       // Calcular posição atual
-      final currentX = particle.startX + (particle.endX - particle.startX) * progress;
-      final currentY = particle.startY + (particle.endY - particle.startY) * progress * progress; // Efeito gravidade
+      final currentX =
+          particle.startX + (particle.endX - particle.startX) * progress;
+      final currentY = particle.startY +
+          (particle.endY - particle.startY) *
+              progress *
+              progress; // Efeito gravidade
 
       final x = currentX * size.width;
       final y = currentY * size.height;

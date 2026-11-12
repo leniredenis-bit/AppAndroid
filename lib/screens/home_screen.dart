@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 for (int i = 0; i < modes.length; i++)
                   leftover == 1 && i == modes.length - 1
-                      ? SizedBox(width: c.maxWidth, height: w * 0.62, child: _ModeCard(mode: modes[i]))
+                      ? SizedBox(width: c.maxWidth, height: w * 0.62, child: _ModeCard(mode: modes[i], wide: true))
                       : SizedBox(width: w, height: w * 0.78, child: _ModeCard(mode: modes[i])),
               ],
             );
@@ -247,7 +247,8 @@ class _Mode {
 
 class _ModeCard extends StatelessWidget {
   final _Mode mode;
-  const _ModeCard({required this.mode});
+  final bool wide;
+  const _ModeCard({required this.mode, this.wide = false});
 
   @override
   Widget build(BuildContext context) {
@@ -257,6 +258,37 @@ class _ModeCard extends StatelessWidget {
       gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: mode.colors),
       borderColor: Colors.white.withValues(alpha: 0.22),
       child: LayoutBuilder(builder: (context, c) {
+        if (wide) {
+          final iconSize = min(48.0, c.maxHeight * 0.52);
+          final k = (c.maxWidth / 300).clamp(0.85, 1.2);
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Text(mode.emoji, style: TextStyle(fontSize: iconSize)),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(mode.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 15 * k)),
+                      Text(mode.desc,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: Colors.white, fontSize: 11.5 * k, height: 1.2)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
         // Emoji e texto proporcionais ao cartão (web/tablet não ficam com ícone minúsculo)
         final k = (c.maxWidth / 170).clamp(0.85, 1.6);
         return Padding(

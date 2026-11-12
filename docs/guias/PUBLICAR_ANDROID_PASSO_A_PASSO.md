@@ -1,286 +1,159 @@
-# Publicar o JW Splash Games na Google Play — passo a passo
+# JW Splash Games — o que falta para publicar na Google Play
 
-Este guia parte do zero no computador, mas **o aplicativo já está montado**: o
-projeto Flutter e os arquivos do app estão nesta pasta:
+Este guia foi reduzido para acompanhar as etapas que ainda faltam. O projeto
+Flutter já está pronto e fica em:
 
 ```text
 C:\Users\Denis\Documents\GitHub\AppAndroid
 ```
 
-Você não precisa criar outro projeto nem copiar o código para uma pasta do
-Android Studio. O que falta é preparar o ambiente Android, configurar a chave
-de upload, gerar o pacote `.aab` e preencher/revisar a Play Console.
+Não crie outro projeto e não copie arquivos para outra pasta.
 
-> **Atenção ao estado atual:** há várias alterações locais no projeto que ainda
-> não foram revisadas ou enviadas ao Git. O AAB incluirá o conteúdo que estiver
-> salvo na pasta quando o build for feito. Revise e teste essas alterações antes
-> de publicar.
+## Status confirmado
 
-## 1. Entenda as pastas e o que vai em cada lugar
+- [x] Projeto Flutter, ícone e splash preparados.
+- [x] `flutter analyze` sem problemas.
+- [x] 45 testes automatizados passaram.
+- [x] SDK configurado em `C:\Android\Sdk` e NDK `28.2.13676358` instalado.
+- [x] APK de teste debug gerado.
+- [ ] Instalar e testar esse APK em um celular Android real.
+- [ ] Confirmar/configurar a chave de upload válida.
+- [ ] Gerar e validar o AAB de release.
+- [ ] Completar a ficha e os formulários da Play Console.
+- [ ] Enviar para a faixa de teste exigida pela Play Console.
 
-Abra o **Explorador de Arquivos** e navegue até
-`C:\Users\Denis\Documents\GitHub\AppAndroid`. Essa é a raiz do projeto. Ela deve
-conter, entre outros:
+O último `flutter doctor` ainda mostrou o estado das licenças como desconhecido,
+mas o Gradle aceitou as licenças dos componentes que precisava e concluiu o
+build debug. **Não repita a instalação/mudança do SDK agora.** Se um novo build
+for bloqueado por licença, trate o erro específico que aparecer.
 
-| Pasta/arquivo | Para que serve | Você precisa colocar algo? |
-|---|---|---|
-| `lib\` | Código Dart das telas, regras e serviços do app | Não; o app já está implementado |
-| `assets\data\` | Perguntas e dados usados pelo app | Não; os dados atuais já estão no projeto |
-| `assets\audio\` e `assets\images\` | Sons e imagens do app | Não para gerar o pacote atual |
-| `assets\icon\` | Arte-fonte do ícone e da tela de abertura | Já contém `app_icon.png`, `app_icon_foreground.png` e `splash_logo.png`, sem cruz |
-| `android\` | Configuração nativa Android, Gradle e Firebase | Não copie o projeto para cá |
-| `android\app\google-services.json` | Configuração Firebase do Android | Já está no projeto; não substitua por arquivo de outro app |
-| `android\key.properties` | Caminhos e senhas da chave de upload | Será criado pelo script; não compartilhe nem envie |
-| `%USERPROFILE%\keystores\` | Local seguro fora do projeto para a chave `.jks` | O script cria a chave aqui |
-| `build\app\outputs\bundle\release\` | Pacote AAB produzido pelo Flutter | O `.aab` aparecerá aqui após o build |
+> Há alterações locais do app. O APK/AAB é criado a partir dos arquivos salvos
+> na pasta do projeto. Revise e teste o conteúdo que será publicado.
 
-**Não coloque o `.aab`, a keystore ou senhas dentro de `lib\`, `assets\` ou
-`android\app\src\main\res\`.** Os arquivos de arte já foram transformados nos
-recursos nativos para Android, iOS e web.
+## 1. Teste o APK no celular
 
-## 2. Abra o projeto no Android Studio
+O APK de teste está em:
 
-1. Inicie o Android Studio.
-2. Na tela inicial, escolha **Open**.
-3. Selecione a pasta inteira:
-   `C:\Users\Denis\Documents\GitHub\AppAndroid`
-   (não selecione apenas a pasta `android`).
-4. Se o Android Studio solicitar confiança no projeto, confirme somente se
-   reconhece a origem dos arquivos.
-5. Se o Flutter não estiver configurado, instale o plugin **Flutter** em
-   **File → Settings → Plugins**. Ele também instalará ou solicitará o plugin
-   Dart. Configure o caminho do Flutter SDK quando solicitado.
-6. Aguarde o carregamento do projeto. Não use **New Project** e não crie outro
-   aplicativo.
-
-Os comandos abaixo podem ser executados na aba **Terminal** do Android Studio.
-Confira que o terminal está na raiz e que o caminho termina em `AppAndroid`.
-Se não estiver, execute:
-
-```powershell
-cd C:\Users\Denis\Documents\GitHub\AppAndroid
+```text
+C:\Users\Denis\Documents\GitHub\AppAndroid\build\app\outputs\flutter-apk\app-debug.apk
 ```
 
-## 3. Prepare o Android SDK e aceite as licenças
+Para abrir a pasta no Windows, pressione **Win + R**, cole o caminho abaixo e
+pressione **Enter**:
 
-O erro do build indica que o NDK `28.2.13676358` não está instalado/licenciado.
-Além disso, o `flutter doctor` detectou que o SDK atual está em
-`C:\Program Files (x86)\Android\android-sdk` e avisou que o espaço em
-`Program Files (x86)` pode causar problemas com o NDK. **Não basta marcar o NDK
-na lista: é necessário instalá-lo; neste computador, primeiro mova o SDK para
-um caminho sem espaços.**
-
-1. No Android Studio, abra **Tools → SDK Manager**.
-2. No campo **Android SDK Location**, clique em **Edit** e altere o local para
-   `C:\Android\Sdk` (um caminho novo, sem espaços). Se a pasta não existir,
-   selecione/crie `C:\Android\Sdk` no seletor de pastas. Não escolha novamente
-   `C:\Program Files (x86)\Android\android-sdk`.
-3. Confirme a alteração e deixe o Android Studio preparar o SDK nesse local.
-   Se necessário, aceite a cópia ou instalação dos componentes. Caso a cópia
-   falhe, mantenha o novo local e instale os componentes listados abaixo pelo
-   SDK Manager.
-4. No terminal do Android Studio, atualize o caminho que o Flutter usa:
-
-   ```powershell
-   flutter config --android-sdk "C:\Android\Sdk"
-   ```
-
-5. Abra **Tools → SDK Manager** novamente e confira que **Android SDK
-   Location** mostra `C:\Android\Sdk`.
-6. Na aba **SDK Platforms**, instale **Android API 36** (Android 16), se ainda
-   não estiver instalada.
-7. Na aba **SDK Tools**, marque **Show Package Details** e instale:
-   - **Android SDK Build-Tools 36.0.0**
-   - **Android SDK Platform-Tools**
-   - **NDK (Side by side) 28.2.13676358**
-
-   Clique em **Apply** e aceite os termos apresentados. Aguarde até os
-   componentes mostrarem **Installed**; a caixa marcada, sozinha, não confirma
-   que o NDK foi instalado.
-8. No terminal do Android Studio, na raiz do projeto, execute:
-
-   ```powershell
-   flutter doctor --android-licenses
-   ```
-
-9. Leia e aceite as licenças apresentadas. No fim, execute:
-
-   ```powershell
-   flutter doctor
-   ```
-
-   Confira que o Android SDK aparece em `C:\Android\Sdk` e que a seção
-   **Android toolchain** não mostra erros de caminho, NDK ou licenças.
-
-Se `flutter doctor --android-licenses` não abrir ou disser que não encontra o
-SDK Manager, confira se o Android Studio e o Flutter estão usando o mesmo SDK
-(`C:\Android\Sdk`). Não edite `android\local.properties` manualmente; o Flutter
-e o Gradle atualizam essa configuração local ao preparar o projeto.
-
-## 4. Revise e teste o app antes da publicação
-
-Na raiz do projeto, execute:
-
-```powershell
-flutter pub get
-flutter analyze
-flutter test
+```text
+C:\Users\Denis\Documents\GitHub\AppAndroid\build\app\outputs\flutter-apk
 ```
 
-Corrija qualquer falha antes de publicar. Depois teste o app em um celular
-Android real, incluindo inicialização, quiz, minigames, áudio, troca de idioma,
-seleção de imagem e multiplayer. O roteiro está em
-[COMO_TESTAR.md](COMO_TESTAR.md).
+Copie `app-debug.apk` para o celular por cabo USB, Drive ou outro meio confiável.
+No aparelho, abra o arquivo e, se solicitado, autorize temporariamente a
+instalação de apps da origem usada. Depois da instalação, teste pelo menos:
 
-Confira também antes de seguir:
+- abertura, navegação e aparência geral;
+- quiz, resultado, estatísticas e configurações;
+- minigames, áudio e troca de idioma;
+- selecionar foto no quebra-cabeça;
+- multiplayer em dois celulares, se possível.
 
-- A arte do ícone e splash é a desejada: livro aberto com brilhos, **sem cruz**.
-- Você revisou as alterações de código e os textos que serão publicados.
-- O texto sobre o uso da Tradução do Novo Mundo não afirma uma permissão que
-  você não tenha. Veja o alerta em [PLANO_LANCAMENTO.md](../../PLANO_LANCAMENTO.md).
-- O nome do app e os elementos de marca foram revisados para evitar sugerir
-  vínculo oficial com uma organização ou site.
+Esse APK tem cerca de 207 MB por ser de depuração; **não é o pacote para a loja**
+e não representa o tamanho do download publicado.
 
-## 5. Confira o identificador e a versão do app
+Se o Android disser que o app não pode ser instalado por conflito com uma
+versão já instalada, não desinstale sem antes considerar que isso pode apagar
+os dados locais dessa instalação. Avise qual mensagem apareceu para avaliarmos
+o próximo passo.
 
-O identificador Android já configurado é:
+## 2. Resolva a chave de upload
+
+O AAB da Play Store precisa ser assinado com a chave de upload correta. Ainda
+não há `android\key.properties` configurado neste projeto.
+
+Primeiro, confirme se este app, com o identificador `com.jwsplashgames.quiz`,
+já teve algum AAB enviado à Play Console:
+
+- **Nunca foi enviado:** na raiz do projeto, execute uma única vez:
+
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File scripts\criar_keystore.ps1
+  ```
+
+  O script pede uma senha e cria a chave em
+  `%USERPROFILE%\keystores\jwsplashgames-upload.jks` e a configuração local em
+  `android\key.properties`.
+
+- **Já foi enviado antes:** não crie uma chave nova. Localize a chave de upload
+  usada anteriormente. Se ela foi perdida, confira na Play Console a opção de
+  redefinir a chave de upload antes de tentar enviar uma nova versão.
+
+Guarde a `.jks` e a senha em local seguro e faça backup. **Não envie a chave ou
+`key.properties` pelo chat, não os coloque no Git e não os apague.** A conta de
+desenvolvedor já existe; ao criar/configurar o app na Play Console, siga também
+as instruções para ativar o Play App Signing.
+
+## 3. Confira a versão e gere o AAB
+
+O identificador do app é:
 
 ```text
 com.jwsplashgames.quiz
 ```
 
-Ele identifica permanentemente o app na Play Store. **Não o altere** se o app
-já tiver sido criado na Play Console.
+Não o altere se o app já foi criado na Play Console. A versão atual em
+`pubspec.yaml` é `1.0.0+2`: `1.0.0` é o nome visível e `2` é o código interno do
+build. Se a Play Console já recebeu o código `2`, aumente o número após `+`
+antes do próximo upload. Todo upload precisa de um código ainda não utilizado.
 
-Abra `pubspec.yaml` e confira a linha `version`. Neste projeto ela está como:
-
-```yaml
-version: 1.0.0+2
-```
-
-`1.0.0` é a versão que aparece para as pessoas; `2` é o código interno do
-build. Se já foi enviado algum pacote com esse código à Play Console, aumente o
-número depois de `+` antes de gerar o próximo AAB. Cada upload precisa de um
-código maior que os anteriores. Não aumente sem necessidade se este ainda for
-o primeiro upload.
-
-## 6. Configure a chave de upload
-
-A Play Store não aceita um AAB assinado com a chave de debug. Este projeto ainda
-precisa de uma chave de upload configurada.
-
-### Se este app ainda nunca foi enviado à Play Console
-
-No terminal, a partir da raiz do projeto, execute uma única vez:
+Com a chave correta configurada, abra o terminal na raiz do projeto e execute:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\criar_keystore.ps1
-```
-
-O script pedirá uma senha duas vezes e criará:
-
-- A keystore em `%USERPROFILE%\keystores\jwsplashgames-upload.jks`.
-- A configuração em `android\key.properties`.
-
-Guarde a senha em um gerenciador de senhas e faça **backup seguro da keystore**.
-Não envie esses dois itens por e-mail/chat, não os coloque no Git e não os
-apague: serão necessários para futuras atualizações do app.
-
-Se o script disser que `keytool` não foi encontrado, configure o JDK no Android
-Studio em **File → Settings → Build, Execution, Deployment → Build Tools →
-Gradle → Gradle JDK**. Depois abra um terminal novo e confira se `keytool` está
-disponível antes de repetir o script.
-
-### Se este app já foi enviado ou publicado anteriormente
-
-**Não crie uma chave nova antes de verificar a chave usada no upload anterior.**
-A Play Console precisa reconhecer a chave de upload cadastrada para este app.
-Localize a cópia da keystore e a senha usadas anteriormente. Se foram perdidas,
-verifique o certificado de upload e o procedimento de redefinição na Play
-Console antes de gerar um pacote.
-
-Na primeira configuração da Play Console, siga a opção **Play App Signing**.
-Em geral, o Google protege a chave de assinatura do app e você usa sua chave de
-upload para enviar novas versões. Siga as instruções exibidas para a conta.
-
-## 7. Gere o AAB de release
-
-`.aab` é o **Android App Bundle**: o pacote de distribuição que se envia à Play
-Console. Não é o projeto Flutter e não é o instalador para instalar o app
-manualmente no celular.
-
-Com SDK/licenças e chave configurados, execute na raiz do projeto:
-
-```powershell
+cd C:\Users\Denis\Documents\GitHub\AppAndroid
 flutter build appbundle --release
 ```
 
-Se o build terminar com `Built ... app-release.aab`, o arquivo estará em:
+O AAB será criado em:
 
 ```text
 C:\Users\Denis\Documents\GitHub\AppAndroid\build\app\outputs\bundle\release\app-release.aab
 ```
 
-Se aparecer novamente `License ... NDK ... not accepted`, volte à etapa 3 e
-confirme que a versão `28.2.13676358` foi instalada e que as licenças foram
-aceitas no mesmo SDK usado pelo Flutter.
+`.aab` significa **Android App Bundle**: é o pacote que se envia à Play Console.
+Não é um instalador para abrir diretamente no celular. Se o build informar que
+está usando assinatura debug ou que falta a chave, não envie esse AAB à loja;
+volte à etapa 2.
 
-Se aparecer aviso de assinatura debug ou falta de `android\key.properties`,
-**não envie esse pacote à Play Console**. Volte à etapa 6. O projeto pode
-construir um bundle de validação com a chave debug, mas ele não serve para
-publicação.
+## 4. Complete a Play Console e envie para teste
 
-## 8. Crie ou configure o app na Play Console
+Entre na [Google Play Console](https://play.google.com/console) com sua conta
+de desenvolvedor:
 
-Entre na [Google Play Console](https://play.google.com/console) com a conta de
-desenvolvedor que você já possui.
-
-1. Se ainda não há uma ficha para o JW Splash Games, escolha **Criar app**:
-   nome **JW Splash Games**, idioma padrão Português (Brasil), tipo **Jogo** e
-   gratuito, se essa ainda for sua decisão. Se o app já existe, abra a ficha
-   existente; não crie outra.
-2. Complete os dados de contato exigidos pela Play Console, incluindo um e-mail
-   público de suporte.
-3. Preencha a ficha da loja usando os textos em
-   [FICHA_DA_LOJA.md](../loja/FICHA_DA_LOJA.md). A pasta `assets\icon\` contém a
-   arte do app; prepare também capturas de tela reais do app e os demais
-   materiais que a Console pedir.
+1. Abra o app existente, se já o criou. Caso ainda não exista, crie **JW Splash
+   Games**, como jogo gratuito, somente se essa continuar sendo sua decisão.
+2. Preencha os dados de contato, incluindo um e-mail de suporte público.
+3. Use os textos da [ficha da loja](../loja/FICHA_DA_LOJA.md) e prepare
+   capturas de tela reais do app e os materiais pedidos pela Console.
 4. Informe a política de privacidade:
    `https://leniredenis-bit.github.io/AppAndroid/privacidade.html`
 5. Preencha classificação de conteúdo, público-alvo, anúncios e **Segurança
-   dos dados** com respostas verdadeiras e consistentes com os serviços usados
-   pelo app. Consulte a seção Google Play da
-   [ficha da loja](../loja/FICHA_DA_LOJA.md). Não declare que o app não coleta
-   dados sem conferir Analytics, Crashlytics, Firebase e o chat de suporte.
-6. Em **Acesso ao app**, explique que as telas comuns não exigem conta e informe
-   como revisar recursos que dependam de mais de um jogador, se a Console
-   solicitar instruções para a equipe de análise.
-7. Ative **Play App Signing** quando solicitado e siga as etapas da Console.
-8. Escolha uma faixa de teste apropriada e envie o arquivo
-   `app-release.aab` da etapa 7. Revise os avisos que a Console mostrar e salve/
-   envie a versão para análise.
+   dos dados** com informações verdadeiras. O app usa Firebase Analytics,
+   Crashlytics, Firebase para multiplayer e chat Crisp; confira as declarações
+   na [ficha da loja](../loja/FICHA_DA_LOJA.md).
+6. Siga a configuração do Play App Signing.
+7. Crie ou selecione a faixa de teste indicada pela Console e envie
+   `app-release.aab`.
+8. Complete quaisquer requisitos de teste fechado que a Console mostrar antes
+   de solicitar acesso à produção. Quantidade de testadores e duração dependem
+   dos requisitos aplicados à conta.
 
-Os requisitos de teste para liberar a produção dependem do tipo e da data de
-criação da conta de desenvolvedor. Se a Console exigir um teste fechado,
-complete exatamente o período e a quantidade de participantes indicados nela
-antes de solicitar acesso à produção.
+## Quando pedir ajuda
 
-## 9. Checklist final
+Depois de instalar e testar o APK, relate qualquer problema observado. Para
+continuar com a publicação, diga também se o app já foi enviado à Play Console
+alguma vez; isso determina se devemos usar uma chave existente ou criar a
+primeira chave de upload.
 
-- [ ] Estou trabalhando em `C:\Users\Denis\Documents\GitHub\AppAndroid`.
-- [ ] Revisei as alterações locais e testei o app.
-- [ ] O `flutter doctor` não aponta erro de licenças Android.
-- [ ] NDK `28.2.13676358` está instalado e licenciado no SDK correto.
-- [ ] Sei se este é o primeiro upload e configurei a chave de upload correta.
-- [ ] Fiz backup seguro da keystore e da senha.
-- [ ] O código de versão é maior que o último enviado, se já houve upload.
-- [ ] `flutter build appbundle --release` gerou o AAB sem assinatura debug.
-- [ ] Completei ficha da loja, privacidade, classificação e Segurança dos dados.
-- [ ] Enviei o AAB à faixa de teste indicada pela Play Console.
+## Referências do projeto
 
-## Documentos úteis deste projeto
-
-- [Build Android, assinatura e SDK](BUILD_ANDROID.md)
-- [Textos da ficha e formulários da loja](../loja/FICHA_DA_LOJA.md)
-- [Roteiro de testes manuais](COMO_TESTAR.md)
-- [Plano e pendências de lançamento](../../PLANO_LANCAMENTO.md)
+- [Textos da ficha e respostas dos formulários](../loja/FICHA_DA_LOJA.md)
+- [Roteiro detalhado de testes](COMO_TESTAR.md)
+- [Build Android e assinatura](BUILD_ANDROID.md)
+- [Plano de lançamento](../../PLANO_LANCAMENTO.md)

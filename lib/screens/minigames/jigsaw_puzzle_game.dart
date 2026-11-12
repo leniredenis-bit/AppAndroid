@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/audio_service.dart';
 import 'common/game_results.dart';
 import 'common/game_text.dart';
@@ -13,6 +15,63 @@ import '../../theme/app_theme.dart';
 import '../../services/app_lifecycle.dart';
 
 const Color _accent = Color(0xFF2DD4BF);
+
+/// Opções de tamanho (lado da grade → nº de peças), usadas no menu e na pintura.
+List<OptionItem<int>> jigsawGridOptions() => [
+      OptionItem(3, t3('Fácil', 'Easy', 'Fácil'), '9'),
+      OptionItem(4, t3('Médio', 'Medium', 'Medio'), '16'),
+      OptionItem(5, t3('Difícil', 'Hard', 'Difícil'), '25'),
+      OptionItem(6, t3('Mestre', 'Master', 'Maestro'), '36'),
+    ];
+
+/// Desenho guardado na pasta do quebra-cabeça (ex.: pintura do jogo de colorir).
+class SavedPuzzle {
+  final String id;
+  final Uint8List bytes;
+  const SavedPuzzle(this.id, this.bytes);
+}
+
+/// Desenhos salvos do quebra-cabeça e a quantidade de peças escolhida.
+class JigsawLibrary {
+  static const _gridKey = 'jigsaw_grid';
+  static const _idsKey = 'jigsaw_saved_ids';
+  static String _pngKey(String id) => 'jigsaw_saved_$id';
+
+  /// Lado da grade escolhido por último (vale para qualquer imagem aberta).
+  static Future<int> loadGrid() async {
+    final grid = (await SharedPreferences.getInstance()).getInt(_gridKey) ?? 3;
+    return grid.clamp(3, 6);
+  }
+
+  static Future<void> saveGrid(int grid) async => (await SharedPreferences.getInstance()).setInt(_gridKey, grid);
+
+  static Future<List<SavedPuzzle>> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = <SavedPuzzle>[];
+    for (final id in prefs.getStringList(_idsKey) ?? const <String>[]) {
+      final raw = prefs.getString(_pngKey(id));
+      if (raw != null) list.add(SavedPuzzle(id, base64Decode(raw)));
+    }
+    return list;
+  }
+
+  /// Salva (ou substitui) o desenho [id], que passa a ser o primeiro da lista.
+  static Future<void> save(String id, Uint8List png) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_pngKey(id), base64Encode(png));
+    final ids = prefs.getStringList(_idsKey) ?? [];
+    ids
+      ..remove(id)
+      ..insert(0, id);
+    await prefs.setStringList(_idsKey, ids);
+  }
+
+  static Future<void> remove(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_pngKey(id));
+    await prefs.setStringList(_idsKey, (prefs.getStringList(_idsKey) ?? [])..remove(id));
+  }
+}
 
 /// Quebra-cabeça clássico com peças de encaixe.
 ///
@@ -23,7 +82,10 @@ class JigsawPuzzleGame extends StatefulWidget {
   /// Imagem inicial opcional (ex.: um desenho feito no jogo de colorir).
   final Uint8List? initialImageBytes;
 
-  const JigsawPuzzleGame({super.key, this.initialImageBytes});
+  /// Lado da grade para a imagem inicial; sem ele, usa a configuração salva.
+  final int? grid;
+
+  const JigsawPuzzleGame({super.key, this.initialImageBytes, this.grid});
 
   @override
   State<JigsawPuzzleGame> createState() => _JigsawPuzzleGameState();
@@ -57,10 +119,15 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerPr
     'assets/images/puzzle4.jpg',
   ];
 
+  /// Imagens extras: qualquer .jpg/.png/.webp colocado em assets/images/puzzles/.
+  static const _puzzleFolder = 'assets/images/puzzles/';
+  List<String> _folderImages = [];
+
   // Configuração
   int _grid = 3;
   bool _showSilhouette = true;
   ImageProvider? _chosenProvider;
+  List<SavedPuzzle> _saved = [];
 
   // Partida
   bool _playing = false;
@@ -90,10 +157,62 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerPr
     super.initState();
     _ticker = createTicker(_tick);
     _audio.playBackgroundMusic('home');
+    if (widget.grid != null) _grid = widget.grid!;
+    _loadLibrary(applyGrid: widget.grid == null);
     if (widget.initialImageBytes != null) {
       _chosenProvider = MemoryImage(widget.initialImageBytes!);
       WidgetsBinding.instance.addPostFrameCallback((_) => _start(_chosenProvider!));
     }
+  }
+
+  Future<void> _loadLibrary({bool applyGrid = false}) async {
+    final grid = await JigsawLibrary.loadGrid();
+    final saved = await JigsawLibrary.load();
+    final folder = await _listFolderImages();
+    if (!mounted) return;
+    setState(() {
+      if (applyGrid && !_playing) _grid = grid;
+      _saved = saved;
+      _folderImages = folder;
+    });
+  }
+
+  Future<List<String>> _listFolderImages() async {
+    try {
+      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+      return manifest
+          .listAssets()
+          .where((a) => a.startsWith(_puzzleFolder) && RegExp(r'\.(jpe?g|png|webp)$', caseSensitive: false).hasMatch(a))
+          .toList()
+        ..sort();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> _deleteSaved(SavedPuzzle s) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: GameColors.panel,
+        title: Text(t3('Remover desenho?', 'Remove drawing?', '¿Quitar dibujo?'),
+            style: const TextStyle(color: Colors.white)),
+        content: Text(
+            t3('Ele sai só dos quebra-cabeças; a pintura continua salva.',
+                'It is only removed from puzzles; the painting stays saved.',
+                'Solo sale de los rompecabezas; la pintura sigue guardada.'),
+            style: const TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t3('Cancelar', 'Cancel', 'Cancelar'))),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(t3('Remover', 'Remove', 'Quitar'), style: const TextStyle(color: GameColors.danger))),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await JigsawLibrary.remove(s.id);
+    if (mounted) setState(() => _saved.remove(s));
   }
 
   @override
@@ -457,12 +576,6 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerPr
   }
 
   Widget _buildMenu() {
-    final options = [
-      OptionItem(3, t3('Fácil', 'Easy', 'Fácil'), '9'),
-      OptionItem(4, t3('Médio', 'Medium', 'Medio'), '16'),
-      OptionItem(5, t3('Difícil', 'Hard', 'Difícil'), '25'),
-      OptionItem(6, t3('Mestre', 'Master', 'Maestro'), '36'),
-    ];
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 30),
       children: [
@@ -480,10 +593,13 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerPr
             children: [
               OptionPicker<int>(
                 title: t3('Peças', 'Pieces', 'Piezas'),
-                options: options,
+                options: jigsawGridOptions(),
                 selected: _grid,
                 accent: _accent,
-                onChanged: (v) => setState(() => _grid = v),
+                onChanged: (v) {
+                  setState(() => _grid = v);
+                  JigsawLibrary.saveGrid(v);
+                },
               ),
               const SizedBox(height: 14),
               SwitchListTile(
@@ -514,14 +630,15 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerPr
           crossAxisSpacing: 12,
           children: [
             _galleryTile(),
-            ..._assetImages.map((a) => _imageTile(AssetImage(a))),
+            ..._saved.map((s) => _imageTile(MemoryImage(s.bytes), onDelete: () => _deleteSaved(s))),
+            ...[..._folderImages, ..._assetImages].map((a) => _imageTile(AssetImage(a))),
           ],
         ),
       ],
     );
   }
 
-  Widget _imageTile(ImageProvider provider) {
+  Widget _imageTile(ImageProvider provider, {VoidCallback? onDelete}) {
     return _PressableTile(
       onTap: () => _start(provider),
       child: ClipRRect(
@@ -530,6 +647,20 @@ class _JigsawPuzzleGameState extends State<JigsawPuzzleGame> with SingleTickerPr
           fit: StackFit.expand,
           children: [
             Image(image: provider, fit: BoxFit.cover),
+            if (onDelete != null)
+              Positioned(
+                left: 4,
+                top: 4,
+                child: IconButton(
+                  tooltip: t3('Remover', 'Remove', 'Quitar'),
+                  onPressed: onDelete,
+                  icon: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                    child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
+                  ),
+                ),
+              ),
             Positioned(
               right: 8,
               bottom: 8,

@@ -425,7 +425,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
       ),
       child: AppCard(
         key: ValueKey(_index),
-        padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
+        padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -459,6 +459,13 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
             Text(q.pergunta,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: p.text, fontSize: size, fontWeight: FontWeight.w600, height: 1.3)),
+            // ID da pergunta no banco (para localizar e corrigir no JSON)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text('Nº ${q.id}',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(color: p.textMuted, fontSize: 11, fontWeight: FontWeight.w600)),
+            ),
           ],
         ),
       ),

@@ -706,13 +706,52 @@ class _ColoringEditorState extends State<_ColoringEditor> with SingleTickerProvi
     if (mounted) setState(() => _confetti = false);
   }
 
+  /// Escolhe o nº de peças, guarda uma cópia do desenho nos quebra-cabeças e abre.
   Future<void> _toPuzzle() async {
+    final grid = await _askPuzzleGrid();
+    if (grid == null || !mounted) return;
     await _save();
     final bytes = await _renderPng(1000);
     if (bytes == null || !mounted) return;
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => JigsawPuzzleGame(initialImageBytes: bytes),
+    // Mesmo id por desenho: pintar de novo atualiza a cópia em vez de duplicar.
+    await JigsawLibrary.save('coloring_${d.id}', bytes);
+    await JigsawLibrary.saveGrid(grid);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(t3('Desenho salvo nos quebra-cabeças!', 'Drawing saved to puzzles!',
+          '¡Dibujo guardado en rompecabezas!')),
     ));
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => JigsawPuzzleGame(initialImageBytes: bytes, grid: grid),
+    ));
+  }
+
+  Future<int?> _askPuzzleGrid() async {
+    var grid = await JigsawLibrary.loadGrid();
+    if (!mounted) return null;
+    return showDialog<int>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          backgroundColor: GameColors.panel,
+          title: Text(t3('🧩 Quantas peças?', '🧩 How many pieces?', '🧩 ¿Cuántas piezas?'),
+              style: const TextStyle(color: Colors.white)),
+          content: OptionPicker<int>(
+            title: t3('Peças', 'Pieces', 'Piezas'),
+            options: jigsawGridOptions(),
+            selected: grid,
+            accent: _accent,
+            onChanged: (v) => setLocal(() => grid = v),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t3('Cancelar', 'Cancel', 'Cancelar'))),
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, grid),
+                child: Text(t3('Recortar', 'Cut it', 'Recortar'), style: const TextStyle(color: _accent))),
+          ],
+        ),
+      ),
+    );
   }
 
   void _clearAll() async {

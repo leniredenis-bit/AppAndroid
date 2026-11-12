@@ -9,6 +9,7 @@ import 'package:jw_splash_games/screens/minigames/coloring_game.dart';
 import 'package:jw_splash_games/screens/minigames/hangman_game.dart';
 import 'package:jw_splash_games/screens/minigames/jigsaw_puzzle_game.dart';
 import 'package:jw_splash_games/screens/minigames/maze_game.dart';
+import 'package:jw_splash_games/screens/minigames/maze_ark_stages.dart';
 import 'package:jw_splash_games/screens/minigames/sequence_crystal_game.dart';
 import 'package:jw_splash_games/screens/minigames/tic_tac_toe_neon.dart';
 import 'package:jw_splash_games/screens/minigames/word_search_enhanced.dart';
@@ -70,6 +71,41 @@ void main() {
   testWidgets('forca', (t) => open(t, const HangmanGame()));
   testWidgets('caça-palavras', (t) => open(t, const WordSearchGame(), startLabel: 'Começar'));
   testWidgets('labirinto', (t) => open(t, const MazeGame(), startLabel: '1'));
+  testWidgets('labirinto: arca de noé', (t) => open(t, const MazeGame(), startLabel: 'Floresta'));
+
+  testWidgets('labirinto: controle flutuante anda e some ao soltar', (t) async {
+    await t.pumpWidget(_app(const MazeGame()));
+    await t.pump(const Duration(milliseconds: 600));
+    await t.tap(find.text('Floresta'));
+    await t.pump(const Duration(milliseconds: 300));
+    expect(find.text('👆 Toque para começar'), findsOneWidget);
+
+    final gesture = await t.startGesture(t.getCenter(find.byKey(const ValueKey('maze-area'))));
+    await t.pump(const Duration(milliseconds: 100));
+    expect(find.text('👆 Toque para começar'), findsNothing, reason: 'o toque fecha a introdução');
+    expect(find.byIcon(Icons.keyboard_arrow_up_rounded), findsOneWidget, reason: 'controle aparece');
+    for (final d in const [Offset(40, 0), Offset(0, 40), Offset(-40, 0), Offset(0, -40)]) {
+      await gesture.moveBy(d);
+      for (int i = 0; i < 20; i++) {
+        await t.pump(const Duration(milliseconds: 16));
+      }
+    }
+    await gesture.up();
+    await t.pump(const Duration(milliseconds: 50));
+    expect(find.byIcon(Icons.keyboard_arrow_up_rounded), findsNothing, reason: 'controle some ao soltar');
+    expect(t.takeException(), isNull);
+    await t.pumpWidget(const SizedBox());
+    await t.pump(const Duration(seconds: 6));
+  });
+
+  test('labirinto: cada fase da arca tem 2 pares de animais', () {
+    for (int i = 0; i < arkStages.length; i++) {
+      final s = arkStages[i];
+      final m = MazeGenerator.generate(s.size, (s.size * 0.85).round(), seed: i * 9173 + 5, braid: 0.12, items: 4);
+      expect(m.gems.toSet().length, 4, reason: s.namePt);
+      expect(m.gems.contains(m.start) || m.gems.contains(m.exit), isFalse);
+    }
+  });
   testWidgets('sequência', (t) => open(t, const SequenceCrystalGame(), startLabel: 'Começar'));
   testWidgets('quebra-cabeça', (t) => open(t, const JigsawPuzzleGame()));
   testWidgets('colorir', (t) => open(t, const ColoringGame(), startLabel: 'Arca de Noé'));

@@ -18,10 +18,13 @@ class HangmanGame extends StatefulWidget {
   State<HangmanGame> createState() => _HangmanGameState();
 }
 
-class _HangmanGameState extends State<HangmanGame> with SingleTickerProviderStateMixin {
+class _HangmanGameState extends State<HangmanGame> with TickerProviderStateMixin {
   final _random = Random();
   late final AnimationController _anim =
       AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))..repeat();
+  // Ciclo próprio e lento para as nuvens atravessarem o céu inteiro
+  late final AnimationController _sky =
+      AnimationController(vsync: this, duration: const Duration(seconds: 28))..repeat();
   final FocusNode _focus = FocusNode();
 
   late HangmanWord _word;
@@ -44,6 +47,7 @@ class _HangmanGameState extends State<HangmanGame> with SingleTickerProviderStat
   @override
   void dispose() {
     _anim.dispose();
+    _sky.dispose();
     _focus.dispose();
     super.dispose();
   }
@@ -231,13 +235,14 @@ class _HangmanGameState extends State<HangmanGame> with SingleTickerProviderStat
               children: [
                 Positioned.fill(
                   child: AnimatedBuilder(
-                    animation: _anim,
+                    animation: Listenable.merge([_anim, _sky]),
                     builder: (_, __) => CustomPaint(
                       painter: _HangmanScenePainter(
                         errors: _wrong.length,
                         won: _won,
                         lost: _lost,
                         t: _anim.value,
+                        sky: _sky.value,
                       ),
                     ),
                   ),
@@ -441,7 +446,9 @@ class _HangmanScenePainter extends CustomPainter {
   final int errors;
   final bool won, lost;
   final double t;
-  _HangmanScenePainter({required this.errors, required this.won, required this.lost, required this.t});
+  final double sky; // 0..1, posição das nuvens
+  _HangmanScenePainter(
+      {required this.errors, required this.won, required this.lost, required this.t, required this.sky});
 
   static const skin = Color(0xFFF2C29B);
   static const hair = Color(0xFF5B3A1E);
@@ -497,8 +504,11 @@ class _HangmanScenePainter extends CustomPainter {
     canvas.drawCircle(const Offset(86, 12), 6, Paint()..color = sunColor.withValues(alpha: 0.35));
     canvas.drawCircle(const Offset(86, 12), 4.3, Paint()..color = sunColor);
     final cloud = Paint()..color = Colors.white.withValues(alpha: lost ? 0.25 : 0.85);
-    final dx = (t * 20) % 120 - 10;
-    for (final c in [Offset(dx, 16), Offset((dx + 55) % 120 - 10, 8)]) {
+    // Entram pela esquerda e saem totalmente pela direita antes de reaparecer
+    final side = (size.width / scale - 100) / 2; // sobra lateral, em unidades da cena
+    final start = -side - 15, span = 100 + 2 * side + 20;
+    for (final (phase, y) in [(0.0, 16.0), (0.5, 8.0)]) {
+      final c = Offset(start + ((sky + phase) % 1) * span, y);
       canvas.drawCircle(c, 3.5, cloud);
       canvas.drawCircle(c + const Offset(4, -1.5), 4.2, cloud);
       canvas.drawCircle(c + const Offset(8.5, 0), 3.2, cloud);
@@ -682,7 +692,7 @@ class _HangmanScenePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _HangmanScenePainter old) =>
-      old.errors != errors || old.won != won || old.lost != lost || old.t != t;
+      old.errors != errors || old.won != won || old.lost != lost || old.t != t || old.sky != sky;
 }
 
 enum _Mood { ok, worried, scared, sad, happy }
